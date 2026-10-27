@@ -643,10 +643,10 @@ function renderParteC(data) {
       </div>
       <div class="tf-buttons">
         <button type="button" class="tf-btn v-btn" data-qid="${q.id}" data-val="V">
-          <span>✅</span> Verdadero (V)
+          V
         </button>
         <button type="button" class="tf-btn f-btn" data-qid="${q.id}" data-val="F">
-          <span>❌</span> Falso (F)
+          F
         </button>
       </div>
     `;
