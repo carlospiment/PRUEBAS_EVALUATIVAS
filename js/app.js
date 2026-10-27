@@ -304,24 +304,87 @@ async function loadStudents() {
         console.warn('No se pudieron obtener resultados de Firestore:', e);
       }
     }
-    const mergedResults = [...localResults, ...cloudResults];
+
+    // Filtrar evaluaciones activas y autorizaciones de reintento
+    const activeCloudResults = cloudResults.filter(r => 
+      !r.tipo && 
+      r.estado !== 'reintento_autorizado' && 
+      !r.archivado_por_reintento &&
+      r.activo !== false
+    );
+    
+    const activeAuthorizations = cloudResults.filter(r => 
+      r.tipo === 'autorizacion_reintento' && 
+      r.activo === true
+    );
+
+    // En servidor local (Node.js) verificar autorizaciones
+    let serverAuthorizations = [];
+    try {
+      const resAuth = await fetch('/api/autorizaciones');
+      if (resAuth.ok) {
+        const dataAuth = await resAuth.json();
+        serverAuthorizations = (dataAuth.autorizaciones || []).filter(a => a.activo !== false);
+      }
+    } catch {}
+
+    const allAuthorizations = [...activeAuthorizations, ...serverAuthorizations];
 
     allStudents = list.map(student => {
-      const offlineRes = mergedResults.find(r => 
-        (r.estudiante_id && r.estudiante_id === student.id) ||
-        cleanText(r.estudiante_nombre) === cleanText(student.nombre)
+      const sNameClean = cleanText(student.nombre);
+
+      // 1. ¿Tiene una autorización activa otorgada por el docente?
+      const auth = allAuthorizations.find(a => 
+        cleanText(a.estudiante_nombre) === sNameClean && 
+        (!a.grado || Number(a.grado) === currentGrade)
       );
 
-      if (offlineRes) {
+      if (auth) {
+        // El docente dio autorización: limpiamos la memoria local de este dispositivo
+        removeLocalResult(student.nombre);
+        return {
+          ...student,
+          completado: false,
+          reintento_autorizado: true,
+          fecha_autorizado: auth.autorizado_at || 'Recientemente'
+        };
+      }
+
+      // 2. ¿Tiene evaluación activa en la nube?
+      const cloudRes = activeCloudResults.find(r => 
+        (r.estudiante_id && r.estudiante_id === student.id) ||
+        cleanText(r.estudiante_nombre) === sNameClean
+      );
+
+      // 3. ¿Tiene evaluación en memoria de este celular/navegador?
+      const localRes = localResults.find(r => 
+        (r.estudiante_id && r.estudiante_id === student.id) ||
+        cleanText(r.estudiante_nombre) === sNameClean
+      );
+
+      // Si la base de datos en la nube está activa y NO tiene resultado activo,
+      // pero el celular aún tenía copia vieja, se purga la copia local
+      if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable() && !cloudRes && localRes) {
+        removeLocalResult(student.nombre);
+        return {
+          ...student,
+          completado: false
+        };
+      }
+
+      const activeRes = cloudRes || localRes;
+
+      if (activeRes && activeRes.estado !== 'reintento_autorizado') {
         return {
           ...student,
           completado: true,
-          fecha_completado: offlineRes.completado_at,
-          duracion: offlineRes.duracion_formato,
-          puntos: offlineRes.puntos_obtenidos,
-          nota_meduca: offlineRes.nota_meduca
+          fecha_completado: activeRes.completado_at,
+          duracion: activeRes.duracion_formato,
+          puntos: activeRes.puntos_obtenidos,
+          nota_meduca: activeRes.nota_meduca
         };
       }
+
       return student;
     });
 
@@ -347,6 +410,18 @@ function saveLocalResult(nuevoResultado) {
     const list = getLocalResults();
     list.push(nuevoResultado);
     localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+function removeLocalResult(studentName) {
+  try {
+    const key = `meduca_agri_eval_${currentGrade}to_grado`;
+    const list = getLocalResults();
+    const cleanName = cleanText(studentName);
+    const filtered = list.filter(r => cleanText(r.estudiante_nombre) !== cleanName);
+    localStorage.setItem(key, JSON.stringify(filtered));
   } catch (e) {
     console.warn(e);
   }
@@ -388,9 +463,14 @@ function setupAutocomplete() {
       const item = document.createElement('div');
       item.className = 'autocomplete-item';
       const grupoBadge = student.grupo_label ? `<span class="group-pill">${student.grupo_label}</span>` : '';
-      const statusBadge = student.completado 
-        ? `<span class="status-tag completado">⚠️ Ya realizada (${student.nota_meduca ? 'Nota: ' + student.nota_meduca : 'Enviada'})</span>` 
-        : `<span class="status-tag pendiente">✅ Disponible</span>`;
+      let statusBadge = '';
+      if (student.reintento_autorizado) {
+        statusBadge = `<span class="status-tag pendiente" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe;">🔄 Oportunidad Autorizada</span>`;
+      } else if (student.completado) {
+        statusBadge = `<span class="status-tag completado">⚠️ Ya realizada (${student.nota_meduca ? 'Nota: ' + student.nota_meduca : 'Enviada'})</span>`;
+      } else {
+        statusBadge = `<span class="status-tag pendiente">✅ Disponible</span>`;
+      }
 
       item.innerHTML = `
         <span style="font-size: 1.2rem;">👤</span>
@@ -435,7 +515,24 @@ function selectStudent(student) {
   currentStudent = student;
   playSound('click');
 
-  if (student.completado) {
+  if (student.reintento_autorizado) {
+    startBtn.disabled = false;
+    alreadyDoneCard.innerHTML = `
+      <div style="background: #eff6ff; border: 2px solid #3b82f6; color: #1e40af; padding: 14px 16px; border-radius: 12px; margin-top: 10px; text-align: left;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+          <span style="font-size: 1.4rem;">🎉</span>
+          <h4 style="margin: 0; font-size: 1.05rem; color: #1d4ed8;">¡Nueva Oportunidad Autorizada!</h4>
+        </div>
+        <p style="margin: 0; font-size: 0.95rem; line-height: 1.4; color: #1e3a8a;">
+          Hola <strong>${student.nombre_simple || student.nombre}</strong>, tu maestro te ha concedido el permiso para realizar nuevamente esta prueba el <strong>${student.fecha_autorizado}</strong>.
+        </p>
+        <p style="margin: 8px 0 0 0; font-size: 0.9rem; color: #2563eb; font-weight: 700;">
+          👉 Presiona el botón verde abajo para comenzar tu evaluación.
+        </p>
+      </div>
+    `;
+    alreadyDoneCard.style.display = 'block';
+  } else if (student.completado) {
     startBtn.disabled = true;
     alreadyDoneCard.innerHTML = `
       <h3>⚠️ Examen Ya Realizado</h3>

@@ -5,6 +5,7 @@
 
 let allResults = [];
 let allStudents = [];
+let allAuthorizations = [];
 let serverInfo = null;
 
 const LESSONS_DATA = [
@@ -283,35 +284,65 @@ async function loadData() {
       allStudents = await resStatic.json();
     }
 
-    // 2. Load Results
+    // 2. Load Results & Server Authorizations
     let serverResults = [];
+    let serverAuthorizations = [];
     try {
       const resRes = await fetch('/api/resultados');
       if (resRes.ok) {
         const data = await resRes.json();
         serverResults = data.resultados || [];
+        serverAuthorizations = data.autorizaciones || [];
       }
     } catch {}
 
     const localResults = getLocalResults();
-    let cloudResults = [];
+    let cloudItems = [];
     if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable()) {
       try {
-        cloudResults = await window.MEDUCA_FIREBASE.getResults();
+        cloudItems = await window.MEDUCA_FIREBASE.getResults();
       } catch (e) {
         console.warn('Error cargando resultados de Firestore:', e);
       }
     }
 
+    // Separar evaluaciones activas de autorizaciones
+    const cloudEvaluations = cloudItems.filter(r => 
+      !r.tipo && 
+      r.estado !== 'reintento_autorizado' && 
+      !r.archivado_por_reintento && 
+      r.activo !== false
+    );
+    const cloudAuthorizations = cloudItems.filter(r => r.tipo === 'autorizacion_reintento');
+
+    allAuthorizations = [...cloudAuthorizations, ...serverAuthorizations];
+
     const combinedMap = new Map();
-    serverResults.forEach(r => combinedMap.set((r.grado || '3') + '_' + (r.id || r.estudiante_nombre), r));
+    serverResults.forEach(r => {
+      if (r.estado !== 'reintento_autorizado' && !r.archivado_por_reintento && r.activo !== false) {
+        combinedMap.set((r.grado || '3') + '_' + (r.id || r.estudiante_nombre), r);
+      }
+    });
+
     localResults.forEach(r => {
       const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
       if (!combinedMap.has(key)) combinedMap.set(key, r);
     });
-    cloudResults.forEach(r => {
+
+    cloudEvaluations.forEach(r => {
       const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
       combinedMap.set(key, r);
+    });
+
+    // Si hay una autorización activa para un estudiante, remover resultado viejo
+    allAuthorizations.forEach(auth => {
+      if (auth.activo) {
+        for (const [k, v] of combinedMap.entries()) {
+          if (v.estudiante_nombre && v.estudiante_nombre.toLowerCase().trim() === auth.estudiante_nombre.toLowerCase().trim()) {
+            combinedMap.delete(k);
+          }
+        }
+      }
     });
 
     allResults = Array.from(combinedMap.values());
@@ -416,9 +447,20 @@ function renderTable() {
   filtered.forEach((item, idx) => {
     const tr = document.createElement('tr');
     const { student, result } = item;
-    const gradoBadge = student.grado === 4 
-      ? `<span style="background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">4° Grado</span>` 
-      : `<span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">3er Grado</span>`;
+    let gradoBadge = `<span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">3er Grado</span>`;
+    if (student.grado === 4) {
+      gradoBadge = `<span style="background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">4° Grado</span>`;
+    } else if (student.grado === 5) {
+      gradoBadge = `<span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">5° Grado</span>`;
+    } else if (student.grado === 6) {
+      gradoBadge = `<span style="background: #f3e8ff; color: #7c3aed; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">6° Grado</span>`;
+    }
+
+    const activeAuth = allAuthorizations.find(a => 
+      a.activo && 
+      a.estudiante_nombre && 
+      a.estudiante_nombre.toLowerCase().trim() === student.nombre.toLowerCase().trim()
+    );
 
     if (result) {
       let badgeColor = '#dcfce7';
@@ -451,8 +493,27 @@ function renderTable() {
           <button class="btn-secondary" onclick="viewDetail('${result.id}')" style="margin-right: 6px;">
             👁️ Ver
           </button>
-          <button class="btn-danger" onclick="resetAttempt('${result.id}', '${student.nombre}', ${student.grado})">
-            🔄 Reiniciar
+          <button class="btn-danger" onclick="resetAttempt('${result.id}', '${student.nombre}', ${student.grado})" title="Autorizar nueva oportunidad y archivar nota">
+            🔄 Dar Oportunidad
+          </button>
+        </td>
+      `;
+    } else if (activeAuth) {
+      tr.innerHTML = `
+        <td style="font-weight: 700; color: #64748b;">${idx + 1}</td>
+        <td>${gradoBadge}</td>
+        <td>
+          <strong>${student.nombre_simple || student.nombre}</strong>
+          <span class="group-pill" style="opacity: 0.9;">${student.grupo_label || student.grupo}</span>
+        </td>
+        <td><span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;">🔄 Oportunidad Autorizada</span></td>
+        <td><span style="color: #2563eb; font-size: 0.82rem; font-weight: 600;" title="Fecha y hora de autorización">📅 ${activeAuth.autorizado_at}</span></td>
+        <td style="color: #64748b; font-size: 0.82rem; font-style: italic;">En espera del alumno</td>
+        <td style="color: #94a3b8;">-</td>
+        <td><span style="background: #f1f5f9; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">Autorizado</span></td>
+        <td>
+          <button class="btn-secondary" onclick="resetAttempt(null, '${student.nombre}', ${student.grado})" title="Actualizar fecha de autorización">
+            🔄 Renovar
           </button>
         </td>
       `;
@@ -600,9 +661,10 @@ function exportResultsCsv() {
 }
 
 async function resetAttempt(resultId, studentName, grado) {
-  const confirmReset = confirm(`¿Estás seguro de que deseas reiniciar el intento de "${studentName}" (${grado}° grado)?\n\nEsto eliminará su nota previa y le permitirá realizar la prueba nuevamente.`);
+  const confirmReset = confirm(`¿Estás seguro de que deseas autorizar una NUEVA OPORTUNIDAD a "${studentName}" (${grado}° grado)?\n\n📌 Se registrará en la base de datos con la fecha y hora exacta actual, archivará su nota previa y le habilitará el acceso inmediato al estudiante desde su dispositivo.`);
   if (!confirmReset) return;
 
+  // 1. Limpiar localStorage local del docente
   try {
     const key = `meduca_agri_eval_${grado}to_grado`;
     const local = JSON.parse(localStorage.getItem(key) || '[]');
@@ -612,23 +674,25 @@ async function resetAttempt(resultId, studentName, grado) {
     console.warn(e);
   }
 
+  // 2. Registrar en la base de datos Firestore con fecha, hora y archivar intento
+  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.authorizeRetake) {
+    try {
+      await window.MEDUCA_FIREBASE.authorizeRetake(studentName, grado);
+    } catch (e) {
+      console.warn('Error al autorizar reintento en Firestore:', e);
+    }
+  }
+
+  // 3. Registrar en servidor local (si se usa server.js)
   try {
     await fetch('/api/resultados/reiniciar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: resultId, estudiante_nombre: studentName })
+      body: JSON.stringify({ id: resultId, estudiante_nombre: studentName, grado: grado })
     });
   } catch {}
 
-  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.deleteResult) {
-    try {
-      await window.MEDUCA_FIREBASE.deleteResult(resultId, studentName);
-    } catch (e) {
-      console.warn('Error al reiniciar en Firestore:', e);
-    }
-  }
-
-  alert(`Intento de ${studentName} reiniciado correctamente.`);
+  alert(`✅ Oportunidad autorizada y registrada en la base de datos para:\n"${studentName}" (${grado}° grado).\n\nEl estudiante ya puede ingresar desde su dispositivo para realizar su evaluación.`);
   await loadData();
 }
 
@@ -787,17 +851,40 @@ async function saveRoster() {
 
 function setupFirestoreRealtimeListener() {
   if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.listenResults) {
-    window.MEDUCA_FIREBASE.listenResults((cloudResults) => {
-      console.log('⚡ Actualización en tiempo real desde Firestore:', cloudResults.length, 'registros.');
+    window.MEDUCA_FIREBASE.listenResults((cloudItems) => {
+      console.log('⚡ Actualización en tiempo real desde Firestore:', cloudItems.length, 'registros.');
+      
+      const cloudEvaluations = cloudItems.filter(r => 
+        !r.tipo && 
+        r.estado !== 'reintento_autorizado' && 
+        !r.archivado_por_reintento && 
+        r.activo !== false
+      );
+      const cloudAuthorizations = cloudItems.filter(r => r.tipo === 'autorizacion_reintento');
+
+      allAuthorizations = cloudAuthorizations;
+
       const combinedMap = new Map();
       allResults.forEach(r => {
         const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
         combinedMap.set(key, r);
       });
-      cloudResults.forEach(r => {
+      cloudEvaluations.forEach(r => {
         const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
         combinedMap.set(key, r);
       });
+
+      // Si hay una autorización activa para un estudiante, remover resultado viejo
+      allAuthorizations.forEach(auth => {
+        if (auth.activo) {
+          for (const [k, v] of combinedMap.entries()) {
+            if (v.estudiante_nombre && v.estudiante_nombre.toLowerCase().trim() === auth.estudiante_nombre.toLowerCase().trim()) {
+              combinedMap.delete(k);
+            }
+          }
+        }
+      });
+
       allResults = Array.from(combinedMap.values());
       calculateAndRenderStats();
       renderTable();

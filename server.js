@@ -19,6 +19,7 @@ const CONFIG_FILE_5 = path.join(DATA_DIR, 'prueba_5to.json');
 const CONFIG_FILE_6 = path.join(DATA_DIR, 'prueba_6to.json');
 const ESTUDIANTES_FILE = path.join(DATA_DIR, 'estudiantes.json');
 const RESULTADOS_FILE = path.join(DATA_DIR, 'resultados.json');
+const AUTORIZACIONES_FILE = path.join(DATA_DIR, 'autorizaciones.json');
 
 function getConfigFileForGrade(grado) {
   const g = parseInt(grado, 10);
@@ -377,6 +378,18 @@ app.post('/api/evaluar', (req, res) => {
   resultados.push(nuevoResultado);
   writeJSON(RESULTADOS_FILE, resultados);
 
+  // Desactivar cualquier autorización activa para este estudiante
+  let autorizaciones = readJSON(AUTORIZACIONES_FILE, []);
+  let authModificada = false;
+  autorizaciones = autorizaciones.map(a => {
+    if (a.activo && normalizeText(a.estudiante_nombre) === normalizeText(estudiante_nombre)) {
+      authModificada = true;
+      return { ...a, activo: false, utilizado_at: new Date().toLocaleString('es-PA'), resultado_id: nuevoResultado.id };
+    }
+    return a;
+  });
+  if (authModificada) writeJSON(AUTORIZACIONES_FILE, autorizaciones);
+
   res.json({
     exito: true,
     mensaje: `Prueba de ${gradoNum}to grado enviada y evaluada con éxito`,
@@ -387,8 +400,9 @@ app.post('/api/evaluar', (req, res) => {
 // 4. Get all results with analytics
 app.get('/api/resultados', (req, res) => {
   const gradoFilter = req.query.grado ? parseInt(req.query.grado, 10) : null;
-  const resultados = readJSON(RESULTADOS_FILE, []);
+  const resultados = readJSON(RESULTADOS_FILE, []).filter(r => !r.archivado_por_reintento && r.activo !== false);
   const estudiantes = readJSON(ESTUDIANTES_FILE, []);
+  const autorizaciones = readJSON(AUTORIZACIONES_FILE, []);
 
   let filteredResultados = resultados;
   let filteredEstudiantes = estudiantes;
@@ -420,28 +434,56 @@ app.get('/api/resultados', (req, res) => {
       promedioNotas,
       promedioTiempo: formatDuration(promedioTiempoSegundos)
     },
-    resultados: filteredResultados.sort((a, b) => b.completado_timestamp - a.completado_timestamp)
+    resultados: filteredResultados.sort((a, b) => b.completado_timestamp - a.completado_timestamp),
+    autorizaciones
   });
 });
 
-// 5. Reset attempt
+// Endpoint para consultar autorizaciones
+app.get('/api/autorizaciones', (req, res) => {
+  const autorizaciones = readJSON(AUTORIZACIONES_FILE, []);
+  res.json({ autorizaciones });
+});
+
+// 5. Reset attempt / Authorize retake
 app.post('/api/resultados/reiniciar', (req, res) => {
-  const { id, estudiante_nombre } = req.body;
+  const { id, estudiante_nombre, grado } = req.body;
   let resultados = readJSON(RESULTADOS_FILE, []);
-  const initialCount = resultados.length;
+  const now = new Date();
+  const fechaStr = now.toLocaleString('es-PA');
 
-  if (id) {
-    resultados = resultados.filter(r => r.id !== id);
-  } else if (estudiante_nombre) {
-    resultados = resultados.filter(r => normalizeText(r.estudiante_nombre) !== normalizeText(estudiante_nombre));
-  }
-
-  if (resultados.length === initialCount) {
-    return res.status(404).json({ error: 'No se encontró el intento' });
-  }
-
+  // Archivar el resultado previo
+  resultados = resultados.map(r => {
+    if ((id && r.id === id) || (estudiante_nombre && normalizeText(r.estudiante_nombre) === normalizeText(estudiante_nombre))) {
+      return {
+        ...r,
+        estado: 'reintento_autorizado',
+        activo: false,
+        archivado_por_reintento: true,
+        reintento_autorizado_at: fechaStr,
+        reintento_autorizado_timestamp: Date.now()
+      };
+    }
+    return r;
+  });
   writeJSON(RESULTADOS_FILE, resultados);
-  res.json({ exito: true, mensaje: 'Intento reiniciado correctamente' });
+
+  // Registrar en autorizaciones.json
+  let autorizaciones = readJSON(AUTORIZACIONES_FILE, []);
+  const nuevaAuth = {
+    id: `auth_${Date.now()}`,
+    estudiante_nombre: estudiante_nombre || 'Estudiante',
+    grado: Number(grado) || 3,
+    autorizado_at: fechaStr,
+    autorizado_iso: now.toISOString(),
+    autorizado_timestamp: Date.now(),
+    autorizado_por: 'Docente (Panel)',
+    activo: true
+  };
+  autorizaciones.push(nuevaAuth);
+  writeJSON(AUTORIZACIONES_FILE, autorizaciones);
+
+  res.json({ exito: true, mensaje: 'Oportunidad autorizada y registrada correctamente', autorizacion: nuevaAuth });
 });
 
 // Helper to get local IP addresses

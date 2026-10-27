@@ -39,9 +39,31 @@ window.MEDUCA_FIREBASE = {
       const docId = resultado.id || `${resultado.grado || 'g'}_${(resultado.estudiante_nombre || 'est').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '_')}_${Date.now()}`;
       await firestoreDb.collection('resultados_evaluaciones').doc(docId).set({
         ...resultado,
+        activo: true,
         sincronizado_cloud_at: new Date().toISOString()
       }, { merge: true });
-      console.log('☁️ Resultado guardado en Firestore:', docId);
+
+      // Si había una autorización activa para este estudiante, desactivarla (ya completó la nueva oportunidad)
+      const cleanName = (resultado.estudiante_nombre || '').toLowerCase().trim();
+      const snap = await firestoreDb.collection('resultados_evaluaciones')
+        .where('tipo', '==', 'autorizacion_reintento')
+        .where('activo', '==', true)
+        .get();
+
+      const batch = firestoreDb.batch();
+      snap.forEach(doc => {
+        const d = doc.data();
+        if (d.estudiante_nombre && d.estudiante_nombre.toLowerCase().trim() === cleanName) {
+          batch.update(doc.ref, {
+            activo: false,
+            utilizado_at: new Date().toLocaleString('es-PA'),
+            resultado_id: docId
+          });
+        }
+      });
+      await batch.commit();
+
+      console.log('☁️ Resultado guardado en Firestore y autorizaciones actualizadas:', docId);
       return true;
     } catch (e) {
       console.error('Error enviando resultado a Firestore:', e);
@@ -81,6 +103,54 @@ window.MEDUCA_FIREBASE = {
     } catch (e) {
       console.warn('No se pudo activar el listener de Firestore:', e);
       return () => {};
+    }
+  },
+
+  // Registrar permanentemente la autorización de una nueva oportunidad en la base de datos
+  async authorizeRetake(studentName, grado, motivo = 'Oportunidad concedida por el docente desde el panel') {
+    if (!firestoreDb) return false;
+    try {
+      const now = new Date();
+      const fechaStr = now.toLocaleString('es-PA');
+      const authId = `auth_${grado}_${(studentName || 'est').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]/g, '_')}_${Date.now()}`;
+      
+      // 1. Guardar documento formal de autorización en la base de datos
+      await firestoreDb.collection('resultados_evaluaciones').doc(authId).set({
+        tipo: 'autorizacion_reintento',
+        estudiante_nombre: studentName,
+        grado: Number(grado),
+        autorizado_at: fechaStr,
+        autorizado_iso: now.toISOString(),
+        autorizado_timestamp: Date.now(),
+        autorizado_por: 'Docente (Panel)',
+        motivo: motivo,
+        activo: true
+      });
+
+      // 2. Archivar cualquier evaluación previa para ese estudiante en la base de datos
+      const snap = await firestoreDb.collection('resultados_evaluaciones')
+        .where('estudiante_nombre', '==', studentName)
+        .get();
+
+      const batch = firestoreDb.batch();
+      snap.forEach(doc => {
+        if (doc.id !== authId && doc.data().tipo !== 'autorizacion_reintento') {
+          batch.update(doc.ref, {
+            estado: 'reintento_autorizado',
+            activo: false,
+            archivado_por_reintento: true,
+            reintento_autorizado_at: fechaStr,
+            reintento_autorizado_timestamp: Date.now()
+          });
+        }
+      });
+      await batch.commit();
+
+      console.log(`✅ Oportunidad registrada en base de datos para: ${studentName} (${fechaStr})`);
+      return true;
+    } catch (e) {
+      console.error('Error registrando autorización en Firestore:', e);
+      return false;
     }
   },
 
