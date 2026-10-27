@@ -1,0 +1,303 @@
+{
+  "id": "eval-agri-6-3-1",
+  "grado_numero": 6,
+  "titulo": "Prueba Sumativa de Agricultura - 6to Grado",
+  "tema": "Destino de la producción agrícola",
+  "grado": "Sexto Grado de Educación Primaria",
+  "leccion": "Lección 6.3.1",
+  "area": "Área 3 - Producción de alimentos para consumo humano",
+  "puntos_totales": 32,
+  "secciones": {
+    "parte_a": {
+      "titulo": "Parte A. Completa",
+      "instrucciones": "Escribe en el espacio en blanco la palabra que completa correctamente cada oración. Puedes hacer clic en las palabras del banco para colocarlas automáticamente.",
+      "banco_palabras": [
+        "producción",
+        "destino",
+        "escolar",
+        "familiar",
+        "alimentos",
+        "desperdicio",
+        "recursos"
+      ],
+      "preguntas": [
+        {
+          "id": "a1",
+          "numero": 1,
+          "tipo": "single",
+          "texto_antes": "La",
+          "texto_despues": "agrícola está formada por los productos obtenidos mediante los cultivos.",
+          "respuestas_validas": ["produccion", "producción"],
+          "puntos": 1
+        },
+        {
+          "id": "a2",
+          "numero": 2,
+          "tipo": "single",
+          "texto_antes": "El",
+          "texto_despues": "de la producción indica el uso que se dará a los productos.",
+          "respuestas_validas": ["destino"],
+          "puntos": 1
+        },
+        {
+          "id": "a3",
+          "numero": 3,
+          "tipo": "single",
+          "texto_antes": "Cuando un producto se utiliza en el contexto escolar hablamos de consumo",
+          "texto_despues": ".",
+          "respuestas_validas": ["escolar"],
+          "puntos": 1
+        },
+        {
+          "id": "a4",
+          "numero": 4,
+          "tipo": "single",
+          "texto_antes": "Cuando se destina a la alimentación del hogar hablamos de consumo",
+          "texto_despues": ".",
+          "respuestas_validas": ["familiar"],
+          "puntos": 1
+        },
+        {
+          "id": "a5",
+          "numero": 5,
+          "tipo": "single",
+          "texto_antes": "Antes de clasificar un producto debemos conocer su",
+          "texto_despues": ".",
+          "respuestas_validas": ["destino", "uso"],
+          "puntos": 1
+        },
+        {
+          "id": "a6",
+          "numero": 6,
+          "tipo": "single",
+          "texto_antes": "El huerto escolar puede producir",
+          "texto_despues": "para la alimentación.",
+          "respuestas_validas": ["alimentos", "alimento"],
+          "puntos": 1
+        },
+        {
+          "id": "a7",
+          "numero": 7,
+          "tipo": "single",
+          "texto_antes": "Debemos evitar el",
+          "texto_despues": "de los alimentos producidos.",
+          "respuestas_validas": ["desperdicio"],
+          "puntos": 1
+        },
+        {
+          "id": "a8",
+          "numero": 8,
+          "tipo": "single",
+          "texto_antes": "El agua, suelo y semillas son ejemplos de",
+          "texto_despues": "agrícolas.",
+          "respuestas_validas": ["recursos", "recurso"],
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_b": {
+      "titulo": "Parte B. Selección Múltiple",
+      "instrucciones": "Lee con atención cada pregunta y haz clic sobre la opción correcta.",
+      "preguntas": [
+        {
+          "id": "b1",
+          "numero": 1,
+          "enunciado": "¿Qué significa destino de la producción?",
+          "opciones": [
+            { "id": "a", "texto": "El color del producto." },
+            { "id": "b", "texto": "El uso que se dará al producto." },
+            { "id": "c", "texto": "El tamaño de la planta." }
+          ],
+          "respuesta_correcta": "b",
+          "puntos": 1
+        },
+        {
+          "id": "b2",
+          "numero": 2,
+          "enunciado": "Un tomate utilizado en una actividad escolar corresponde a:",
+          "opciones": [
+            { "id": "a", "texto": "Consumo escolar." },
+            { "id": "b", "texto": "Consumo familiar." },
+            { "id": "c", "texto": "Ninguno." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b3",
+          "numero": 3,
+          "enunciado": "Un producto destinado al hogar corresponde a:",
+          "opciones": [
+            { "id": "a", "texto": "Consumo escolar." },
+            { "id": "b", "texto": "Consumo familiar." },
+            { "id": "c", "texto": "Maquinaria agrícola." }
+          ],
+          "respuesta_correcta": "b",
+          "puntos": 1
+        },
+        {
+          "id": "b4",
+          "numero": 4,
+          "enunciado": "¿Puede un mismo cultivo tener diferentes destinos?",
+          "opciones": [
+            { "id": "a", "texto": "Sí." },
+            { "id": "b", "texto": "No." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b5",
+          "numero": 5,
+          "enunciado": "Organizar la producción ayuda a:",
+          "opciones": [
+            { "id": "a", "texto": "Aprovechar mejor los productos." },
+            { "id": "b", "texto": "Aumentar el desperdicio." },
+            { "id": "c", "texto": "Perder la cosecha." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_c": {
+      "titulo": "Parte C. Verdadero o Falso",
+      "instrucciones": "Indica si cada afirmación es Verdadera (V) o Falsa (F) haciendo clic en el botón correspondiente.",
+      "preguntas": [
+        {
+          "id": "c1",
+          "numero": 1,
+          "enunciado": "El destino indica el uso de la producción.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c2",
+          "numero": 2,
+          "enunciado": "Consumo escolar y consumo familiar son los dos destinos estudiados en esta Lección.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c3",
+          "numero": 3,
+          "enunciado": "Un tomate siempre debe destinarse al consumo escolar.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c4",
+          "numero": 4,
+          "enunciado": "Un mismo producto puede tener diferentes destinos.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c5",
+          "numero": 5,
+          "enunciado": "Los productos del huerto pueden relacionarse con una alimentación saludable.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c6",
+          "numero": 6,
+          "enunciado": "Para producir alimentos utilizamos recursos agrícolas.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c7",
+          "numero": 7,
+          "enunciado": "No importa desperdiciar parte de la cosecha.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c8",
+          "numero": 8,
+          "enunciado": "Organizar la producción ayuda a aprovecharla.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c9",
+          "numero": 9,
+          "enunciado": "El consumo familiar se relaciona con la alimentación del hogar.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c10",
+          "numero": 10,
+          "enunciado": "Debemos utilizar responsablemente los recursos agrícolas.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_d": {
+      "titulo": "Parte D. Relaciona",
+      "instrucciones": "Relaciona cada concepto de la izquierda con su significado correspondiente de la derecha.",
+      "conceptos": [
+        { "id": "d1", "numero": 1, "termino": "Producción agrícola", "respuesta_correcta": "C" },
+        { "id": "d2", "numero": 2, "termino": "Destino", "respuesta_correcta": "D" },
+        { "id": "d3", "numero": 3, "termino": "Consumo escolar", "respuesta_correcta": "A" },
+        { "id": "d4", "numero": 4, "termino": "Consumo familiar", "respuesta_correcta": "B" }
+      ],
+      "significados": [
+        { "letra": "A", "definicion": "Uso dentro del contexto escolar" },
+        { "letra": "B", "definicion": "Uso en la familia" },
+        { "letra": "C", "definicion": "Productos obtenidos mediante cultivos" },
+        { "letra": "D", "definicion": "Uso que tendrá la producción" }
+      ],
+      "puntos_por_item": 1
+    },
+    "parte_e": {
+      "tipo": "clasificacion",
+      "titulo": "Parte E. Clasifica",
+      "instrucciones": "Indica si cada situación corresponde a Consumo escolar (E) o Consumo familiar (F) haciendo clic en el botón correspondiente.",
+      "clasificaciones": [
+        { "clave": "E", "nombre": "Consumo escolar", "icono": "🏫" },
+        { "clave": "F", "nombre": "Consumo familiar", "icono": "🏠" }
+      ],
+      "preguntas": [
+        {
+          "id": "e1",
+          "numero": 1,
+          "enunciado": "Tomates utilizados en una actividad de alimentación en la escuela.",
+          "respuesta_correcta": "E",
+          "puntos": 1
+        },
+        {
+          "id": "e2",
+          "numero": 2,
+          "enunciado": "Culantro destinado a un hogar.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "e3",
+          "numero": 3,
+          "enunciado": "Pepinos utilizados en una actividad escolar autorizada.",
+          "respuesta_correcta": "E",
+          "puntos": 1
+        },
+        {
+          "id": "e4",
+          "numero": 4,
+          "enunciado": "Ajíes destinados a la alimentación de una familia.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "e5",
+          "numero": 5,
+          "enunciado": "Lechugas utilizadas en una feria escolar.",
+          "respuesta_correcta": "E",
+          "puntos": 1
+        }
+      ]
+    }
+  }
+}

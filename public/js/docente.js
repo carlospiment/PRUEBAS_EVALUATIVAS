@@ -9,6 +9,17 @@ let serverInfo = null;
 
 const LESSONS_DATA = [
   {
+    grado: 6,
+    codigo: "Lección 6.3.1",
+    titulo: "Destino de la producción agrícola",
+    icono: "🍅",
+    slug: "sexto_grado.html",
+    color: "#7c3aed",
+    badgeBg: "#ede9fe",
+    badgeColor: "#5b21b6",
+    gradoTexto: "Sexto Grado (6°)"
+  },
+  {
     grado: 5,
     codigo: "Lección 5.3.1",
     titulo: "Métodos modernos de producción",
@@ -251,8 +262,9 @@ function getLocalResults(grade) {
     const r3 = JSON.parse(localStorage.getItem('meduca_agri_eval_3to_grado') || '[]');
     const r4 = JSON.parse(localStorage.getItem('meduca_agri_eval_4to_grado') || '[]');
     const r5 = JSON.parse(localStorage.getItem('meduca_agri_eval_5to_grado') || '[]');
+    const r6 = JSON.parse(localStorage.getItem('meduca_agri_eval_6to_grado') || '[]');
     const rOld = JSON.parse(localStorage.getItem('meduca_agri_eval_3er_grado') || '[]');
-    return [...r3, ...r4, ...r5, ...rOld];
+    return [...r3, ...r4, ...r5, ...r6, ...rOld];
   } catch {
     return [];
   }
@@ -509,9 +521,16 @@ function updateGroupFilterOptions() {
       <option value="5B">Salón 5°B</option>
       <option value="5C">Salón 5°C</option>
     `;
+  } else if (g === '6') {
+    sel.innerHTML = `
+      <option value="todos">Todos los salones de 6°</option>
+      <option value="6A">Salón 6°A</option>
+      <option value="6B">Salón 6°B</option>
+      <option value="6C">Salón 6°C</option>
+    `;
   } else {
     sel.innerHTML = `
-      <option value="todos">Todos los salones (3°, 4° y 5°)</option>
+      <option value="todos">Todos los salones (3°, 4°, 5° y 6°)</option>
       <option value="3A">Salón 3°A</option>
       <option value="3B">Salón 3°B</option>
       <option value="3C">Salón 3°C</option>
@@ -521,6 +540,9 @@ function updateGroupFilterOptions() {
       <option value="5A">Salón 5°A</option>
       <option value="5B">Salón 5°B</option>
       <option value="5C">Salón 5°C</option>
+      <option value="6A">Salón 6°A</option>
+      <option value="6B">Salón 6°B</option>
+      <option value="6C">Salón 6°C</option>
     `;
   }
 }
@@ -531,6 +553,7 @@ function exportResultsCsv() {
   if (gradeSel === '3') target = allResults.filter(r => r.grado === 3 || !r.grado);
   else if (gradeSel === '4') target = allResults.filter(r => r.grado === 4);
   else if (gradeSel === '5') target = allResults.filter(r => r.grado === 5);
+  else if (gradeSel === '6') target = allResults.filter(r => r.grado === 6);
 
   if (target.length === 0) {
     alert('No hay evaluaciones registradas con los filtros actuales para exportar.');

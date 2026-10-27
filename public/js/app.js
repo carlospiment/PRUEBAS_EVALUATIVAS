@@ -183,13 +183,17 @@ function setupTeacherAuthModal() {
 
 // Detect Grade strictly from body dataset, pathname, or URL
 function detectGrade() {
-  // 1. Explicit body attribute (e.g. <body data-grade="5"> or <body data-grade="4"> or <body data-grade="3">)
+  // 1. Explicit body attribute (e.g. <body data-grade="6">)
   if (document.body && document.body.dataset && document.body.dataset.grade) {
     currentGrade = parseInt(document.body.dataset.grade, 10);
     return;
   }
   // 2. Pathname check
   const path = window.location.pathname.toLowerCase();
+  if (path.includes('sexto')) {
+    currentGrade = 6;
+    return;
+  }
   if (path.includes('quinto')) {
     currentGrade = 5;
     return;
@@ -205,12 +209,12 @@ function detectGrade() {
   // 3. Query string ?grado=
   const params = new URLSearchParams(window.location.search);
   const g = params.get('grado');
-  if (g === '3' || g === '4' || g === '5') {
+  if (g === '3' || g === '4' || g === '5' || g === '6') {
     currentGrade = parseInt(g, 10);
     return;
   }
   // Default
-  currentGrade = 5;
+  currentGrade = 6;
 }
 
 function setupOnlineStatus() {
@@ -250,7 +254,8 @@ async function loadConfig() {
   try {
     let res = null;
     let staticFile = './data/prueba_3ro.json';
-    if (currentGrade === 5) staticFile = './data/prueba_5to.json';
+    if (currentGrade === 6) staticFile = './data/prueba_6to.json';
+    else if (currentGrade === 5) staticFile = './data/prueba_5to.json';
     else if (currentGrade === 4) staticFile = './data/prueba_4to.json';
 
     try {
@@ -737,35 +742,75 @@ function renderParteD(data) {
   container.appendChild(grid);
 }
 
-// RENDER PARTE E (RESPUESTA CORTA - 4TO GRADO)
+// RENDER PARTE E (RESPUESTA CORTA O CLASIFICACIÓN)
 function renderParteE(data) {
   const container = document.getElementById('parteEQuestions');
   if (!data || !container) return;
 
   container.innerHTML = '';
+  const isClasificacion = data.tipo === 'clasificacion';
+
   data.preguntas.forEach((q, idx) => {
     const block = document.createElement('div');
     block.className = 'short-answer-block';
     block.id = `short_block_${q.id}`;
     block.dataset.qid = q.id;
 
-    block.innerHTML = `
-      <div class="short-answer-prompt">
-        <span style="color: var(--primary);">${idx + 1}.</span>
-        <span>${q.enunciado || q.afirmacion || ''}</span>
-      </div>
-      <textarea class="short-answer-textarea" id="textarea_${q.id}" data-qid="${q.id}" placeholder="Escribe aquí tu respuesta con tus propias palabras..."></textarea>
-    `;
+    if (isClasificacion) {
+      block.innerHTML = `
+        <div class="short-answer-prompt" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="flex: 1; min-width: 260px;">
+            <span style="color: var(--primary); font-weight: 800; font-size: 1.1rem;">${idx + 1}.</span>
+            <span style="margin-left: 6px; font-weight: 600;">${q.enunciado || ''}</span>
+          </div>
+          <div class="classify-buttons" style="display: flex; gap: 10px;">
+            <button type="button" class="classify-btn" data-qid="${q.id}" data-val="E" style="padding: 10px 18px; border-radius: var(--radius-pill); border: 2.5px solid #cbd5e1; background: #f8fafc; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;">
+              <span>🏫</span> E (Escolar)
+            </button>
+            <button type="button" class="classify-btn" data-qid="${q.id}" data-val="F" style="padding: 10px 18px; border-radius: var(--radius-pill); border: 2.5px solid #cbd5e1; background: #f8fafc; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;">
+              <span>🏠</span> F (Familiar)
+            </button>
+          </div>
+        </div>
+      `;
 
-    const ta = block.querySelector('textarea');
-    ta.addEventListener('input', () => {
-      if (ta.value.trim().length > 0) {
-        block.classList.add('answered');
-      } else {
-        block.classList.remove('answered');
-      }
-      updateProgress();
-    });
+      block.querySelectorAll('.classify-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          playSound('click');
+          block.querySelectorAll('.classify-btn').forEach(b => {
+            b.classList.remove('selected');
+            b.style.background = '#f8fafc';
+            b.style.color = '#1e293b';
+            b.style.borderColor = '#cbd5e1';
+          });
+          btn.classList.add('selected');
+          btn.style.background = btn.dataset.val === 'E' ? '#2563eb' : '#ea580c';
+          btn.style.color = '#ffffff';
+          btn.style.borderColor = btn.dataset.val === 'E' ? '#1d4ed8' : '#c2410c';
+          block.classList.add('answered');
+          block.dataset.selected = btn.dataset.val;
+          updateProgress();
+        });
+      });
+    } else {
+      block.innerHTML = `
+        <div class="short-answer-prompt">
+          <span style="color: var(--primary);">${idx + 1}.</span>
+          <span>${q.enunciado || q.afirmacion || ''}</span>
+        </div>
+        <textarea class="short-answer-textarea" id="textarea_${q.id}" data-qid="${q.id}" placeholder="Escribe aquí tu respuesta con tus propias palabras..."></textarea>
+      `;
+
+      const ta = block.querySelector('textarea');
+      ta.addEventListener('input', () => {
+        if (ta.value.trim().length > 0) {
+          block.classList.add('answered');
+        } else {
+          block.classList.remove('answered');
+        }
+        updateProgress();
+      });
+    }
 
     container.appendChild(block);
   });
@@ -973,10 +1018,15 @@ function evaluateTestOffline(responses, durationSec) {
   if (cfg.secciones?.parte_e?.preguntas) {
     cfg.secciones.parte_e.preguntas.forEach(q => {
       const resp = responses.parte_e ? responses.parte_e[q.id] : '';
-      const textNorm = cleanText(resp);
-      const keywords = q.palabras_clave || [];
-      const hasKw = keywords.some(kw => textNorm.includes(cleanText(kw)));
-      const esCorrecta = textNorm.length >= 4 && (hasKw || textNorm.length >= 8);
+      let esCorrecta = false;
+      if (q.respuesta_correcta) {
+        esCorrecta = (resp || '').trim().toUpperCase() === q.respuesta_correcta.trim().toUpperCase();
+      } else {
+        const textNorm = cleanText(resp);
+        const keywords = q.palabras_clave || [];
+        const hasKw = keywords.some(kw => textNorm.includes(cleanText(kw)));
+        esCorrecta = textNorm.length >= 4 && (hasKw || textNorm.length >= 8);
+      }
       const pts = esCorrecta ? 1 : 0;
       puntosObtenidos += pts;
       evaluacionDetallada.parte_e.puntos += pts;
@@ -1074,6 +1124,10 @@ async function confirmAndSubmitTest() {
 
   document.querySelectorAll('.short-answer-textarea').forEach(ta => {
     responses.parte_e[ta.dataset.qid] = ta.value.trim();
+  });
+
+  document.querySelectorAll('.short-answer-block[data-selected]').forEach(blk => {
+    responses.parte_e[blk.dataset.qid] = blk.dataset.selected;
   });
 
   const payload = {

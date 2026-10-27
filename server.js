@@ -16,11 +16,13 @@ const DATA_DIR = path.join(__dirname, 'data');
 const CONFIG_FILE_3 = path.join(DATA_DIR, 'prueba_3ro.json');
 const CONFIG_FILE_4 = path.join(DATA_DIR, 'prueba_4to.json');
 const CONFIG_FILE_5 = path.join(DATA_DIR, 'prueba_5to.json');
+const CONFIG_FILE_6 = path.join(DATA_DIR, 'prueba_6to.json');
 const ESTUDIANTES_FILE = path.join(DATA_DIR, 'estudiantes.json');
 const RESULTADOS_FILE = path.join(DATA_DIR, 'resultados.json');
 
 function getConfigFileForGrade(grado) {
   const g = parseInt(grado, 10);
+  if (g === 6) return CONFIG_FILE_6;
   if (g === 5) return CONFIG_FILE_5;
   if (g === 4) return CONFIG_FILE_4;
   return CONFIG_FILE_3;
@@ -119,7 +121,10 @@ app.get('/api/prueba', (req, res) => {
       safeConfig.secciones.parte_d.conceptos.forEach(c => delete c.respuesta_correcta);
     }
     if (safeConfig.secciones.parte_e?.preguntas) {
-      safeConfig.secciones.parte_e.preguntas.forEach(e => delete e.palabras_clave);
+      safeConfig.secciones.parte_e.preguntas.forEach(e => {
+        delete e.palabras_clave;
+        delete e.respuesta_correcta;
+      });
     }
   }
 
@@ -313,15 +318,22 @@ app.post('/api/evaluar', (req, res) => {
     });
   });
 
-  // Parte E: Respuesta Corta (solo para 4to grado)
+  // Parte E: Respuesta Corta o Clasificación (4to, 5to y 6to grado)
   if (config.secciones?.parte_e?.preguntas) {
     config.secciones.parte_e.preguntas.forEach(pregunta => {
       const respEst = respuestas.parte_e ? respuestas.parte_e[pregunta.id] : '';
-      const textNorm = normalizeText(respEst);
-      const keywords = pregunta.palabras_clave || [];
-      const hasKeyword = keywords.some(kw => textNorm.includes(normalizeText(kw)));
-      const hasLength = textNorm.length >= 4;
-      const esCorrecta = hasLength && (hasKeyword || textNorm.length >= 8);
+      let esCorrecta = false;
+
+      if (pregunta.respuesta_correcta) {
+        esCorrecta = (respEst || '').trim().toUpperCase() === pregunta.respuesta_correcta.trim().toUpperCase();
+      } else {
+        const textNorm = normalizeText(respEst);
+        const keywords = pregunta.palabras_clave || [];
+        const hasKeyword = keywords.some(kw => textNorm.includes(normalizeText(kw)));
+        const hasLength = textNorm.length >= 4;
+        esCorrecta = hasLength && (hasKeyword || textNorm.length >= 8);
+      }
+
       const pts = esCorrecta ? 1 : 0;
 
       puntosObtenidos += pts;
@@ -332,6 +344,7 @@ app.post('/api/evaluar', (req, res) => {
         enunciado: pregunta.enunciado,
         respuesta_dada: respEst || '(En blanco)',
         es_correcta: esCorrecta,
+        respuesta_esperada: pregunta.respuesta_correcta || null,
         puntos: pts
       });
     });
