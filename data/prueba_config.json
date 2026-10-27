@@ -1,0 +1,177 @@
+{
+  "id": "eval-agri-3-3-1",
+  "titulo": "Prueba Sumativa de Agricultura",
+  "tema": "El huerto escolar, la salud y la nutrición",
+  "grado": "Tercer Grado de Educación Primaria",
+  "leccion": "Lección 3.3.1",
+  "area": "Área 3 - Producción de alimentos para consumo humano",
+  "puntos_totales": 19,
+  "secciones": {
+    "parte_a": {
+      "titulo": "Parte A. Completa",
+      "instrucciones": "Escribe en el espacio en blanco la palabra que completa correctamente cada oración. Puedes guiarte con el banco de palabras.",
+      "banco_palabras": ["huerto", "nutrición", "nutrientes", "germinación", "cosecha"],
+      "preguntas": [
+        {
+          "id": "a1",
+          "numero": 1,
+          "texto_antes": "El",
+          "texto_despues": "escolar es un espacio donde cultivamos plantas que producen alimentos.",
+          "respuestas_validas": ["huerto"],
+          "puntos": 1
+        },
+        {
+          "id": "a2",
+          "numero": 2,
+          "texto_antes": "La",
+          "texto_despues": "es la manera en que nuestro cuerpo obtiene y utiliza nutrientes.",
+          "respuestas_validas": ["nutricion", "nutrición"],
+          "puntos": 1
+        },
+        {
+          "id": "a3",
+          "numero": 3,
+          "texto_antes": "Los alimentos aportan",
+          "texto_despues": "al cuerpo.",
+          "respuestas_validas": ["nutrientes", "nutriente", "energia", "energía"],
+          "puntos": 1
+        },
+        {
+          "id": "a4",
+          "numero": 4,
+          "texto_antes": "La etapa en que una semilla comienza a desarrollarse se llama",
+          "texto_despues": ".",
+          "respuestas_validas": ["germinacion", "germinación"],
+          "puntos": 1
+        },
+        {
+          "id": "a5",
+          "numero": 5,
+          "texto_antes": "Cuando recogemos el producto de un cultivo realizamos la",
+          "texto_despues": ".",
+          "respuestas_validas": ["cosecha"],
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_b": {
+      "titulo": "Parte B. Selección Múltiple",
+      "instrucciones": "Lee cuidadosamente cada pregunta y selecciona la opción correcta.",
+      "preguntas": [
+        {
+          "id": "b1",
+          "numero": 1,
+          "enunciado": "¿Para qué sirve un huerto escolar?",
+          "opciones": [
+            { "id": "a", "texto": "Producir alimentos y aprender.", "icono": "🌱" },
+            { "id": "b", "texto": "Tirar residuos.", "icono": "🗑️" },
+            { "id": "c", "texto": "Guardar juguetes.", "icono": "🧸" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b2",
+          "numero": 2,
+          "enunciado": "El tomate es:",
+          "opciones": [
+            { "id": "a", "texto": "Un cultivo que produce un fruto.", "icono": "🍅" },
+            { "id": "b", "texto": "Una herramienta.", "icono": "🔧" },
+            { "id": "c", "texto": "Un tipo de suelo.", "icono": "🪨" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b3",
+          "numero": 3,
+          "enunciado": "La nutrición está relacionada con:",
+          "opciones": [
+            { "id": "a", "texto": "Los nutrientes de los alimentos.", "icono": "🥗" },
+            { "id": "b", "texto": "Las herramientas.", "icono": "🔨" },
+            { "id": "c", "texto": "La maquinaria.", "icono": "🚜" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b4",
+          "numero": 4,
+          "enunciado": "Una etapa del cultivo es:",
+          "opciones": [
+            { "id": "a", "texto": "Germinación.", "icono": "🌱" },
+            { "id": "b", "texto": "Almacenamiento de herramientas.", "icono": "📦" },
+            { "id": "c", "texto": "Barrido.", "icono": "🧹" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_c": {
+      "titulo": "Parte C. Verdadero o Falso",
+      "instrucciones": "Indica si cada afirmación es Verdadera (V) o Falsa (F).",
+      "preguntas": [
+        {
+          "id": "c1",
+          "numero": 1,
+          "enunciado": "El huerto escolar puede producir alimentos.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c2",
+          "numero": 2,
+          "enunciado": "El huerto también puede utilizarse para aprender.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c3",
+          "numero": 3,
+          "enunciado": "Todos los alimentos tienen exactamente el mismo valor nutricional.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c4",
+          "numero": 4,
+          "enunciado": "Las plantas necesitan cuidados durante su crecimiento.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c5",
+          "numero": 5,
+          "enunciado": "La cosecha ocurre antes de sembrar.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c6",
+          "numero": 6,
+          "enunciado": "Debemos cuidar el agua y el suelo del huerto.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_d": {
+      "titulo": "Parte D. Relaciona",
+      "instrucciones": "Relaciona cada concepto de la izquierda con su significado correcto de la derecha.",
+      "conceptos": [
+        { "id": "d1", "numero": 1, "termino": "Huerto", "respuesta_correcta": "B" },
+        { "id": "d2", "numero": 2, "termino": "Nutrición", "respuesta_correcta": "D" },
+        { "id": "d3", "numero": 3, "termino": "Germinación", "respuesta_correcta": "C" },
+        { "id": "d4", "numero": 4, "termino": "Cosecha", "respuesta_correcta": "A" }
+      ],
+      "significados": [
+        { "letra": "A", "definicion": "Recolección del producto" },
+        { "letra": "B", "definicion": "Espacio donde se cultivan alimentos" },
+        { "letra": "C", "definicion": "Inicio del desarrollo de la semilla" },
+        { "letra": "D", "definicion": "Obtención y uso de nutrientes" }
+      ],
+      "puntos_por_item": 1
+    }
+  }
+}

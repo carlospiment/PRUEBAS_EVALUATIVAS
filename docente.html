@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Docente - Resultados de Prueba de Agricultura (3er Grado)</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧑‍🏫</text></svg>">
+</head>
+<body style="background: #f1f5f9;">
+
+  <div class="container" style="max-width: 1060px;">
+
+    <!-- HEADER DOCENTE -->
+    <header class="teacher-header">
+      <div>
+        <div style="font-size: 0.88rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9;">
+          🏫 MEDUCA • Tercer Grado de Primaria
+        </div>
+        <h1 style="color: white; font-size: 1.85rem; margin-top: 4px;">
+          🧑‍🏫 Panel Docente - Prueba Sumativa
+        </h1>
+        <div style="font-size: 1rem; opacity: 0.95;">
+          Tema: <strong>El huerto escolar, la salud y la nutrición</strong> (Lección 3.3.1)
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <a href="./index.html" class="btn-secondary" style="background: white; color: #1e3a8a;">
+          <span>🌱</span> Vista del Estudiante
+        </a>
+        <button type="button" id="exportCsvBtn" class="btn-secondary" style="background: #22c55e; color: white; border: none; cursor: pointer;">
+          <span>📥</span> Descargar Excel (CSV)
+        </button>
+      </div>
+    </header>
+
+    <!-- ESTADÍSTICAS GENERALES -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="statTotal">0</div>
+        <div class="stat-label">👥 Total en Lista</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statRealizadas" style="color: #16a34a;">0</div>
+        <div class="stat-label">✅ Pruebas Realizadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statPendientes" style="color: #ea580c;">0</div>
+        <div class="stat-label">⏳ Pendientes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statPromedioNota" style="color: #2563eb;">-</div>
+        <div class="stat-label">⭐ Promedio (Escala 1.0 - 5.0)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="statPromedioTiempo" style="color: #9333ea; font-size: 1.8rem;">-</div>
+        <div class="stat-label">⏱️ Tiempo Promedio</div>
+      </div>
+    </section>
+
+    <!-- ENLACES DE RED LOCAL Y GITHUB PAGES -->
+    <div class="card" style="padding: 18px 22px; margin-bottom: 20px; background: #f8fafc; border: 1.5px solid #cbd5e1;">
+      <h3 style="font-size: 1.15rem; color: #1e3a8a; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+        <span>🌐</span> Enlaces para Conectar Tablets o Computadoras de los Estudiantes
+      </h3>
+      <div id="networkLinksContainer" style="font-size: 0.95rem; color: #334155;">
+        Cargando direcciones de red...
+      </div>
+    </div>
+
+    <!-- BARRA DE ACCIONES Y FILTROS -->
+    <div class="card" style="padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+      <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 260px;">
+        <input 
+          type="text" 
+          id="searchInput" 
+          placeholder="🔍 Buscar estudiante por nombre o apellido..." 
+          style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; width: 100%; font-family: inherit; font-size: 0.95rem; outline: none;"
+        >
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <!-- Filtro por salón -->
+        <select id="groupFilterSelect" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 700; outline: none; background: white; color: #1e3a8a;">
+          <option value="todos">Todos los salones (3°A, 3°B, 3°C)</option>
+          <option value="3A">Salón 3°A</option>
+          <option value="3B">Salón 3°B</option>
+          <option value="3C">Salón 3°C</option>
+        </select>
+
+        <!-- Filtro por estado -->
+        <select id="statusFilter" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white;">
+          <option value="todos">Todos los estados</option>
+          <option value="realizadas">Solo pruebas realizadas</option>
+          <option value="pendientes">Solo pendientes</option>
+        </select>
+
+        <button type="button" id="openRosterBtn" class="btn-secondary">
+          <span>📋</span> Ver / Editar Lista
+        </button>
+
+        <button type="button" id="refreshBtn" class="btn-secondary">
+          <span>🔄</span> Refrescar
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLA DE RESULTADOS -->
+    <div class="table-responsive">
+      <table class="results-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">#</th>
+            <th>Estudiante</th>
+            <th>Estado</th>
+            <th>Fecha y Hora</th>
+            <th>Tiempo</th>
+            <th>Puntos (19)</th>
+            <th>Nota MEDUCA</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="resultsTableBody">
+          <!-- Filas generadas dinámicamente -->
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- MODAL: GESTIONAR LISTA DE ESTUDIANTES -->
+  <div class="modal-overlay" id="rosterModal">
+    <div class="modal-card" style="max-width: 580px; text-align: left;">
+      <h3 style="color: #1e3a8a; font-size: 1.45rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+        <span>📋</span> Lista de Estudiantes de 3er Grado
+      </h3>
+      <p style="color: #4b5563; font-size: 0.95rem; margin-bottom: 14px;">
+        Estudiantes sincronizados desde <em>Libreta de Calificaciones</em>. Puedes editar o agregar nombres (uno por línea):
+      </p>
+
+      <textarea 
+        id="rosterTextarea" 
+        rows="12" 
+        style="width: 100%; padding: 12px; font-family: monospace; font-size: 0.95rem; border: 2px solid #cbd5e1; border-radius: 8px; outline: none; margin-bottom: 16px; line-height: 1.5;"
+        placeholder="Ejemplo:&#10;Elian Antonio Acosta (3°A)&#10;Thiago Josué Ansola (3°A)..."
+      ></textarea>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-secondary" id="closeRosterModal">
+          Cancelar
+        </button>
+        <button type="button" class="btn-primary" id="saveRosterBtn" style="width: auto; padding: 10px 22px;">
+          💾 Guardar Cambios
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: VER DETALLE DE RESPUESTAS DEL ESTUDIANTE -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-card" style="max-width: 680px; text-align: left; max-height: 85vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 14px;">
+        <div>
+          <h3 id="detailStudentName" style="color: #1e3a8a; font-size: 1.4rem;">Estudiante</h3>
+          <div style="font-size: 0.9rem; color: #64748b; margin-top: 2px;">
+            <span>📅 Fecha: </span><span id="detailDate">-</span> • 
+            <span>⏱️ Tiempo: </span><strong id="detailTime" style="color: #92400e;">-</strong>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">Calificación</div>
+          <div id="detailScore" style="font-size: 1.25rem; font-weight: 800; color: #15803d;">-</div>
+        </div>
+      </div>
+
+      <div id="detailModalBody">
+        <!-- Detalle de respuestas -->
+      </div>
+
+      <div style="text-align: right; margin-top: 20px;">
+        <button type="button" class="btn-secondary" id="closeDetailModal">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./js/docente.js"></script>
+</body>
+</html>

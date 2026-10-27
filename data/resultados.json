@@ -1,0 +1,195 @@
+[
+  {
+    "id": "res-1793059983658-d6ljt",
+    "estudiante_id": "est-01",
+    "estudiante_nombre": "Alejandro Morales Mendoza",
+    "iniciado_at": "2026-10-27T00:10:17.809Z",
+    "completado_at": "10/26/2026, 7:13:03 p. m.",
+    "completado_timestamp": 1793059983658,
+    "duracion_segundos": 162,
+    "duracion_formato": "02:42 min",
+    "puntos_obtenidos": 19,
+    "puntos_totales": 19,
+    "porcentaje": 100,
+    "nota_meduca": 5,
+    "desempeno": "Excelente",
+    "detalles": {
+      "parte_a": {
+        "puntos": 5,
+        "items": [
+          {
+            "id": "a1",
+            "numero": 1,
+            "respuesta_dada": "huerto",
+            "es_correcta": true,
+            "respuesta_esperada": "huerto",
+            "puntos": 1
+          },
+          {
+            "id": "a2",
+            "numero": 2,
+            "respuesta_dada": "nutrición",
+            "es_correcta": true,
+            "respuesta_esperada": "nutricion",
+            "puntos": 1
+          },
+          {
+            "id": "a3",
+            "numero": 3,
+            "respuesta_dada": "nutrientes",
+            "es_correcta": true,
+            "respuesta_esperada": "nutrientes",
+            "puntos": 1
+          },
+          {
+            "id": "a4",
+            "numero": 4,
+            "respuesta_dada": "germinación",
+            "es_correcta": true,
+            "respuesta_esperada": "germinacion",
+            "puntos": 1
+          },
+          {
+            "id": "a5",
+            "numero": 5,
+            "respuesta_dada": "cosecha",
+            "es_correcta": true,
+            "respuesta_esperada": "cosecha",
+            "puntos": 1
+          }
+        ]
+      },
+      "parte_b": {
+        "puntos": 4,
+        "items": [
+          {
+            "id": "b1",
+            "numero": 1,
+            "respuesta_dada": "a",
+            "es_correcta": true,
+            "respuesta_esperada": "a",
+            "puntos": 1
+          },
+          {
+            "id": "b2",
+            "numero": 2,
+            "respuesta_dada": "a",
+            "es_correcta": true,
+            "respuesta_esperada": "a",
+            "puntos": 1
+          },
+          {
+            "id": "b3",
+            "numero": 3,
+            "respuesta_dada": "a",
+            "es_correcta": true,
+            "respuesta_esperada": "a",
+            "puntos": 1
+          },
+          {
+            "id": "b4",
+            "numero": 4,
+            "respuesta_dada": "a",
+            "es_correcta": true,
+            "respuesta_esperada": "a",
+            "puntos": 1
+          }
+        ]
+      },
+      "parte_c": {
+        "puntos": 6,
+        "items": [
+          {
+            "id": "c1",
+            "numero": 1,
+            "respuesta_dada": "V",
+            "es_correcta": true,
+            "respuesta_esperada": "V",
+            "puntos": 1
+          },
+          {
+            "id": "c2",
+            "numero": 2,
+            "respuesta_dada": "V",
+            "es_correcta": true,
+            "respuesta_esperada": "V",
+            "puntos": 1
+          },
+          {
+            "id": "c3",
+            "numero": 3,
+            "respuesta_dada": "F",
+            "es_correcta": true,
+            "respuesta_esperada": "F",
+            "puntos": 1
+          },
+          {
+            "id": "c4",
+            "numero": 4,
+            "respuesta_dada": "V",
+            "es_correcta": true,
+            "respuesta_esperada": "V",
+            "puntos": 1
+          },
+          {
+            "id": "c5",
+            "numero": 5,
+            "respuesta_dada": "F",
+            "es_correcta": true,
+            "respuesta_esperada": "F",
+            "puntos": 1
+          },
+          {
+            "id": "c6",
+            "numero": 6,
+            "respuesta_dada": "V",
+            "es_correcta": true,
+            "respuesta_esperada": "V",
+            "puntos": 1
+          }
+        ]
+      },
+      "parte_d": {
+        "puntos": 4,
+        "items": [
+          {
+            "id": "d1",
+            "numero": 1,
+            "termino": "Huerto",
+            "respuesta_dada": "B",
+            "es_correcta": true,
+            "respuesta_esperada": "B",
+            "puntos": 1
+          },
+          {
+            "id": "d2",
+            "numero": 2,
+            "termino": "Nutrición",
+            "respuesta_dada": "D",
+            "es_correcta": true,
+            "respuesta_esperada": "D",
+            "puntos": 1
+          },
+          {
+            "id": "d3",
+            "numero": 3,
+            "termino": "Germinación",
+            "respuesta_dada": "C",
+            "es_correcta": true,
+            "respuesta_esperada": "C",
+            "puntos": 1
+          },
+          {
+            "id": "d4",
+            "numero": 4,
+            "termino": "Cosecha",
+            "respuesta_dada": "A",
+            "es_correcta": true,
+            "respuesta_esperada": "A",
+            "puntos": 1
+          }
+        ]
+      }
+    }
+  }
+]
