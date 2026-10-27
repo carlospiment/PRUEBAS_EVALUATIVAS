@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   './css/style.css',
   './js/app.js',
   './js/docente.js',
+  './js/qrcode.min.js',
   './data/estudiantes.json',
   './data/prueba_3ro.json',
   './data/prueba_4to.json',

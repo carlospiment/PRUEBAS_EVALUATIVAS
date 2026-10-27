@@ -1,17 +1,43 @@
 /* ===================================================
    LÓGICA DEL PANEL DOCENTE - ADMINISTRACIÓN Y REPORTES
-   Soporte Multi-Grado: 3er y 4to Grado de Primaria
+   Soporte Multi-Grado, Códigos QR y Enlaces Directos
    =================================================== */
 
 let allResults = [];
 let allStudents = [];
 let serverInfo = null;
-let currentGradeFilter = 'todos';
+
+const LESSONS_DATA = [
+  {
+    grado: 4,
+    codigo: "Lección 4.3.1",
+    titulo: "Beneficios e importancia del huerto escolar",
+    icono: "🥕",
+    slug: "cuarto_grado.html",
+    color: "#ea580c",
+    badgeBg: "#ffedd5",
+    badgeColor: "#c2410c",
+    gradoTexto: "Cuarto Grado (4°)"
+  },
+  {
+    grado: 3,
+    codigo: "Lección 3.3.1",
+    titulo: "El huerto escolar, la salud y la nutrición",
+    icono: "🌿",
+    slug: "tercer_grado.html",
+    color: "#15803d",
+    badgeBg: "#dcfce7",
+    badgeColor: "#166534",
+    gradoTexto: "Tercer Grado (3°)"
+  }
+];
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadServerInfo();
+  renderLessonsQrSection();
   await loadData();
   setupDocenteEvents();
+  setupQrModalEvents();
 });
 
 async function loadServerInfo() {
@@ -19,46 +45,135 @@ async function loadServerInfo() {
     const res = await fetch('/api/servidor-info');
     if (res.ok) {
       serverInfo = await res.json();
-      renderServerLinks();
-    } else {
-      renderGitHubPagesLinks();
     }
-  } catch (err) {
-    renderGitHubPagesLinks();
-  }
+  } catch {}
 }
 
-function renderServerLinks() {
-  const container = document.getElementById('networkLinksContainer');
-  if (!container || !serverInfo) return;
-
-  let html = `<div><strong>Acceso en esta computadora:</strong> <a href="http://localhost:${serverInfo.puerto}" target="_blank">http://localhost:${serverInfo.puerto}</a></div>`;
-  if (serverInfo.urls && serverInfo.urls.length > 0) {
-    html += `<div style="margin-top: 8px;"><strong>Acceso en Red Local (Tablets / Celulares):</strong></div><ul style="margin-left: 20px; margin-top: 4px;">`;
-    serverInfo.urls.forEach(u => {
-      html += `<li><a href="${u}" target="_blank" style="font-weight: 700; color: #15803d;">${u}</a></li>`;
-    });
-    html += `</ul>`;
-  }
-  container.innerHTML = html;
-}
-
-function renderGitHubPagesLinks() {
-  const container = document.getElementById('networkLinksContainer');
+// Render Lesson Cards with QR Code buttons
+function renderLessonsQrSection() {
+  const container = document.getElementById('lessonsLinksContainer');
   if (!container) return;
-  const baseUrl = window.location.href.replace('docente.html', '');
-  container.innerHTML = `
-    <div><strong>Enlaces Oficiales de GitHub Pages:</strong></div>
-    <ul style="margin-left: 20px; margin-top: 6px; line-height: 1.8;">
-      <li>🥕 <strong>Prueba 4to Grado:</strong> <a href="${baseUrl}cuarto_grado.html" target="_blank" style="font-weight: 700; color: #ea580c;">${baseUrl}cuarto_grado.html</a></li>
-      <li>🌿 <strong>Prueba 3er Grado:</strong> <a href="${baseUrl}tercer_grado.html" target="_blank" style="font-weight: 700; color: #15803d;">${baseUrl}tercer_grado.html</a></li>
-    </ul>
-    <div style="font-size: 0.88rem; color: #64748b; margin-top: 6px;">
-      ⚡ Funciona 100% Offline (PWA). Una vez abierta por primera vez, no requiere conexión a internet continua.
-    </div>
-  `;
+
+  const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+
+  let gridHtml = `<div class="lessons-qr-grid">`;
+
+  LESSONS_DATA.forEach(lesson => {
+    const fullUrl = baseUrl + lesson.slug;
+    gridHtml += `
+      <div class="lesson-qr-card ${lesson.grado === 4 ? 'grade-4' : ''}" onclick="openQrModal(${lesson.grado})">
+        <div>
+          <div class="lesson-qr-header">
+            <span class="lesson-qr-icon">${lesson.icono}</span>
+            <div>
+              <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor};">
+                ${lesson.gradoTexto} • ${lesson.codigo}
+              </span>
+              <h4 class="lesson-qr-title">${lesson.titulo}</h4>
+            </div>
+          </div>
+
+          <div style="font-size: 0.88rem; color: #64748b; margin-top: 6px;">
+            🔗 Enlace: <span style="font-family: monospace; color: #1e3a8a; word-break: break-all;">${fullUrl}</span>
+          </div>
+        </div>
+
+        <div class="lesson-qr-footer">
+          <span style="font-size: 0.85rem; font-weight: 700; color: #475569;">📱 Clic para ver Código QR</span>
+          <button type="button" class="btn-qr-action ${lesson.grado === 4 ? 'orange' : ''}" onclick="event.stopPropagation(); openQrModal(${lesson.grado});">
+            <span>📷</span> Ver QR
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  gridHtml += `</div>`;
+  container.innerHTML = gridHtml;
 }
 
+// Open QR Modal and generate QR code
+function openQrModal(gradeNum) {
+  const lesson = LESSONS_DATA.find(l => l.grado === gradeNum);
+  if (!lesson) return;
+
+  const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  const fullUrl = baseUrl + lesson.slug;
+
+  const modal = document.getElementById('qrModal');
+  const badge = document.getElementById('qrModalBadge');
+  const title = document.getElementById('qrModalTitle');
+  const subtitle = document.getElementById('qrModalSubtitle');
+  const linkText = document.getElementById('qrModalLinkText');
+  const openLink = document.getElementById('openQrLinkBtn');
+  const qrBox = document.getElementById('qrCodeContainer');
+
+  badge.textContent = `${lesson.gradoTexto} • ${lesson.codigo}`;
+  badge.style.background = lesson.badgeBg;
+  badge.style.color = lesson.badgeColor;
+
+  title.textContent = `${lesson.icono} ${lesson.codigo}: ${lesson.titulo}`;
+  subtitle.textContent = `Escanea este código con la tablet o celular para abrir la evaluación`;
+
+  linkText.textContent = fullUrl;
+  linkText.href = fullUrl;
+  openLink.href = fullUrl;
+
+  // Clear previous QR
+  qrBox.innerHTML = '';
+
+  // Generate QR Code with qrcodejs
+  if (typeof QRCode !== 'undefined') {
+    new QRCode(qrBox, {
+      text: fullUrl,
+      width: 230,
+      height: 230,
+      colorDark: lesson.color,
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  } else {
+    qrBox.innerHTML = `<p style="color: #ef4444;">Librería QR no disponible</p>`;
+  }
+
+  modal.classList.add('active');
+}
+
+function setupQrModalEvents() {
+  const closeBtn = document.getElementById('closeQrModalBtn');
+  const modal = document.getElementById('qrModal');
+  const copyBtn = document.getElementById('copyQrLinkBtn');
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+  }
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  }
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      const link = document.getElementById('qrModalLinkText').textContent.trim();
+      try {
+        await navigator.clipboard.writeText(link);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span>✅</span> ¡Enlace Copiado!';
+        copyBtn.style.background = '#15803d';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+          copyBtn.style.background = '';
+        }, 2200);
+      } catch (err) {
+        alert('Enlace: ' + link);
+      }
+    });
+  }
+}
+
+// Load Results and Student Data
 function getLocalResults(grade) {
   try {
     if (grade) {
@@ -175,20 +290,16 @@ function renderTable() {
 
   const filtered = rows.filter(item => {
     const s = item.student;
-    // Grade Filter
     if (gradeFilter !== 'todos' && s.grado !== parseInt(gradeFilter, 10)) return false;
 
-    // Search
     const matchSearch = (s.nombre || '').toLowerCase().includes(search) || 
                         (s.apellidos || '').toLowerCase().includes(search) || 
                         (s.nombres || '').toLowerCase().includes(search);
     if (!matchSearch) return false;
 
-    // Status filter
     if (statusFilter === 'realizadas' && !item.result) return false;
     if (statusFilter === 'pendientes' && item.result) return false;
 
-    // Group filter
     if (groupFilter !== 'todos' && s.grupo !== groupFilter) return false;
 
     return true;
@@ -275,7 +386,6 @@ function setupDocenteEvents() {
   document.getElementById('refreshBtn').addEventListener('click', loadData);
   document.getElementById('exportCsvBtn').addEventListener('click', exportResultsCsv);
 
-  // Manage students modal
   const rosterModal = document.getElementById('rosterModal');
   document.getElementById('openRosterBtn').addEventListener('click', () => {
     const listText = allStudents.map(s => s.nombre).join('\n');
@@ -324,7 +434,6 @@ function updateGroupFilterOptions() {
   }
 }
 
-// Client-Side CSV Export
 function exportResultsCsv() {
   const gradeSel = document.getElementById('gradeFilterSelect').value;
   let target = allResults;
@@ -361,7 +470,6 @@ function exportResultsCsv() {
   document.body.removeChild(link);
 }
 
-// Reset student attempt
 async function resetAttempt(resultId, studentName, grado) {
   const confirmReset = confirm(`¿Estás seguro de que deseas reiniciar el intento de "${studentName}" (${grado}° grado)?\n\nEsto eliminará su nota previa y le permitirá realizar la prueba nuevamente.`);
   if (!confirmReset) return;
@@ -387,7 +495,6 @@ async function resetAttempt(resultId, studentName, grado) {
   await loadData();
 }
 
-// View student answer details
 function viewDetail(resultId) {
   const res = allResults.find(r => r.id === resultId);
   if (!res) return;
@@ -484,7 +591,7 @@ function viewDetail(resultId) {
   });
   html += `</ul></div>`;
 
-  // Parte E (si aplica para 4to grado)
+  // Parte E
   if (d.parte_e?.items && d.parte_e.items.length > 0) {
     html += `
       <div style="margin-bottom: 20px;">

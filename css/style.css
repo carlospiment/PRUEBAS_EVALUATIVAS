@@ -1209,3 +1209,104 @@ h1, h2, h3, h4, .font-heading {
   border-color: var(--primary);
   box-shadow: 0 6px 14px rgba(22, 101, 52, 0.3);
 }
+/* --- TARJETAS DE LECCIONES Y QR EN PANEL DOCENTE --- */
+.lessons-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.lesson-qr-card {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.lesson-qr-card:hover {
+  border-color: #16a34a;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(22, 101, 52, 0.14);
+  background: #f0fdf4;
+}
+
+.lesson-qr-card.grade-4:hover {
+  border-color: #ea580c;
+  background: #fff7ed;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.14);
+}
+
+.lesson-qr-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lesson-qr-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.lesson-qr-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.lesson-qr-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.lesson-qr-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-qr-action {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-qr-action:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+}
+
+.btn-qr-action.orange {
+  background: #ea580c;
+}
+
+.btn-qr-action.orange:hover {
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
+}
