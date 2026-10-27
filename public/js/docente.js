@@ -250,8 +250,9 @@ function getLocalResults(grade) {
     }
     const r3 = JSON.parse(localStorage.getItem('meduca_agri_eval_3to_grado') || '[]');
     const r4 = JSON.parse(localStorage.getItem('meduca_agri_eval_4to_grado') || '[]');
+    const r5 = JSON.parse(localStorage.getItem('meduca_agri_eval_5to_grado') || '[]');
     const rOld = JSON.parse(localStorage.getItem('meduca_agri_eval_3er_grado') || '[]');
-    return [...r3, ...r4, ...rOld];
+    return [...r3, ...r4, ...r5, ...rOld];
   } catch {
     return [];
   }
@@ -298,16 +299,24 @@ async function loadData() {
 
 function calculateAndRenderStats() {
   const gradeSel = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const groupSel = document.getElementById('groupFilterSelect')?.value || 'todos';
 
   let filteredStudents = allStudents;
   let filteredResults = allResults;
 
-  if (gradeSel === '3') {
-    filteredStudents = allStudents.filter(s => s.grado === 3);
-    filteredResults = allResults.filter(r => r.grado === 3 || !r.grado);
-  } else if (gradeSel === '4') {
-    filteredStudents = allStudents.filter(s => s.grado === 4);
-    filteredResults = allResults.filter(r => r.grado === 4);
+  if (gradeSel !== 'todos') {
+    const gNum = parseInt(gradeSel, 10);
+    filteredStudents = allStudents.filter(s => s.grado === gNum);
+    filteredResults = allResults.filter(r => (r.grado === gNum) || (!r.grado && gNum === 3));
+  }
+
+  if (groupSel !== 'todos') {
+    filteredStudents = filteredStudents.filter(s => s.grupo === groupSel);
+    filteredResults = filteredResults.filter(r => {
+      if (r.grupo) return r.grupo === groupSel;
+      const st = allStudents.find(s => (s.id && s.id === r.estudiante_id) || (s.nombre && s.nombre.toLowerCase().trim() === (r.estudiante_nombre || '').toLowerCase().trim()));
+      return st && st.grupo === groupSel;
+    });
   }
 
   const totalEst = filteredStudents.length;
@@ -443,14 +452,18 @@ function renderTable() {
 }
 
 function setupDocenteEvents() {
+  updateGroupFilterOptions();
   document.getElementById('searchInput').addEventListener('input', renderTable);
   document.getElementById('gradeFilterSelect').addEventListener('change', () => {
-    calculateAndRenderStats();
     updateGroupFilterOptions();
+    calculateAndRenderStats();
     renderTable();
   });
   document.getElementById('statusFilter').addEventListener('change', renderTable);
-  document.getElementById('groupFilterSelect').addEventListener('change', renderTable);
+  document.getElementById('groupFilterSelect').addEventListener('change', () => {
+    calculateAndRenderStats();
+    renderTable();
+  });
   document.getElementById('refreshBtn').addEventListener('click', loadData);
   document.getElementById('exportCsvBtn').addEventListener('click', exportResultsCsv);
 
