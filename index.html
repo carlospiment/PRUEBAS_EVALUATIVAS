@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prueba Sumativa de Agricultura - 3er Grado | MEDUCA</title>
+  <title>Prueba Sumativa de Agricultura | MEDUCA</title>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#15803d">
@@ -22,28 +22,31 @@
         <div class="badge-top" style="margin-bottom: 0;">
           <span>🏫 MEDUCA</span>
           <span>•</span>
-          <span id="testGrade">Tercer Grado de Educación Primaria</span>
+          <span id="testGrade">Cuarto Grado de Educación Primaria</span>
         </div>
         <div id="offlineBadge" class="status-pill online">
           🟢 En línea
         </div>
       </div>
-      <h1 id="testTitle">Prueba Sumativa de Agricultura</h1>
-      <div class="subtitle" id="testTopic">El huerto escolar, la salud y la nutrición (Lección 3.3.1)</div>
+      <h1 id="testTitle">Prueba Sumativa de Agricultura - 4to Grado</h1>
+      <div class="subtitle" id="testTopic">Beneficios e importancia del huerto escolar (Lección 4.3.1)</div>
     </header>
 
+    <!-- SELECTOR DE GRADO (3ER O 4TO GRADO) -->
+    <div class="grade-switcher">
+      <button type="button" class="grade-btn" id="gradeBtn3">🌿 3er Grado</button>
+      <button type="button" class="grade-btn active" id="gradeBtn4">🥕 4to Grado</button>
+    </div>
+
     <!-- PANTALLA 1: INGRESO DE ESTUDIANTE (AUTOCOMPLETE) -->
-    <section class="card login-box" id="loginSection">
+    <section class="card login-box" id="loginSection" style="margin-top: 20px;">
       <div class="icon-mascot">🌱</div>
       <h2>¡Bienvenido(a) a tu evaluación!</h2>
       <p>Selecciona tu salón y escribe tu nombre para comenzar la prueba.</p>
 
-      <!-- FILTRO DE GRUPO (3°A, 3°B, 3°C) -->
-      <div class="group-filters">
-        <button type="button" class="group-filter-btn active" data-group="TODOS">Todos los salones</button>
-        <button type="button" class="group-filter-btn" data-group="3A">Grado 3°A</button>
-        <button type="button" class="group-filter-btn" data-group="3B">Grado 3°B</button>
-        <button type="button" class="group-filter-btn" data-group="3C">Grado 3°C</button>
+      <!-- FILTRO DE GRUPO DINÁMICO (3°A/B/C o 4°A/B/C) -->
+      <div class="group-filters" id="groupFiltersContainer">
+        <!-- Generado dinámicamente -->
       </div>
 
       <div class="autocomplete-wrapper">
@@ -94,7 +97,7 @@
         <div class="progress-track">
           <div class="progress-fill" id="progressFill"></div>
         </div>
-        <span class="progress-label" id="progressLabel">0 de 19 preguntas</span>
+        <span class="progress-label" id="progressLabel">0 reactivos respondidos</span>
       </div>
     </aside>
 
@@ -163,10 +166,25 @@
           <h2>D. Relaciona los Conceptos</h2>
         </div>
         <p class="instructions">
-          Selecciona en cada concepto la letra del significado que le corresponde.
+          Selecciona en cada concepto la letra del significado o ejemplo correspondiente.
         </p>
 
         <div id="parteDQuestions">
+          <!-- Preguntas generadas aleatoriamente -->
+        </div>
+      </section>
+
+      <!-- PARTE E: RESPUESTA CORTA (4TO GRADO) -->
+      <section class="card" id="parteESection" style="display: none;">
+        <div class="card-title">
+          <span class="icon">📝</span>
+          <h2>E. Respuesta Corta</h2>
+        </div>
+        <p class="instructions">
+          Escribe una respuesta breve y clara para cada pregunta con tus propias palabras.
+        </p>
+
+        <div id="parteEQuestions">
           <!-- Preguntas generadas aleatoriamente -->
         </div>
       </section>
@@ -195,7 +213,7 @@
             <div class="metric-lbl">Calificación MEDUCA</div>
           </div>
           <div class="score-metric">
-            <div class="metric-val" id="modalPuntosVal">19 / 19</div>
+            <div class="metric-val" id="modalPuntosVal">24 / 24</div>
             <div class="metric-lbl">Puntos Obtenidos</div>
           </div>
         </div>

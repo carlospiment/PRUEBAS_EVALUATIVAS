@@ -1,36 +1,38 @@
 /* ===================================================
-   SERVICE WORKER - PRUEBA SUMATIVA AGRICULTURA 3ER GRADO
+   SERVICE WORKER - PRUEBAS SUMATIVAS MEDUCA (3° Y 4° GRADO)
    Soporte 100% Offline para PWA y GitHub Pages
    =================================================== */
 
-const CACHE_NAME = 'meduca-agri-eval-v2';
+const CACHE_NAME = 'meduca-agri-eval-v3';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './docente.html',
+  './cuarto_grado.html',
+  './tercer_grado.html',
   './css/style.css',
   './js/app.js',
   './js/docente.js',
   './data/estudiantes.json',
+  './data/prueba_3ro.json',
+  './data/prueba_4to.json',
   './data/prueba_config.json',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap'
 ];
 
-// Install Event: Precaches all essential assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Precaching assets para modo Offline...');
+      console.log('[SW v3] Precaching assets 3er y 4to grado...');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('[SW] Algunos recursos externos no pudieron pre-cachearse:', err);
+        console.warn('[SW] Error al cachear algunos recursos:', err);
       });
     }).then(() => self.skipWaiting())
   );
 });
 
-// Activate Event: Cleans older caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -46,14 +48,10 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event: Cache-First with Network Fallback
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
-
   const url = new URL(event.request.url);
 
-  // For API endpoints, prefer network, fall back to offline handled by client
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -65,12 +63,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static pages and assets: Cache First, then Network
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
+      if (cachedResponse) return cachedResponse;
 
       return fetch(event.request).then((networkResponse) => {
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
@@ -84,7 +79,6 @@ self.addEventListener('fetch', (event) => {
 
         return networkResponse;
       }).catch(() => {
-        // Fallback for navigation requests
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

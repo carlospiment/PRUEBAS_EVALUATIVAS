@@ -13,7 +13,8 @@ app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const DATA_DIR = path.join(__dirname, 'data');
-const CONFIG_FILE = path.join(DATA_DIR, 'prueba_config.json');
+const CONFIG_FILE_3 = path.join(DATA_DIR, 'prueba_3ro.json');
+const CONFIG_FILE_4 = path.join(DATA_DIR, 'prueba_4to.json');
 const ESTUDIANTES_FILE = path.join(DATA_DIR, 'estudiantes.json');
 const RESULTADOS_FILE = path.join(DATA_DIR, 'resultados.json');
 
@@ -42,7 +43,7 @@ function writeJSON(file, data) {
   }
 }
 
-// Normalizer for text answers (remove accents, trim, lowercase, strip leading articles)
+// Normalizer for text answers
 function normalizeText(str) {
   if (!str) return '';
   let cleaned = str
@@ -52,12 +53,11 @@ function normalizeText(str) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[.,;:!?¿¡"']/g, '')
     .replace(/\s+/g, ' ');
-  // Strip leading articles like 'el ', 'la ', 'los ', 'las '
   cleaned = cleaned.replace(/^(el|la|los|las|un|una|unos|unas)\s+/, '');
   return cleaned;
 }
 
-// Format seconds into MM:SS or HH:MM:SS
+// Format seconds into MM:SS
 function formatDuration(seconds) {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
@@ -73,7 +73,6 @@ function formatDuration(seconds) {
 // Calculate Panamanian MEDUCA Grade (1.0 to 5.0)
 function calculateMeducaGrade(points, total) {
   if (total <= 0) return 1.0;
-  // Escala oficial: Nota = 1.0 + 4.0 * (puntos / total)
   const nota = 1.0 + 4.0 * (points / total);
   return Number(Math.max(1.0, Math.min(5.0, nota)).toFixed(1));
 }
@@ -87,16 +86,20 @@ function getPerformanceLevel(nota) {
 
 // --- API ROUTES ---
 
-// 1. Get test config (Safe for student: without answers)
+// 1. Get test config by grade (Safe for student)
 app.get('/api/prueba', (req, res) => {
-  const config = readJSON(CONFIG_FILE, {});
-  // Deep clone to strip answer keys for student security
-  const safeConfig = JSON.parse(JSON.stringify(config));
+  const grado = req.query.grado === '4' ? '4' : '3';
+  const file = grado === '4' ? CONFIG_FILE_4 : CONFIG_FILE_3;
+  const config = readJSON(file, {});
 
-  // Strip answers in safe config
+  // Safe clone
+  const safeConfig = JSON.parse(JSON.stringify(config));
   if (safeConfig.secciones) {
     if (safeConfig.secciones.parte_a?.preguntas) {
-      safeConfig.secciones.parte_a.preguntas.forEach(p => delete p.respuestas_validas);
+      safeConfig.secciones.parte_a.preguntas.forEach(p => {
+        delete p.respuestas_validas;
+        delete p.respuestas_validas_conjunto;
+      });
     }
     if (safeConfig.secciones.parte_b?.preguntas) {
       safeConfig.secciones.parte_b.preguntas.forEach(p => delete p.respuesta_correcta);
@@ -107,25 +110,38 @@ app.get('/api/prueba', (req, res) => {
     if (safeConfig.secciones.parte_d?.conceptos) {
       safeConfig.secciones.parte_d.conceptos.forEach(c => delete c.respuesta_correcta);
     }
+    if (safeConfig.secciones.parte_e?.preguntas) {
+      safeConfig.secciones.parte_e.preguntas.forEach(e => delete e.palabras_clave);
+    }
   }
 
   res.json(safeConfig);
 });
 
-// 2. Get students with their completion status
+// 2. Get students by grade
 app.get('/api/estudiantes', (req, res) => {
+  const grado = req.query.grado ? parseInt(req.query.grado, 10) : null;
   const estudiantes = readJSON(ESTUDIANTES_FILE, []);
   const resultados = readJSON(RESULTADOS_FILE, []);
 
-  // Map each student to check if already submitted
-  const lista = estudiantes.map(est => {
+  let listaFiltrada = estudiantes;
+  if (grado) {
+    listaFiltrada = estudiantes.filter(e => e.grado === grado);
+  }
+
+  const lista = listaFiltrada.map(est => {
     const resExistente = resultados.find(r => 
       (r.estudiante_id && r.estudiante_id === est.id) ||
       normalizeText(r.estudiante_nombre) === normalizeText(est.nombre)
     );
     return {
       id: est.id,
+      num: est.num,
+      grado: est.grado,
+      grupo: est.grupo,
+      grupo_label: est.grupo_label,
       nombre: est.nombre,
+      nombre_simple: est.nombre_simple,
       completado: !!resExistente,
       fecha_completado: resExistente ? resExistente.completado_at : null,
       duracion: resExistente ? resExistente.duracion_formato : null,
@@ -134,169 +150,201 @@ app.get('/api/estudiantes', (req, res) => {
     };
   });
 
-  // Sort alphabetically
   lista.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
   res.json(lista);
 });
 
-// 3. Verify specific student eligibility (One-time attempt check)
-app.get('/api/estudiantes/verificar', (req, res) => {
-  const nombre = req.query.nombre;
-  if (!nombre) {
-    return res.status(400).json({ error: 'Nombre es requerido' });
-  }
-
-  const resultados = readJSON(RESULTADOS_FILE, []);
-  const previo = resultados.find(r => normalizeText(r.estudiante_nombre) === normalizeText(nombre));
-
-  if (previo) {
-    return res.json({
-      permitido: false,
-      mensaje: 'Ya realizaste esta prueba evaluativa.',
-      resultado: {
-        estudiante_nombre: previo.estudiante_nombre,
-        completado_at: previo.completado_at,
-        duracion_formato: previo.duracion_formato,
-        puntos_obtenidos: previo.puntos_obtenidos,
-        puntos_totales: previo.puntos_totales,
-        nota_meduca: previo.nota_meduca,
-        desempeno: previo.desempeno
-      }
-    });
-  }
-
-  res.json({ permitido: true });
-});
-
-// 4. Submit and Grade Test (Server-side validation & evaluation)
+// 3. Submit and Grade Test (Supports 3rd and 4th grade)
 app.post('/api/evaluar', (req, res) => {
-  const { estudiante_nombre, estudiante_id, respuestas, duracion_segundos, iniciado_at } = req.body;
+  const { estudiante_nombre, estudiante_id, respuestas, duracion_segundos, iniciado_at, grado } = req.body;
 
   if (!estudiante_nombre || !respuestas) {
-    return res.status(400).json({ error: 'Faltan datos requeridos (nombre o respuestas)' });
+    return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
+  const gradoNum = grado === 4 || grado === '4' ? 4 : 3;
+  const configFile = gradoNum === 4 ? CONFIG_FILE_4 : CONFIG_FILE_3;
+  const config = readJSON(configFile, {});
   const resultados = readJSON(RESULTADOS_FILE, []);
-  const config = readJSON(CONFIG_FILE, {});
 
-  // STRICT SINGLE-ATTEMPT CHECK
+  // Check single attempt
   const previo = resultados.find(r => 
-    normalizeText(r.estudiante_nombre) === normalizeText(estudiante_nombre) ||
-    (estudiante_id && r.estudiante_id === estudiante_id)
+    (r.grado === gradoNum || !r.grado) && (
+      normalizeText(r.estudiante_nombre) === normalizeText(estudiante_nombre) ||
+      (estudiante_id && r.estudiante_id === estudiante_id)
+    )
   );
 
   if (previo) {
     return res.status(403).json({
       error: 'UNICO_INTENTO_PERMITIDO',
-      mensaje: `El estudiante ${estudiante_nombre} ya envió esta prueba previamente. Solo se permite un intento.`,
+      mensaje: `El estudiante ${estudiante_nombre} ya envió esta prueba de ${gradoNum}to grado. Solo se permite un intento.`,
       resultado_previo: previo
     });
   }
 
-  // EVALUATION LOGIC
   let puntosObtenidos = 0;
   const evaluacionDetallada = {
     parte_a: { puntos: 0, items: [] },
     parte_b: { puntos: 0, items: [] },
     parte_c: { puntos: 0, items: [] },
-    parte_d: { puntos: 0, items: [] }
+    parte_d: { puntos: 0, items: [] },
+    parte_e: { puntos: 0, items: [] }
   };
 
-  // Parte A: Completa (5 pts)
-  const parteAConfig = config.secciones?.parte_a?.preguntas || [];
-  parteAConfig.forEach(pregunta => {
-    const respuestaEstudiante = respuestas.parte_a ? respuestas.parte_a[pregunta.id] : '';
-    const normEst = normalizeText(respuestaEstudiante);
-    const validas = (pregunta.respuestas_validas || []).map(normalizeText);
-    const esCorrecta = validas.includes(normEst);
+  // Parte A: Completa
+  const pAConfig = config.secciones?.parte_a?.preguntas || [];
+  pAConfig.forEach(pregunta => {
+    if (pregunta.tipo === 'triple') {
+      // 3 blanks for classification (economicos, nutritivos, comunitarios)
+      const r1 = normalizeText(respuestas.parte_a ? respuestas.parte_a['a2_1'] : '');
+      const r2 = normalizeText(respuestas.parte_a ? respuestas.parte_a['a2_2'] : '');
+      const r3 = normalizeText(respuestas.parte_a ? respuestas.parte_a['a2_3'] : '');
+      const dadas = [r1, r2, r3].filter(r => r.length > 0);
 
-    const pts = esCorrecta ? pregunta.puntos : 0;
-    puntosObtenidos += pts;
-    evaluacionDetallada.parte_a.puntos += pts;
-    evaluacionDetallada.parte_a.items.push({
-      id: pregunta.id,
-      numero: pregunta.numero,
-      respuesta_dada: respuestaEstudiante || '(En blanco)',
-      es_correcta: esCorrecta,
-      respuesta_esperada: pregunta.respuestas_validas[0],
-      puntos: pts
-    });
+      const targets = [
+        ['economicos', 'economico'],
+        ['nutritivos', 'nutritivo'],
+        ['comunitarios', 'comunitario']
+      ];
+
+      let matchCount = 0;
+      targets.forEach(targetGroup => {
+        const foundIndex = dadas.findIndex(d => targetGroup.includes(d));
+        if (foundIndex !== -1) {
+          matchCount++;
+          dadas.splice(foundIndex, 1);
+        }
+      });
+
+      puntosObtenidos += matchCount;
+      evaluacionDetallada.parte_a.puntos += matchCount;
+      evaluacionDetallada.parte_a.items.push({
+        id: pregunta.id,
+        numero: pregunta.numero,
+        respuesta_dada: `${r1 || '_'}, ${r2 || '_'}, ${r3 || '_'}`,
+        es_correcta: matchCount === 3,
+        respuesta_esperada: 'económicos, nutritivos, comunitarios',
+        puntos: matchCount
+      });
+    } else {
+      const respEst = respuestas.parte_a ? respuestas.parte_a[pregunta.id] : '';
+      const norm = normalizeText(respEst);
+      const validas = (pregunta.respuestas_validas || []).map(normalizeText);
+      const esCorrecta = validas.includes(norm);
+      const pts = esCorrecta ? pregunta.puntos : 0;
+
+      puntosObtenidos += pts;
+      evaluacionDetallada.parte_a.puntos += pts;
+      evaluacionDetallada.parte_a.items.push({
+        id: pregunta.id,
+        numero: pregunta.numero,
+        respuesta_dada: respEst || '(En blanco)',
+        es_correcta: esCorrecta,
+        respuesta_esperada: pregunta.respuestas_validas ? pregunta.respuestas_validas[0] : '',
+        puntos: pts
+      });
+    }
   });
 
-  // Parte B: Selección Múltiple (4 pts)
-  const parteBConfig = config.secciones?.parte_b?.preguntas || [];
-  parteBConfig.forEach(pregunta => {
-    const respuestaEstudiante = respuestas.parte_b ? respuestas.parte_b[pregunta.id] : '';
-    const esCorrecta = (respuestaEstudiante || '').toLowerCase() === (pregunta.respuesta_correcta || '').toLowerCase();
-
+  // Parte B: Selección Múltiple
+  const pBConfig = config.secciones?.parte_b?.preguntas || [];
+  pBConfig.forEach(pregunta => {
+    const respEst = respuestas.parte_b ? respuestas.parte_b[pregunta.id] : '';
+    const esCorrecta = (respEst || '').toLowerCase() === (pregunta.respuesta_correcta || '').toLowerCase();
     const pts = esCorrecta ? pregunta.puntos : 0;
+
     puntosObtenidos += pts;
     evaluacionDetallada.parte_b.puntos += pts;
     evaluacionDetallada.parte_b.items.push({
       id: pregunta.id,
       numero: pregunta.numero,
-      respuesta_dada: respuestaEstudiante || '(Sin responder)',
+      respuesta_dada: respEst || '(Sin responder)',
       es_correcta: esCorrecta,
       respuesta_esperada: pregunta.respuesta_correcta,
       puntos: pts
     });
   });
 
-  // Parte C: Verdadero o Falso (6 pts)
-  const parteCConfig = config.secciones?.parte_c?.preguntas || [];
-  parteCConfig.forEach(pregunta => {
-    const respuestaEstudiante = respuestas.parte_c ? respuestas.parte_c[pregunta.id] : '';
-    const esCorrecta = (respuestaEstudiante || '').toUpperCase() === (pregunta.respuesta_correcta || '').toUpperCase();
-
+  // Parte C: Verdadero o Falso
+  const pCConfig = config.secciones?.parte_c?.preguntas || [];
+  pCConfig.forEach(pregunta => {
+    const respEst = respuestas.parte_c ? respuestas.parte_c[pregunta.id] : '';
+    const esCorrecta = (respEst || '').toUpperCase() === (pregunta.respuesta_correcta || '').toUpperCase();
     const pts = esCorrecta ? pregunta.puntos : 0;
+
     puntosObtenidos += pts;
     evaluacionDetallada.parte_c.puntos += pts;
     evaluacionDetallada.parte_c.items.push({
       id: pregunta.id,
       numero: pregunta.numero,
-      respuesta_dada: respuestaEstudiante || '(Sin responder)',
+      respuesta_dada: respEst || '(Sin responder)',
       es_correcta: esCorrecta,
       respuesta_esperada: pregunta.respuesta_correcta,
       puntos: pts
     });
   });
 
-  // Parte D: Relaciona (4 pts)
-  const parteDConceptos = config.secciones?.parte_d?.conceptos || [];
-  parteDConceptos.forEach(item => {
-    const respuestaEstudiante = respuestas.parte_d ? respuestas.parte_d[item.id] : '';
-    const esCorrecta = (respuestaEstudiante || '').toUpperCase() === (item.respuesta_correcta || '').toUpperCase();
-
+  // Parte D: Relaciona
+  const pDConceptos = config.secciones?.parte_d?.conceptos || [];
+  pDConceptos.forEach(item => {
+    const respEst = respuestas.parte_d ? respuestas.parte_d[item.id] : '';
+    const esCorrecta = (respEst || '').toUpperCase() === (item.respuesta_correcta || '').toUpperCase();
     const pts = esCorrecta ? 1 : 0;
+
     puntosObtenidos += pts;
     evaluacionDetallada.parte_d.puntos += pts;
     evaluacionDetallada.parte_d.items.push({
       id: item.id,
       numero: item.numero,
       termino: item.termino,
-      respuesta_dada: respuestaEstudiante || '(Sin asignar)',
+      respuesta_dada: respEst || '(Sin asignar)',
       es_correcta: esCorrecta,
       respuesta_esperada: item.respuesta_correcta,
       puntos: pts
     });
   });
 
-  const puntosTotales = config.puntos_totales || 19;
+  // Parte E: Respuesta Corta (solo para 4to grado)
+  if (config.secciones?.parte_e?.preguntas) {
+    config.secciones.parte_e.preguntas.forEach(pregunta => {
+      const respEst = respuestas.parte_e ? respuestas.parte_e[pregunta.id] : '';
+      const textNorm = normalizeText(respEst);
+      const keywords = pregunta.palabras_clave || [];
+      const hasKeyword = keywords.some(kw => textNorm.includes(normalizeText(kw)));
+      const hasLength = textNorm.length >= 4;
+      const esCorrecta = hasLength && (hasKeyword || textNorm.length >= 8);
+      const pts = esCorrecta ? 1 : 0;
+
+      puntosObtenidos += pts;
+      evaluacionDetallada.parte_e.puntos += pts;
+      evaluacionDetallada.parte_e.items.push({
+        id: pregunta.id,
+        numero: pregunta.numero,
+        enunciado: pregunta.enunciado,
+        respuesta_dada: respEst || '(En blanco)',
+        es_correcta: esCorrecta,
+        puntos: pts
+      });
+    });
+  }
+
+  const puntosTotales = config.puntos_totales || (gradoNum === 4 ? 24 : 19);
   const notaMeduca = calculateMeducaGrade(puntosObtenidos, puntosTotales);
   const porcentaje = Math.round((puntosObtenidos / puntosTotales) * 100);
   const duracionSeg = parseInt(duracion_segundos, 10) || 0;
-  const duracionTexto = formatDuration(duracionSeg);
   const perf = getPerformanceLevel(notaMeduca);
 
   const nuevoResultado = {
     id: 'res-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    grado: gradoNum,
     estudiante_id: estudiante_id || null,
     estudiante_nombre: estudiante_nombre.trim(),
     iniciado_at: iniciado_at || new Date().toISOString(),
     completado_at: new Date().toLocaleString('es-PA', { timeZone: 'America/Panama' }),
     completado_timestamp: Date.now(),
     duracion_segundos: duracionSeg,
-    duracion_formato: duracionTexto,
+    duracion_formato: formatDuration(duracionSeg),
     puntos_obtenidos: puntosObtenidos,
     puntos_totales: puntosTotales,
     porcentaje: porcentaje,
@@ -310,35 +358,38 @@ app.post('/api/evaluar', (req, res) => {
 
   res.json({
     exito: true,
-    mensaje: 'Prueba enviada y evaluada con éxito',
+    mensaje: `Prueba de ${gradoNum}to grado enviada y evaluada con éxito`,
     resultado: nuevoResultado
   });
 });
 
-// 5. Teacher: Get all results with analytics
+// 4. Get all results with analytics
 app.get('/api/resultados', (req, res) => {
+  const gradoFilter = req.query.grado ? parseInt(req.query.grado, 10) : null;
   const resultados = readJSON(RESULTADOS_FILE, []);
   const estudiantes = readJSON(ESTUDIANTES_FILE, []);
 
-  const totalEstudiantes = estudiantes.length;
-  const totalCompletados = resultados.length;
+  let filteredResultados = resultados;
+  let filteredEstudiantes = estudiantes;
+
+  if (gradoFilter) {
+    filteredResultados = resultados.filter(r => r.grado === gradoFilter);
+    filteredEstudiantes = estudiantes.filter(e => e.grado === gradoFilter);
+  }
+
+  const totalEstudiantes = filteredEstudiantes.length;
+  const totalCompletados = filteredResultados.length;
   const tasaCompletado = totalEstudiantes > 0 ? Math.round((totalCompletados / totalEstudiantes) * 100) : 0;
 
   let sumaNotas = 0;
   let sumaTiempo = 0;
-  let notaMaxima = 1.0;
-  let notaMinima = 5.0;
-
-  resultados.forEach(r => {
-    sumaNotas += r.nota_meduca;
+  filteredResultados.forEach(r => {
+    sumaNotas += Number(r.nota_meduca) || 1.0;
     sumaTiempo += r.duracion_segundos || 0;
-    if (r.nota_meduca > notaMaxima) notaMaxima = r.nota_meduca;
-    if (r.nota_meduca < notaMinima) notaMinima = r.nota_meduca;
   });
 
   const promedioNotas = totalCompletados > 0 ? Number((sumaNotas / totalCompletados).toFixed(2)) : 0;
   const promedioTiempoSegundos = totalCompletados > 0 ? Math.round(sumaTiempo / totalCompletados) : 0;
-  const promedioTiempo = formatDuration(promedioTiempoSegundos);
 
   res.json({
     estadisticas: {
@@ -346,21 +397,18 @@ app.get('/api/resultados', (req, res) => {
       totalCompletados,
       tasaCompletado,
       promedioNotas,
-      promedioTiempo,
-      promedioTiempoSegundos,
-      notaMaxima: totalCompletados > 0 ? notaMaxima : 0,
-      notaMinima: totalCompletados > 0 ? notaMinima : 0
+      promedioTiempo: formatDuration(promedioTiempoSegundos)
     },
-    resultados: resultados.sort((a, b) => b.completado_timestamp - a.completado_timestamp)
+    resultados: filteredResultados.sort((a, b) => b.completado_timestamp - a.completado_timestamp)
   });
 });
 
-// 6. Teacher: Reset a student attempt (Allows retaking if needed)
+// 5. Reset attempt
 app.post('/api/resultados/reiniciar', (req, res) => {
   const { id, estudiante_nombre } = req.body;
   let resultados = readJSON(RESULTADOS_FILE, []);
-
   const initialCount = resultados.length;
+
   if (id) {
     resultados = resultados.filter(r => r.id !== id);
   } else if (estudiante_nombre) {
@@ -368,60 +416,14 @@ app.post('/api/resultados/reiniciar', (req, res) => {
   }
 
   if (resultados.length === initialCount) {
-    return res.status(404).json({ error: 'No se encontró el intento para reiniciar' });
+    return res.status(404).json({ error: 'No se encontró el intento' });
   }
 
   writeJSON(RESULTADOS_FILE, resultados);
   res.json({ exito: true, mensaje: 'Intento reiniciado correctamente' });
 });
 
-// 7. Teacher: Update student roster
-app.post('/api/estudiantes/actualizar', (req, res) => {
-  const { lista_texto } = req.body;
-  if (!lista_texto || typeof lista_texto !== 'string') {
-    return res.status(400).json({ error: 'Se requiere una lista de nombres de texto' });
-  }
-
-  const lineas = lista_texto.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-  const nuevosEstudiantes = lineas.map((nombre, index) => {
-    // Clean numbering if copied from a numbered list (e.g. "1. Juan Perez")
-    const nombreLimpio = nombre.replace(/^(\d+[\.\-\)]\s*)/, '').trim();
-    return {
-      id: `est-${(index + 1).toString().padStart(2, '0')}`,
-      nombre: nombreLimpio
-    };
-  });
-
-  writeJSON(ESTUDIANTES_FILE, nuevosEstudiantes);
-  res.json({
-    exito: true,
-    total: nuevosEstudiantes.length,
-    estudiantes: nuevosEstudiantes
-  });
-});
-
-// 8. Teacher: Export to CSV
-app.get('/api/exportar/csv', (req, res) => {
-  const resultados = readJSON(RESULTADOS_FILE, []);
-  
-  let csv = '\uFEFF'; // UTF-8 BOM for Excel in Spanish
-  csv += 'N°,Estudiante,Fecha y Hora,Tiempo Empleado,Puntos (de 19),Nota MEDUCA,Nivel,Parte A (5 pts),Parte B (4 pts),Parte C (6 pts),Parte D (4 pts)\n';
-
-  resultados.forEach((r, idx) => {
-    const ptsA = r.detalles?.parte_a?.puntos ?? '-';
-    const ptsB = r.detalles?.parte_b?.puntos ?? '-';
-    const ptsC = r.detalles?.parte_c?.puntos ?? '-';
-    const ptsD = r.detalles?.parte_d?.puntos ?? '-';
-    
-    csv += `"${idx + 1}","${r.estudiante_nombre}","${r.completado_at}","${r.duracion_formato}",${r.puntos_obtenidos},${r.nota_meduca},"${r.desempeno}",${ptsA},${ptsB},${ptsC},${ptsD}\n`;
-  });
-
-  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename="Resultados_Prueba_Agricultura_3erGrado.csv"');
-  res.send(csv);
-});
-
-// Helper to get local IP addresses for easy device connection
+// Helper to get local IP addresses
 function getNetworkIps() {
   const interfaces = os.networkInterfaces();
   const addresses = [];
@@ -435,7 +437,6 @@ function getNetworkIps() {
   return addresses;
 }
 
-// 9. Server info & local IPs
 app.get('/api/servidor-info', (req, res) => {
   res.json({
     puerto: PORT,
@@ -445,15 +446,5 @@ app.get('/api/servidor-info', (req, res) => {
 });
 
 const server = app.listen(PORT, () => {
-  console.log(`====================================================`);
-  console.log(`🌱 PRUEBA SUMATIVA DE AGRICULTURA - 3ER GRADO 🌱`);
-  console.log(`====================================================`);
-  console.log(`💻 Acceso Local: http://localhost:${PORT}`);
-  const ips = getNetworkIps();
-  if (ips.length > 0) {
-    console.log(`📱 Acceso en Red Local (Tablets / Celulares):`);
-    ips.forEach(ip => console.log(`   ➜ http://${ip}:${PORT}`));
-  }
-  console.log(`🧑‍🏫 Panel Docente: http://localhost:${PORT}/docente.html`);
-  console.log(`====================================================`);
+  console.log(`🌱 SERVIDOR DE EVALUACIONES MEDUCA ACTIVO (PUERTO ${PORT}) 🌱`);
 });

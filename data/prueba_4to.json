@@ -1,0 +1,230 @@
+{
+  "id": "eval-agri-4-3-1",
+  "grado_numero": 4,
+  "titulo": "Prueba Sumativa de Agricultura - 4to Grado",
+  "tema": "Beneficios e importancia del huerto escolar",
+  "grado": "Cuarto Grado de Educación Primaria",
+  "leccion": "Lección 4.3.1",
+  "area": "Área 3 - Producción de alimentos para consumo humano",
+  "puntos_totales": 24,
+  "secciones": {
+    "parte_a": {
+      "titulo": "Parte A. Completa",
+      "instrucciones": "Escribe en el espacio en blanco la palabra que completa correctamente cada oración. Puedes apoyarte con las palabras del banco.",
+      "banco_palabras": [
+        "huerto",
+        "económicos",
+        "nutritivos",
+        "comunitarios",
+        "económico",
+        "nutritivo",
+        "comunitario"
+      ],
+      "preguntas": [
+        {
+          "id": "a1",
+          "numero": 1,
+          "tipo": "single",
+          "texto_antes": "El",
+          "texto_despues": "escolar es un espacio educativo para cultivar alimentos.",
+          "respuestas_validas": ["huerto", "el huerto"],
+          "puntos": 1
+        },
+        {
+          "id": "a2",
+          "numero": 2,
+          "tipo": "triple",
+          "texto_antes": "Los beneficios del huerto pueden clasificarse en",
+          "texto_medio1": ",",
+          "texto_medio2": "y",
+          "texto_despues": ".",
+          "blanks": ["a2_1", "a2_2", "a2_3"],
+          "respuestas_validas_conjunto": [
+            ["economicos", "económicos"],
+            ["nutritivos", "nutritivo"],
+            ["comunitarios", "comunitario"]
+          ],
+          "puntos": 3
+        },
+        {
+          "id": "a3",
+          "numero": 3,
+          "tipo": "single",
+          "texto_antes": "Un beneficio",
+          "texto_despues": "puede estar relacionado con el ahorro.",
+          "respuestas_validas": ["economico", "económico"],
+          "puntos": 1
+        },
+        {
+          "id": "a4",
+          "numero": 4,
+          "tipo": "single",
+          "texto_antes": "Un beneficio",
+          "texto_despues": "se relaciona con los alimentos y la alimentación.",
+          "respuestas_validas": ["nutritivo", "nutricional"],
+          "puntos": 1
+        },
+        {
+          "id": "a5",
+          "numero": 5,
+          "tipo": "single",
+          "texto_antes": "Un beneficio",
+          "texto_despues": "favorece la cooperación entre personas.",
+          "respuestas_validas": ["comunitario", "social"],
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_b": {
+      "titulo": "Parte B. Selección Múltiple",
+      "instrucciones": "Lee con atención cada enunciado y selecciona la opción correcta.",
+      "preguntas": [
+        {
+          "id": "b1",
+          "numero": 1,
+          "enunciado": "Producir algunos alimentos puede representar un beneficio:",
+          "opciones": [
+            { "id": "a", "texto": "Económico.", "icono": "💰" },
+            { "id": "b", "texto": "Mecánico.", "icono": "⚙️" },
+            { "id": "c", "texto": "Climático.", "icono": "🌦️" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b2",
+          "numero": 2,
+          "enunciado": "Aprender sobre los alimentos es principalmente un beneficio:",
+          "opciones": [
+            { "id": "a", "texto": "Nutritivo y educativo.", "icono": "🥗" },
+            { "id": "b", "texto": "De maquinaria.", "icono": "🚜" },
+            { "id": "c", "texto": "De transporte.", "icono": "🚚" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b3",
+          "numero": 3,
+          "enunciado": "Trabajar en equipo es un beneficio:",
+          "opciones": [
+            { "id": "a", "texto": "Comunitario.", "icono": "🤝" },
+            { "id": "b", "texto": "Geológico.", "icono": "🪨" },
+            { "id": "c", "texto": "Mecánico.", "icono": "🔧" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b4",
+          "numero": 4,
+          "enunciado": "El huerto escolar también es:",
+          "opciones": [
+            { "id": "a", "texto": "Un espacio de aprendizaje.", "icono": "📚" },
+            { "id": "b", "texto": "Un depósito de basura.", "icono": "🗑️" },
+            { "id": "c", "texto": "Un lugar sin función educativa.", "icono": "🚫" }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_c": {
+      "titulo": "Parte C. Verdadero o Falso",
+      "instrucciones": "Indica si cada afirmación es Verdadera (V) o Falsa (F).",
+      "preguntas": [
+        {
+          "id": "c1",
+          "numero": 1,
+          "enunciado": "El huerto escolar puede proporcionar diferentes beneficios.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c2",
+          "numero": 2,
+          "enunciado": "Los beneficios económicos pueden relacionarse con el ahorro.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c3",
+          "numero": 3,
+          "enunciado": "Los beneficios nutritivos no tienen ninguna relación con los alimentos.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c4",
+          "numero": 4,
+          "enunciado": "El huerto puede promover trabajo en equipo.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c5",
+          "numero": 5,
+          "enunciado": "Los alimentos cultivados y comprados pueden compararse.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c6",
+          "numero": 6,
+          "enunciado": "El huerto escolar solamente sirve para producir y no para aprender.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_d": {
+      "titulo": "Parte D. Relaciona",
+      "instrucciones": "Relaciona cada beneficio de la izquierda con su ejemplo correspondiente de la derecha.",
+      "conceptos": [
+        { "id": "d1", "numero": 1, "termino": "Económico", "respuesta_correcta": "B" },
+        { "id": "d2", "numero": 2, "termino": "Nutritivo", "respuesta_correcta": "C" },
+        { "id": "d3", "numero": 3, "termino": "Comunitario", "respuesta_correcta": "A" }
+      ],
+      "significados": [
+        { "letra": "A", "definicion": "Trabajo cooperativo" },
+        { "letra": "B", "definicion": "Ahorro" },
+        { "letra": "C", "definicion": "Conocer alimentos" }
+      ],
+      "puntos_por_item": 1
+    },
+    "parte_e": {
+      "titulo": "Parte E. Respuesta Corta",
+      "instrucciones": "Escribe una respuesta breve y clara con tus propias palabras para cada pregunta.",
+      "preguntas": [
+        {
+          "id": "e1",
+          "numero": 1,
+          "enunciado": "Escribe un beneficio económico del huerto.",
+          "puntos": 1,
+          "palabras_clave": ["ahorro", "ahorrar", "dinero", "comprar", "gasto", "vender", "costo", "producir"]
+        },
+        {
+          "id": "e2",
+          "numero": 2,
+          "enunciado": "Escribe un beneficio nutritivo.",
+          "puntos": 1,
+          "palabras_clave": ["nutricion", "nutrientes", "salud", "fresco", "alimento", "vitamina", "comer", "sano", "vegetal"]
+        },
+        {
+          "id": "e3",
+          "numero": 3,
+          "enunciado": "Escribe un beneficio comunitario.",
+          "puntos": 1,
+          "palabras_clave": ["equipo", "cooperacion", "cooperativo", "convivencia", "compartir", "familia", "comunidad", "juntos", "ayuda", "union"]
+        },
+        {
+          "id": "e4",
+          "numero": 4,
+          "enunciado": "¿Por qué el huerto es importante para la escuela?",
+          "puntos": 1,
+          "palabras_clave": ["aprender", "aprendizaje", "alimentos", "escuela", "cuidar", "naturaleza", "plantas", "equipo", "responsabilidad"]
+        }
+      ]
+    }
+  }
+}

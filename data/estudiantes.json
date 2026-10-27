@@ -2,6 +2,7 @@
   {
     "id": "3A_1",
     "num": 1,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Acosta",
@@ -13,6 +14,7 @@
   {
     "id": "3A_2",
     "num": 2,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Ansola Trejos",
@@ -24,6 +26,7 @@
   {
     "id": "3A_3",
     "num": 3,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Avila López",
@@ -35,6 +38,7 @@
   {
     "id": "3A_4",
     "num": 4,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Ballesteros Vega",
@@ -46,6 +50,7 @@
   {
     "id": "3A_5",
     "num": 5,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Bethancourt Avila",
@@ -57,6 +62,7 @@
   {
     "id": "3A_6",
     "num": 6,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Castillo Pérez",
@@ -68,6 +74,7 @@
   {
     "id": "3A_7",
     "num": 7,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Castro Abrego",
@@ -79,6 +86,7 @@
   {
     "id": "3A_8",
     "num": 8,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Ceballos Gallardo",
@@ -90,6 +98,7 @@
   {
     "id": "3A_9",
     "num": 9,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Córdoba Herrera",
@@ -101,6 +110,7 @@
   {
     "id": "3A_10",
     "num": 10,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Corea Pérez",
@@ -112,6 +122,7 @@
   {
     "id": "3A_11",
     "num": 11,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Cubilla Rivera",
@@ -123,6 +134,7 @@
   {
     "id": "3A_12",
     "num": 12,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Clarke Cedeño",
@@ -134,6 +146,7 @@
   {
     "id": "3A_13",
     "num": 13,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Falcón González",
@@ -145,6 +158,7 @@
   {
     "id": "3A_14",
     "num": 14,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Gallardo",
@@ -156,6 +170,7 @@
   {
     "id": "3A_15",
     "num": 15,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Gantes",
@@ -167,6 +182,7 @@
   {
     "id": "3A_16",
     "num": 16,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Marín Calles",
@@ -178,6 +194,7 @@
   {
     "id": "3A_17",
     "num": 17,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Marín Melgarejo",
@@ -189,6 +206,7 @@
   {
     "id": "3A_18",
     "num": 18,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Nuñez Herrera",
@@ -200,6 +218,7 @@
   {
     "id": "3A_19",
     "num": 19,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Pinilla Fernandez",
@@ -211,6 +230,7 @@
   {
     "id": "3A_20",
     "num": 20,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Pinzón Martínez",
@@ -222,6 +242,7 @@
   {
     "id": "3A_21",
     "num": 21,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Ramos González",
@@ -233,6 +254,7 @@
   {
     "id": "3A_22",
     "num": 22,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Reina Trejos",
@@ -244,6 +266,7 @@
   {
     "id": "3A_23",
     "num": 23,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Rodríguez González",
@@ -255,6 +278,7 @@
   {
     "id": "3A_24",
     "num": 24,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Rojas Zamora",
@@ -266,6 +290,7 @@
   {
     "id": "3A_25",
     "num": 25,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Smith Julian",
@@ -277,6 +302,7 @@
   {
     "id": "3A_26",
     "num": 26,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Torres Campos",
@@ -288,6 +314,7 @@
   {
     "id": "3A_27",
     "num": 27,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Urrutia",
@@ -299,6 +326,7 @@
   {
     "id": "3A_28",
     "num": 28,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Vega Carpos",
@@ -310,6 +338,7 @@
   {
     "id": "3A_29",
     "num": 29,
+    "grado": 3,
     "grupo": "3A",
     "grupo_label": "3°A",
     "apellidos": "Villagra González",
@@ -321,6 +350,7 @@
   {
     "id": "3B_1",
     "num": 1,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Andrion González",
@@ -332,6 +362,7 @@
   {
     "id": "3B_2",
     "num": 2,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Arcia Smith",
@@ -343,6 +374,7 @@
   {
     "id": "3B_3",
     "num": 3,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Arias López",
@@ -354,6 +386,7 @@
   {
     "id": "3B_4",
     "num": 4,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Arosemena Pimentel",
@@ -365,6 +398,7 @@
   {
     "id": "3B_5",
     "num": 5,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Balsa Morales",
@@ -376,6 +410,7 @@
   {
     "id": "3B_6",
     "num": 6,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Caicedo Rodríguez",
@@ -387,6 +422,7 @@
   {
     "id": "3B_7",
     "num": 7,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Cobos Cuevas",
@@ -398,6 +434,7 @@
   {
     "id": "3B_8",
     "num": 8,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Cortez Barba",
@@ -409,6 +446,7 @@
   {
     "id": "3B_9",
     "num": 9,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Díaz Ambulo",
@@ -420,6 +458,7 @@
   {
     "id": "3B_10",
     "num": 10,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Díaz Martinez",
@@ -431,6 +470,7 @@
   {
     "id": "3B_11",
     "num": 11,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Dixón González",
@@ -442,6 +482,7 @@
   {
     "id": "3B_12",
     "num": 12,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Fowler Alain",
@@ -453,6 +494,7 @@
   {
     "id": "3B_13",
     "num": 13,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "García Carmona",
@@ -464,6 +506,7 @@
   {
     "id": "3B_14",
     "num": 14,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Gómez Ovalle",
@@ -475,6 +518,7 @@
   {
     "id": "3B_15",
     "num": 15,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Marín Iturralde",
@@ -486,6 +530,7 @@
   {
     "id": "3B_16",
     "num": 16,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Muñoz Jiménez",
@@ -497,6 +542,7 @@
   {
     "id": "3B_17",
     "num": 17,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Robles Forero",
@@ -508,6 +554,7 @@
   {
     "id": "3B_18",
     "num": 18,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Rodríguez González",
@@ -519,6 +566,7 @@
   {
     "id": "3B_19",
     "num": 19,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Rodríguez González",
@@ -530,6 +578,7 @@
   {
     "id": "3B_20",
     "num": 20,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Salcedo Rodríguez",
@@ -541,6 +590,7 @@
   {
     "id": "3B_21",
     "num": 21,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Samuels Montenegro",
@@ -552,6 +602,7 @@
   {
     "id": "3B_22",
     "num": 22,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Serracín Jiménez",
@@ -563,6 +614,7 @@
   {
     "id": "3B_23",
     "num": 23,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Serrano Espinoza",
@@ -574,6 +626,7 @@
   {
     "id": "3B_24",
     "num": 24,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Serrano Pino",
@@ -585,6 +638,7 @@
   {
     "id": "3B_25",
     "num": 25,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Soto Gonzalez",
@@ -596,6 +650,7 @@
   {
     "id": "3B_26",
     "num": 26,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Tenorio De Gracia",
@@ -607,6 +662,7 @@
   {
     "id": "3B_27",
     "num": 27,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Tenorio Perez",
@@ -618,6 +674,7 @@
   {
     "id": "3B_28",
     "num": 28,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Vasquez Jorge",
@@ -629,6 +686,7 @@
   {
     "id": "3B_29",
     "num": 29,
+    "grado": 3,
     "grupo": "3B",
     "grupo_label": "3°B",
     "apellidos": "Vasquez Julio",
@@ -640,6 +698,7 @@
   {
     "id": "3C_1",
     "num": 1,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Abrego Delgado",
@@ -651,6 +710,7 @@
   {
     "id": "3C_2",
     "num": 2,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Alvarado Williams",
@@ -662,6 +722,7 @@
   {
     "id": "3C_3",
     "num": 3,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Angelkos Ortiz",
@@ -673,6 +734,7 @@
   {
     "id": "3C_4",
     "num": 4,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Arosemena Vasquez",
@@ -684,6 +746,7 @@
   {
     "id": "3C_5",
     "num": 5,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Blanco Rangel",
@@ -695,6 +758,7 @@
   {
     "id": "3C_6",
     "num": 6,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Castro",
@@ -706,6 +770,7 @@
   {
     "id": "3C_7",
     "num": 7,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Cedeño Borel",
@@ -717,6 +782,7 @@
   {
     "id": "3C_8",
     "num": 8,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Chanis Díaz",
@@ -728,6 +794,7 @@
   {
     "id": "3C_9",
     "num": 9,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Crawford Arrieta",
@@ -739,6 +806,7 @@
   {
     "id": "3C_10",
     "num": 10,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "De Gracia Arboleda",
@@ -750,6 +818,7 @@
   {
     "id": "3C_11",
     "num": 11,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Díaz Tuñón",
@@ -761,6 +830,7 @@
   {
     "id": "3C_12",
     "num": 12,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Fong Díaz",
@@ -772,6 +842,7 @@
   {
     "id": "3C_13",
     "num": 13,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Gallardo Espinosa",
@@ -783,6 +854,7 @@
   {
     "id": "3C_14",
     "num": 14,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "González Mendoza",
@@ -794,6 +866,7 @@
   {
     "id": "3C_15",
     "num": 15,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Guevara Hernández",
@@ -805,6 +878,7 @@
   {
     "id": "3C_16",
     "num": 16,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Hernández Ben",
@@ -816,6 +890,7 @@
   {
     "id": "3C_17",
     "num": 17,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Herrera Iglesia",
@@ -827,6 +902,7 @@
   {
     "id": "3C_18",
     "num": 18,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Jaen Espinosa",
@@ -838,6 +914,7 @@
   {
     "id": "3C_19",
     "num": 19,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Morales Messina",
@@ -849,6 +926,7 @@
   {
     "id": "3C_20",
     "num": 20,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Osorio Salazar",
@@ -860,6 +938,7 @@
   {
     "id": "3C_21",
     "num": 21,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Perez González",
@@ -871,6 +950,7 @@
   {
     "id": "3C_22",
     "num": 22,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Perez Zambrano",
@@ -882,6 +962,7 @@
   {
     "id": "3C_23",
     "num": 23,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Peñalba Torres",
@@ -893,6 +974,7 @@
   {
     "id": "3C_24",
     "num": 24,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Pino Becerra",
@@ -904,6 +986,7 @@
   {
     "id": "3C_25",
     "num": 25,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Price Esquina",
@@ -915,6 +998,7 @@
   {
     "id": "3C_26",
     "num": 26,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Sosa Trujillo",
@@ -926,6 +1010,7 @@
   {
     "id": "3C_27",
     "num": 27,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Torres Salgados",
@@ -937,12 +1022,865 @@
   {
     "id": "3C_28",
     "num": 28,
+    "grado": 3,
     "grupo": "3C",
     "grupo_label": "3°C",
     "apellidos": "Zuñiga Antúnez",
     "nombres": "Alessia Gabriela",
     "nombre": "Alessia Gabriela Zuñiga Antúnez (3°C)",
     "nombre_simple": "Alessia Gabriela Zuñiga Antúnez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_1",
+    "num": 1,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Arce Miranda",
+    "nombres": "Alanis Arlet",
+    "nombre": "Alanis Arlet Arce Miranda (4°A)",
+    "nombre_simple": "Alanis Arlet Arce Miranda",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_2",
+    "num": 2,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Arias López",
+    "nombres": "Haley Alexa",
+    "nombre": "Haley Alexa Arias López (4°A)",
+    "nombre_simple": "Haley Alexa Arias López",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_3",
+    "num": 3,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Batista González",
+    "nombres": "Ashly Del Carmen",
+    "nombre": "Ashly Del Carmen Batista González (4°A)",
+    "nombre_simple": "Ashly Del Carmen Batista González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_4",
+    "num": 4,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Bonilla Álvarez",
+    "nombres": "Ashley Noemi",
+    "nombre": "Ashley Noemi Bonilla Álvarez (4°A)",
+    "nombre_simple": "Ashley Noemi Bonilla Álvarez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_5",
+    "num": 5,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Capuro Pinzón",
+    "nombres": "Moisés Antonio",
+    "nombre": "Moisés Antonio Capuro Pinzón (4°A)",
+    "nombre_simple": "Moisés Antonio Capuro Pinzón",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_6",
+    "num": 6,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Cedeño Estrada",
+    "nombres": "Jessibell Abigail",
+    "nombre": "Jessibell Abigail Cedeño Estrada (4°A)",
+    "nombre_simple": "Jessibell Abigail Cedeño Estrada",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_7",
+    "num": 7,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Cisneros Rodríguez",
+    "nombres": "Julio Cesar",
+    "nombre": "Julio Cesar Cisneros Rodríguez (4°A)",
+    "nombre_simple": "Julio Cesar Cisneros Rodríguez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_8",
+    "num": 8,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Coloma Correoso",
+    "nombres": "Liz Karley",
+    "nombre": "Liz Karley Coloma Correoso (4°A)",
+    "nombre_simple": "Liz Karley Coloma Correoso",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_9",
+    "num": 9,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Elizondro Delgado",
+    "nombres": "Jimena Del Carmen",
+    "nombre": "Jimena Del Carmen Elizondro Delgado (4°A)",
+    "nombre_simple": "Jimena Del Carmen Elizondro Delgado",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_10",
+    "num": 10,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Gómez Cano",
+    "nombres": "Sofía Noemí",
+    "nombre": "Sofía Noemí Gómez Cano (4°A)",
+    "nombre_simple": "Sofía Noemí Gómez Cano",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_11",
+    "num": 11,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Goodrich Forero",
+    "nombres": "Allyson Esther",
+    "nombre": "Allyson Esther Goodrich Forero (4°A)",
+    "nombre_simple": "Allyson Esther Goodrich Forero",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_12",
+    "num": 12,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "López Del Moral",
+    "nombres": "Khaleth Israel",
+    "nombre": "Khaleth Israel López Del Moral (4°A)",
+    "nombre_simple": "Khaleth Israel López Del Moral",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_13",
+    "num": 13,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Marín González",
+    "nombres": "Lian Marie",
+    "nombre": "Lian Marie Marín González (4°A)",
+    "nombre_simple": "Lian Marie Marín González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_14",
+    "num": 14,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Mc Rae",
+    "nombres": "Bernal, Tyron Owen",
+    "nombre": "Bernal, Tyron Owen Mc Rae (4°A)",
+    "nombre_simple": "Bernal, Tyron Owen Mc Rae",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_15",
+    "num": 15,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Navarrete Salinas",
+    "nombres": "Magín Luis",
+    "nombre": "Magín Luis Navarrete Salinas (4°A)",
+    "nombre_simple": "Magín Luis Navarrete Salinas",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_16",
+    "num": 16,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Pérez Ortíz",
+    "nombres": "Lia Bethel",
+    "nombre": "Lia Bethel Pérez Ortíz (4°A)",
+    "nombre_simple": "Lia Bethel Pérez Ortíz",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_17",
+    "num": 17,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Rivas Vega",
+    "nombres": "Sophia Victoria",
+    "nombre": "Sophia Victoria Rivas Vega (4°A)",
+    "nombre_simple": "Sophia Victoria Rivas Vega",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_18",
+    "num": 18,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Robles Hayot",
+    "nombres": "Edrian Gael",
+    "nombre": "Edrian Gael Robles Hayot (4°A)",
+    "nombre_simple": "Edrian Gael Robles Hayot",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_19",
+    "num": 19,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Rodríguez La Casa",
+    "nombres": "Jayden Isaias",
+    "nombre": "Jayden Isaias Rodríguez La Casa (4°A)",
+    "nombre_simple": "Jayden Isaias Rodríguez La Casa",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_20",
+    "num": 20,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Sánchez González",
+    "nombres": "Harley Nazareth",
+    "nombre": "Harley Nazareth Sánchez González (4°A)",
+    "nombre_simple": "Harley Nazareth Sánchez González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_21",
+    "num": 21,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Tello Trigueros",
+    "nombres": "Oseias Efraín",
+    "nombre": "Oseias Efraín Tello Trigueros (4°A)",
+    "nombre_simple": "Oseias Efraín Tello Trigueros",
+    "estado": "Activo"
+  },
+  {
+    "id": "4A_22",
+    "num": 22,
+    "grado": 4,
+    "grupo": "4A",
+    "grupo_label": "4°A",
+    "apellidos": "Urrutia Alarcon",
+    "nombres": "Luisa María",
+    "nombre": "Luisa María Urrutia Alarcon (4°A)",
+    "nombre_simple": "Luisa María Urrutia Alarcon",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_1",
+    "num": 1,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Alain Hernández",
+    "nombres": "Ellen Esther",
+    "nombre": "Ellen Esther Alain Hernández (4°B)",
+    "nombre_simple": "Ellen Esther Alain Hernández",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_2",
+    "num": 2,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Arias",
+    "nombres": "Gemma Lucia",
+    "nombre": "Gemma Lucia Arias (4°B)",
+    "nombre_simple": "Gemma Lucia Arias",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_3",
+    "num": 3,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Ayala Silva",
+    "nombres": "Dylon",
+    "nombre": "Dylon Ayala Silva (4°B)",
+    "nombre_simple": "Dylon Ayala Silva",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_4",
+    "num": 4,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Balsa Morales",
+    "nombres": "Adrian Enrique",
+    "nombre": "Adrian Enrique Balsa Morales (4°B)",
+    "nombre_simple": "Adrian Enrique Balsa Morales",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_5",
+    "num": 5,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Bustamante Abrego",
+    "nombres": "Roberto Antonio",
+    "nombre": "Roberto Antonio Bustamante Abrego (4°B)",
+    "nombre_simple": "Roberto Antonio Bustamante Abrego",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_6",
+    "num": 6,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Carrera Jiménez",
+    "nombres": "Nixia Lisbeth",
+    "nombre": "Nixia Lisbeth Carrera Jiménez (4°B)",
+    "nombre_simple": "Nixia Lisbeth Carrera Jiménez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_7",
+    "num": 7,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Castillo Cañas",
+    "nombres": "Isaac Alexander",
+    "nombre": "Isaac Alexander Castillo Cañas (4°B)",
+    "nombre_simple": "Isaac Alexander Castillo Cañas",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_8",
+    "num": 8,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Coronado Pino",
+    "nombres": "Juan Antonio",
+    "nombre": "Juan Antonio Coronado Pino (4°B)",
+    "nombre_simple": "Juan Antonio Coronado Pino",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_9",
+    "num": 9,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Del Mar Cherigo",
+    "nombres": "Nuris Mabel",
+    "nombre": "Nuris Mabel Del Mar Cherigo (4°B)",
+    "nombre_simple": "Nuris Mabel Del Mar Cherigo",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_10",
+    "num": 10,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Delgado Zeballos",
+    "nombres": "Mathias Enrique",
+    "nombre": "Mathias Enrique Delgado Zeballos (4°B)",
+    "nombre_simple": "Mathias Enrique Delgado Zeballos",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_11",
+    "num": 11,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Díaz Barahona",
+    "nombres": "Delany Michelle",
+    "nombre": "Delany Michelle Díaz Barahona (4°B)",
+    "nombre_simple": "Delany Michelle Díaz Barahona",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_12",
+    "num": 12,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Durán García",
+    "nombres": "Carleyns Aileen",
+    "nombre": "Carleyns Aileen Durán García (4°B)",
+    "nombre_simple": "Carleyns Aileen Durán García",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_13",
+    "num": 13,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "García Castillo",
+    "nombres": "Angellies",
+    "nombre": "Angellies García Castillo (4°B)",
+    "nombre_simple": "Angellies García Castillo",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_14",
+    "num": 14,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "López Garcés",
+    "nombres": "Anelys Liseth",
+    "nombre": "Anelys Liseth López Garcés (4°B)",
+    "nombre_simple": "Anelys Liseth López Garcés",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_15",
+    "num": 15,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "López González",
+    "nombres": "Allison Sofía",
+    "nombre": "Allison Sofía López González (4°B)",
+    "nombre_simple": "Allison Sofía López González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_16",
+    "num": 16,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "López Rodríguez",
+    "nombres": "Joel Alberto",
+    "nombre": "Joel Alberto López Rodríguez (4°B)",
+    "nombre_simple": "Joel Alberto López Rodríguez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_17",
+    "num": 17,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Martínez",
+    "nombres": "Angel",
+    "nombre": "Angel Martínez (4°B)",
+    "nombre_simple": "Angel Martínez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_18",
+    "num": 18,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Moreno Hidalgo",
+    "nombres": "Aline Listenia",
+    "nombre": "Aline Listenia Moreno Hidalgo (4°B)",
+    "nombre_simple": "Aline Listenia Moreno Hidalgo",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_19",
+    "num": 19,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Muñoz Jiménez",
+    "nombres": "Astrid Suseth",
+    "nombre": "Astrid Suseth Muñoz Jiménez (4°B)",
+    "nombre_simple": "Astrid Suseth Muñoz Jiménez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_20",
+    "num": 20,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Osorio Guadamur",
+    "nombres": "Thiago David",
+    "nombre": "Thiago David Osorio Guadamur (4°B)",
+    "nombre_simple": "Thiago David Osorio Guadamur",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_21",
+    "num": 21,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Rayland",
+    "nombres": "Briany Ximena",
+    "nombre": "Briany Ximena Rayland (4°B)",
+    "nombre_simple": "Briany Ximena Rayland",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_22",
+    "num": 22,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Ruíz González",
+    "nombres": "Isabella Shaddai",
+    "nombre": "Isabella Shaddai Ruíz González (4°B)",
+    "nombre_simple": "Isabella Shaddai Ruíz González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_23",
+    "num": 23,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Sánchez Saldaña",
+    "nombres": "Ivanna Lucia",
+    "nombre": "Ivanna Lucia Sánchez Saldaña (4°B)",
+    "nombre_simple": "Ivanna Lucia Sánchez Saldaña",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_24",
+    "num": 24,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Tejada Brown",
+    "nombres": "Ibrahim Daniel",
+    "nombre": "Ibrahim Daniel Tejada Brown (4°B)",
+    "nombre_simple": "Ibrahim Daniel Tejada Brown",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_25",
+    "num": 25,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Tenorio Pérez",
+    "nombres": "Yan Rey",
+    "nombre": "Yan Rey Tenorio Pérez (4°B)",
+    "nombre_simple": "Yan Rey Tenorio Pérez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4B_26",
+    "num": 26,
+    "grado": 4,
+    "grupo": "4B",
+    "grupo_label": "4°B",
+    "apellidos": "Valdelamar Díaz",
+    "nombres": "Kimberley Sherlyn",
+    "nombre": "Kimberley Sherlyn Valdelamar Díaz (4°B)",
+    "nombre_simple": "Kimberley Sherlyn Valdelamar Díaz",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_1",
+    "num": 1,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Almengor Mock",
+    "nombres": "Hidekel Asir",
+    "nombre": "Hidekel Asir Almengor Mock (4°C)",
+    "nombre_simple": "Hidekel Asir Almengor Mock",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_2",
+    "num": 2,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Angelkos Ortiz",
+    "nombres": "Emma Sofia",
+    "nombre": "Emma Sofia Angelkos Ortiz (4°C)",
+    "nombre_simple": "Emma Sofia Angelkos Ortiz",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_3",
+    "num": 3,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Bethancourt Martínez",
+    "nombres": "Daniela Alejandra",
+    "nombre": "Daniela Alejandra Bethancourt Martínez (4°C)",
+    "nombre_simple": "Daniela Alejandra Bethancourt Martínez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_4",
+    "num": 4,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Espinosa Asprilla",
+    "nombres": "Khloe Paola",
+    "nombre": "Khloe Paola Espinosa Asprilla (4°C)",
+    "nombre_simple": "Khloe Paola Espinosa Asprilla",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_5",
+    "num": 5,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Franco Escartín",
+    "nombres": "Izabella Izamara",
+    "nombre": "Izabella Izamara Franco Escartín (4°C)",
+    "nombre_simple": "Izabella Izamara Franco Escartín",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_6",
+    "num": 6,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "González Barría",
+    "nombres": "Daibellys Arlette",
+    "nombre": "Daibellys Arlette González Barría (4°C)",
+    "nombre_simple": "Daibellys Arlette González Barría",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_7",
+    "num": 7,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Govea Lasso",
+    "nombres": "Eithan Edmir",
+    "nombre": "Eithan Edmir Govea Lasso (4°C)",
+    "nombre_simple": "Eithan Edmir Govea Lasso",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_8",
+    "num": 8,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Greig",
+    "nombres": "Meredith",
+    "nombre": "Meredith Greig (4°C)",
+    "nombre_simple": "Meredith Greig",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_9",
+    "num": 9,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Guilboa Núñez",
+    "nombres": "Maicol Antonio",
+    "nombre": "Maicol Antonio Guilboa Núñez (4°C)",
+    "nombre_simple": "Maicol Antonio Guilboa Núñez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_10",
+    "num": 10,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Iglesias Quiroz",
+    "nombres": "Enrique Javier",
+    "nombre": "Enrique Javier Iglesias Quiroz (4°C)",
+    "nombre_simple": "Enrique Javier Iglesias Quiroz",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_11",
+    "num": 11,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Kantule Pérez",
+    "nombres": "Yurielis Darielys",
+    "nombre": "Yurielis Darielys Kantule Pérez (4°C)",
+    "nombre_simple": "Yurielis Darielys Kantule Pérez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_12",
+    "num": 12,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Martínez De Obadía",
+    "nombres": "Maryelis Iveth",
+    "nombre": "Maryelis Iveth Martínez De Obadía (4°C)",
+    "nombre_simple": "Maryelis Iveth Martínez De Obadía",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_13",
+    "num": 13,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Morales Acosta",
+    "nombres": "Abigail Milagros",
+    "nombre": "Abigail Milagros Morales Acosta (4°C)",
+    "nombre_simple": "Abigail Milagros Morales Acosta",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_14",
+    "num": 14,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Morán Miranda",
+    "nombres": "Nahomy Esther",
+    "nombre": "Nahomy Esther Morán Miranda (4°C)",
+    "nombre_simple": "Nahomy Esther Morán Miranda",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_15",
+    "num": 15,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Ortiz Solís",
+    "nombres": "Jatzy Yazmin",
+    "nombre": "Jatzy Yazmin Ortiz Solís (4°C)",
+    "nombre_simple": "Jatzy Yazmin Ortiz Solís",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_16",
+    "num": 16,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Quintana Coronado",
+    "nombres": "Adrianys Melek",
+    "nombre": "Adrianys Melek Quintana Coronado (4°C)",
+    "nombre_simple": "Adrianys Melek Quintana Coronado",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_17",
+    "num": 17,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Quiroz González",
+    "nombres": "Brithany Milagros",
+    "nombre": "Brithany Milagros Quiroz González (4°C)",
+    "nombre_simple": "Brithany Milagros Quiroz González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_18",
+    "num": 18,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Rengifo Gálvez",
+    "nombres": "Jesús Elías",
+    "nombre": "Jesús Elías Rengifo Gálvez (4°C)",
+    "nombre_simple": "Jesús Elías Rengifo Gálvez",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_19",
+    "num": 19,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Rojas Zamora",
+    "nombres": "Rafael Alexander",
+    "nombre": "Rafael Alexander Rojas Zamora (4°C)",
+    "nombre_simple": "Rafael Alexander Rojas Zamora",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_20",
+    "num": 20,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Silvera González",
+    "nombres": "Adán Andrés",
+    "nombre": "Adán Andrés Silvera González (4°C)",
+    "nombre_simple": "Adán Andrés Silvera González",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_21",
+    "num": 21,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Urrutia Reyes",
+    "nombres": "Isabela Valeria",
+    "nombre": "Isabela Valeria Urrutia Reyes (4°C)",
+    "nombre_simple": "Isabela Valeria Urrutia Reyes",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_22",
+    "num": 22,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Vega Arosemena",
+    "nombres": "María Aimeth",
+    "nombre": "María Aimeth Vega Arosemena (4°C)",
+    "nombre_simple": "María Aimeth Vega Arosemena",
+    "estado": "Activo"
+  },
+  {
+    "id": "4C_23",
+    "num": 23,
+    "grado": 4,
+    "grupo": "4C",
+    "grupo_label": "4°C",
+    "apellidos": "Zeballos Prado",
+    "nombres": "María Lucia",
+    "nombre": "María Lucia Zeballos Prado (4°C)",
+    "nombre_simple": "María Lucia Zeballos Prado",
     "estado": "Activo"
   }
 ]
