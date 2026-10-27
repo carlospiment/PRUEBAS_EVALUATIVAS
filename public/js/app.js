@@ -113,7 +113,73 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initGrade(currentGrade);
   setupAutocomplete();
   setupEventListeners();
+  setupTeacherAuthModal();
 });
+
+const TEACHER_PIN = '0476';
+
+// Intercept clicks to docente.html and require PIN 0476
+function setupTeacherAuthModal() {
+  const pinModal = document.getElementById('teacherPinModal');
+  const pinInput = document.getElementById('modalPinInput');
+  const pinError = document.getElementById('modalPinError');
+  const confirmBtn = document.getElementById('confirmPinModalBtn');
+  const cancelBtn = document.getElementById('cancelPinModalBtn');
+
+  document.querySelectorAll('a[href*="docente.html"]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      // If already authenticated during current session, go directly
+      if (sessionStorage.getItem('meduca_docente_auth') === TEACHER_PIN) {
+        window.location.href = './docente.html';
+        return;
+      }
+      if (pinModal) {
+        pinInput.value = '';
+        pinError.style.display = 'none';
+        pinModal.classList.add('active');
+        setTimeout(() => pinInput.focus(), 150);
+      } else {
+        const entered = prompt('🔐 Ingrese la clave de acceso docente:');
+        if (entered === TEACHER_PIN) {
+          sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
+          window.location.href = './docente.html';
+        } else if (entered !== null) {
+          alert('❌ Clave incorrecta. Acceso denegado.');
+        }
+      }
+    });
+  });
+
+  const checkPin = () => {
+    if (!pinInput) return;
+    if (pinInput.value.trim() === TEACHER_PIN) {
+      sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
+      pinModal.classList.remove('active');
+      window.location.href = './docente.html';
+    } else {
+      playSound('click');
+      pinError.style.display = 'block';
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  };
+
+  if (confirmBtn) confirmBtn.addEventListener('click', checkPin);
+  if (pinInput) {
+    pinInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        checkPin();
+      }
+    });
+  }
+  if (cancelBtn && pinModal) {
+    cancelBtn.addEventListener('click', () => {
+      pinModal.classList.remove('active');
+    });
+  }
+}
 
 // Detect Grade strictly from body dataset, pathname, or URL
 function detectGrade() {

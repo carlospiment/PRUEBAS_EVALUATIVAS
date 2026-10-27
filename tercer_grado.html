@@ -215,6 +215,38 @@
       </div>
     </footer>
 
+    <!-- MODAL DE ACCESO DOCENTE (CLAVE: 0476) -->
+    <div class="modal-overlay" id="teacherPinModal">
+      <div class="modal-card" style="max-width: 420px; text-align: center; border-color: #3b82f6;">
+        <div style="font-size: 3rem; margin-bottom: 8px;">🔐</div>
+        <h2 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 8px;">Acceso del Docente</h2>
+        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 18px;">
+          Ingresa la clave de 4 dígitos para ingresar al panel y ver las calificaciones:
+        </p>
+
+        <input 
+          type="password" 
+          id="modalPinInput" 
+          class="pin-input-field" 
+          maxlength="4" 
+          placeholder="••••" 
+          autocomplete="off"
+        >
+        <div id="modalPinError" style="color: #ef4444; font-weight: 600; font-size: 0.9rem; margin-top: 10px; display: none;">
+          ❌ Clave incorrecta. Inténtalo de nuevo.
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 22px; justify-content: center;">
+          <button type="button" class="btn-secondary" id="cancelPinModalBtn" style="padding: 10px 20px;">
+            Cancelar
+          </button>
+          <button type="button" class="btn-primary" id="confirmPinModalBtn" style="padding: 10px 24px; background: #2563eb;">
+            <span>🔓</span> Acceder
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script src="./js/app.js"></script>

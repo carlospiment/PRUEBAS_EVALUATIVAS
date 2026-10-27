@@ -32,13 +32,70 @@ const LESSONS_DATA = [
   }
 ];
 
+const TEACHER_PIN = '0476';
+
 document.addEventListener('DOMContentLoaded', async () => {
+  setupLockScreen();
   await loadServerInfo();
   renderLessonsQrSection();
   await loadData();
   setupDocenteEvents();
   setupQrModalEvents();
 });
+
+function setupLockScreen() {
+  const lockScreen = document.getElementById('teacherLockScreen');
+  const pinInput = document.getElementById('lockPinInput');
+  const pinError = document.getElementById('lockPinError');
+  const submitBtn = document.getElementById('submitLockPinBtn');
+  const logoutBtn = document.getElementById('logoutDocenteBtn');
+
+  const isAuth = sessionStorage.getItem('meduca_docente_auth') === TEACHER_PIN;
+  if (!isAuth) {
+    if (lockScreen) {
+      lockScreen.style.display = 'flex';
+      setTimeout(() => { if (pinInput) pinInput.focus(); }, 150);
+    }
+  } else {
+    if (lockScreen) lockScreen.style.display = 'none';
+  }
+
+  const unlock = () => {
+    if (!pinInput) return;
+    if (pinInput.value.trim() === TEACHER_PIN) {
+      sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
+      if (lockScreen) lockScreen.style.display = 'none';
+    } else {
+      if (pinError) pinError.style.display = 'block';
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  };
+
+  if (submitBtn) submitBtn.addEventListener('click', unlock);
+  if (pinInput) {
+    pinInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        unlock();
+      }
+    });
+  }
+
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      sessionStorage.removeItem('meduca_docente_auth');
+      if (lockScreen) {
+        if (pinInput) pinInput.value = '';
+        if (pinError) pinError.style.display = 'none';
+        lockScreen.style.display = 'flex';
+        setTimeout(() => { if (pinInput) pinInput.focus(); }, 150);
+      } else {
+        window.location.href = './index.html';
+      }
+    });
+  }
+}
 
 async function loadServerInfo() {
   try {

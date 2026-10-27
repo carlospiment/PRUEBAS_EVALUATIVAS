@@ -85,9 +85,87 @@
       </div>
     </footer>
 
+    <!-- MODAL DE ACCESO DOCENTE (CLAVE: 0476) -->
+    <div class="modal-overlay" id="teacherPinModal">
+      <div class="modal-card" style="max-width: 420px; text-align: center; border-color: #3b82f6;">
+        <div style="font-size: 3rem; margin-bottom: 8px;">🔐</div>
+        <h2 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 8px;">Acceso del Docente</h2>
+        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 18px;">
+          Ingresa la clave de 4 dígitos para ingresar al panel y ver las calificaciones:
+        </p>
+
+        <input 
+          type="password" 
+          id="modalPinInput" 
+          class="pin-input-field" 
+          maxlength="4" 
+          placeholder="••••" 
+          autocomplete="off"
+        >
+        <div id="modalPinError" style="color: #ef4444; font-weight: 600; font-size: 0.9rem; margin-top: 10px; display: none;">
+          ❌ Clave incorrecta. Inténtalo de nuevo.
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 22px; justify-content: center;">
+          <button type="button" class="btn-secondary" id="cancelPinModalBtn" style="padding: 10px 20px;">
+            Cancelar
+          </button>
+          <button type="button" class="btn-primary" id="confirmPinModalBtn" style="padding: 10px 24px; background: #2563eb;">
+            <span>🔓</span> Acceder
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
+    const TEACHER_PIN = '0476';
+    const pinModal = document.getElementById('teacherPinModal');
+    const pinInput = document.getElementById('modalPinInput');
+    const pinError = document.getElementById('modalPinError');
+    const confirmBtn = document.getElementById('confirmPinModalBtn');
+    const cancelBtn = document.getElementById('cancelPinModalBtn');
+
+    document.querySelectorAll('a[href*="docente.html"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (sessionStorage.getItem('meduca_docente_auth') === TEACHER_PIN) {
+          window.location.href = './docente.html';
+          return;
+        }
+        pinInput.value = '';
+        pinError.style.display = 'none';
+        pinModal.classList.add('active');
+        setTimeout(() => pinInput.focus(), 150);
+      });
+    });
+
+    const checkPin = () => {
+      if (pinInput.value.trim() === TEACHER_PIN) {
+        sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
+        pinModal.classList.remove('active');
+        window.location.href = './docente.html';
+      } else {
+        pinError.style.display = 'block';
+        pinInput.value = '';
+        pinInput.focus();
+      }
+    };
+
+    if (confirmBtn) confirmBtn.addEventListener('click', checkPin);
+    if (pinInput) {
+      pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          checkPin();
+        }
+      });
+    }
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', () => pinModal.classList.remove('active'));
+    }
+
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
