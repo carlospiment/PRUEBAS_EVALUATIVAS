@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadData();
   setupDocenteEvents();
   setupQrModalEvents();
+  setupFirestoreRealtimeListener();
 });
 
 function setupLockScreen() {
@@ -293,11 +294,24 @@ async function loadData() {
     } catch {}
 
     const localResults = getLocalResults();
+    let cloudResults = [];
+    if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable()) {
+      try {
+        cloudResults = await window.MEDUCA_FIREBASE.getResults();
+      } catch (e) {
+        console.warn('Error cargando resultados de Firestore:', e);
+      }
+    }
+
     const combinedMap = new Map();
     serverResults.forEach(r => combinedMap.set((r.grado || '3') + '_' + (r.id || r.estudiante_nombre), r));
     localResults.forEach(r => {
       const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
       if (!combinedMap.has(key)) combinedMap.set(key, r);
+    });
+    cloudResults.forEach(r => {
+      const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
+      combinedMap.set(key, r);
     });
 
     allResults = Array.from(combinedMap.values());
@@ -606,6 +620,14 @@ async function resetAttempt(resultId, studentName, grado) {
     });
   } catch {}
 
+  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.deleteResult) {
+    try {
+      await window.MEDUCA_FIREBASE.deleteResult(resultId, studentName);
+    } catch (e) {
+      console.warn('Error al reiniciar en Firestore:', e);
+    }
+  }
+
   alert(`Intento de ${studentName} reiniciado correctamente.`);
   await loadData();
 }
@@ -760,5 +782,25 @@ async function saveRoster() {
   } finally {
     saveBtn.disabled = false;
     saveBtn.textContent = '💾 Guardar Cambios';
+  }
+}
+
+function setupFirestoreRealtimeListener() {
+  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.listenResults) {
+    window.MEDUCA_FIREBASE.listenResults((cloudResults) => {
+      console.log('⚡ Actualización en tiempo real desde Firestore:', cloudResults.length, 'registros.');
+      const combinedMap = new Map();
+      allResults.forEach(r => {
+        const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
+        combinedMap.set(key, r);
+      });
+      cloudResults.forEach(r => {
+        const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
+        combinedMap.set(key, r);
+      });
+      allResults = Array.from(combinedMap.values());
+      calculateAndRenderStats();
+      renderTable();
+    });
   }
 }

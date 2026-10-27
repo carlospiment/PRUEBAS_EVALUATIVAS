@@ -296,8 +296,18 @@ async function loadStudents() {
     }
 
     const localResults = getLocalResults();
+    let cloudResults = [];
+    if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable()) {
+      try {
+        cloudResults = await window.MEDUCA_FIREBASE.getResults();
+      } catch (e) {
+        console.warn('No se pudieron obtener resultados de Firestore:', e);
+      }
+    }
+    const mergedResults = [...localResults, ...cloudResults];
+
     allStudents = list.map(student => {
-      const offlineRes = localResults.find(r => 
+      const offlineRes = mergedResults.find(r => 
         (r.estudiante_id && r.estudiante_id === student.id) ||
         cleanText(r.estudiante_nombre) === cleanText(student.nombre)
       );
@@ -1167,6 +1177,15 @@ async function confirmAndSubmitTest() {
   }
 
   saveLocalResult(finalResultado);
+
+  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.saveResult) {
+    try {
+      await window.MEDUCA_FIREBASE.saveResult(finalResultado);
+    } catch (e) {
+      console.warn('Error al guardar en Firebase:', e);
+    }
+  }
+
   showResultModal(finalResultado);
 }
 
