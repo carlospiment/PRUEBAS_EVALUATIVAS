@@ -602,7 +602,7 @@ function renderParteB(data) {
     block.innerHTML = `
       <div class="mcq-prompt">
         <span style="color: var(--primary);">${qIdx + 1}.</span>
-        <span>${q.enunciado}</span>
+        <span>${q.enunciado || q.afirmacion || ''}</span>
       </div>
       <div class="mcq-options-grid">
         ${optionsHtml}
@@ -639,7 +639,7 @@ function renderParteC(data) {
     item.innerHTML = `
       <div class="tf-text">
         <span style="color: var(--primary); font-weight: 800; margin-right: 6px;">${idx + 1}.</span>
-        <span>${q.enunciado}</span>
+        <span>${q.enunciado || q.afirmacion || ''}</span>
       </div>
       <div class="tf-buttons">
         <button type="button" class="tf-btn v-btn" data-qid="${q.id}" data-val="V">
@@ -752,7 +752,7 @@ function renderParteE(data) {
     block.innerHTML = `
       <div class="short-answer-prompt">
         <span style="color: var(--primary);">${idx + 1}.</span>
-        <span>${q.enunciado}</span>
+        <span>${q.enunciado || q.afirmacion || ''}</span>
       </div>
       <textarea class="short-answer-textarea" id="textarea_${q.id}" data-qid="${q.id}" placeholder="Escribe aquí tu respuesta con tus propias palabras..."></textarea>
     `;

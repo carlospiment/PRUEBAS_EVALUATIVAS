@@ -159,70 +159,70 @@
         {
           "id": "c1",
           "numero": 1,
-          "afirmacion": "Todas las semillas presentan exactamente las mismas condiciones.",
+          "enunciado": "Todas las semillas presentan exactamente las mismas condiciones.",
           "respuesta_correcta": "F",
           "puntos": 1
         },
         {
           "id": "c2",
           "numero": 2,
-          "afirmacion": "La germinación es una etapa del desarrollo de una planta.",
+          "enunciado": "La germinación es una etapa del desarrollo de una planta.",
           "respuesta_correcta": "V",
           "puntos": 1
         },
         {
           "id": "c3",
           "numero": 3,
-          "afirmacion": "Algunos cultivos pueden establecerse utilizando semilleros.",
+          "enunciado": "Algunos cultivos pueden establecerse utilizando semilleros.",
           "respuesta_correcta": "V",
           "puntos": 1
         },
         {
           "id": "c4",
           "numero": 4,
-          "afirmacion": "Cualquier terreno es igualmente adecuado para cualquier cultivo.",
+          "enunciado": "Cualquier terreno es igualmente adecuado para cualquier cultivo.",
           "respuesta_correcta": "F",
           "puntos": 1
         },
         {
           "id": "c5",
           "numero": 5,
-          "afirmacion": "La disponibilidad de agua puede influir en la selección del terreno.",
+          "enunciado": "La disponibilidad de agua puede influir en la selección del terreno.",
           "respuesta_correcta": "V",
           "puntos": 1
         },
         {
           "id": "c6",
           "numero": 6,
-          "afirmacion": "La preparación del terreno forma parte del proceso productivo.",
+          "enunciado": "La preparación del terreno forma parte del proceso productivo.",
           "respuesta_correcta": "V",
           "puntos": 1
         },
         {
           "id": "c7",
           "numero": 7,
-          "afirmacion": "Todos los cultivos tienen la misma época de siembra.",
+          "enunciado": "Todos los cultivos tienen la misma época de siembra.",
           "respuesta_correcta": "F",
           "puntos": 1
         },
         {
           "id": "c8",
           "numero": 8,
-          "afirmacion": "Una bitácora permite dar seguimiento al cultivo.",
+          "enunciado": "Una bitácora permite dar seguimiento al cultivo.",
           "respuesta_correcta": "V",
           "puntos": 1
         },
         {
           "id": "c9",
           "numero": 9,
-          "afirmacion": "La planificación agrícola debe realizarse antes y durante la producción.",
+          "enunciado": "La planificación agrícola debe realizarse antes y durante la producción.",
           "respuesta_correcta": "V",
           "puntos": 1
         },
         {
           "id": "c10",
           "numero": 10,
-          "afirmacion": "Observar y registrar son actividades importantes en la agricultura.",
+          "enunciado": "Observar y registrar son actividades importantes en la agricultura.",
           "respuesta_correcta": "V",
           "puntos": 1
         }
