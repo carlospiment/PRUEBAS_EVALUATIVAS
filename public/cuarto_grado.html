@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba Sumativa de Agricultura - 4to Grado | MEDUCA</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#15803d">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥕</text></svg>">
+</head>
+<body data-grade="4">
+
+  <!-- Canvas Confetti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="container">
+
+    <!-- HERO HEADER -->
+    <header class="header-hero" style="background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #f97316 100%); border-color: #fdba74;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+        <div class="badge-top" style="margin-bottom: 0; background: rgba(0, 0, 0, 0.2);">
+          <span>🏫 MEDUCA</span>
+          <span>•</span>
+          <span id="testGrade">Cuarto Grado de Educación Primaria</span>
+        </div>
+        <div id="offlineBadge" class="status-pill online">
+          🟢 En línea
+        </div>
+      </div>
+      <h1 id="testTitle">Prueba Sumativa de Agricultura - 4to Grado</h1>
+      <div class="subtitle" id="testTopic">Beneficios e importancia del huerto escolar (Lección 4.3.1)</div>
+    </header>
+
+    <!-- PANTALLA 1: INGRESO DE ESTUDIANTE (AUTOCOMPLETE) -->
+    <section class="card login-box" id="loginSection" style="margin-top: 24px;">
+      <div class="icon-mascot">🥕</div>
+      <h2>¡Bienvenido(a) a tu evaluación!</h2>
+      <p>Escribe tu nombre o apellido para comenzar la prueba de <strong>Cuarto Grado</strong>.</p>
+
+      <div class="autocomplete-wrapper" style="margin-top: 18px;">
+        <input 
+          type="text" 
+          id="studentNameInput" 
+          class="input-name" 
+          placeholder="Escribe tu nombre o apellido..." 
+          autocomplete="off"
+        >
+        <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+      </div>
+
+      <!-- Alerta si ya fue realizada -->
+      <div id="alreadyDoneCard" class="already-done-card"></div>
+
+      <button type="button" id="startTestBtn" class="btn-primary" disabled style="margin-top: 18px; background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);">
+        <span>🚀</span> Comenzar Prueba de 4to Grado
+      </button>
+
+      <div style="margin-top: 24px; font-size: 0.9rem; color: #6b7280;">
+        🔀 <strong>Preguntas al azar:</strong> el orden se genera aleatoriamente.<br>
+        ⏱️ <strong>Cronómetro:</strong> se registra el tiempo que demores.<br>
+        🔒 <strong>Único intento:</strong> solo puedes realizarla una vez.
+      </div>
+    </section>
+
+    <!-- BARRA SUPERIOR FIJA (CRONÓMETRO Y PROGRESO) -->
+    <aside class="sticky-timer-bar" id="stickyHeader" style="display: none;">
+      <div class="student-tag">
+        <div class="student-avatar" style="background: #ffedd5; border-color: #ea580c;">👦</div>
+        <div>
+          <span style="font-size: 0.8rem; color: #4b5563; display: block; font-weight: 500;">Estudiante (4to Grado)</span>
+          <span id="activeStudentName">Nombre del Alumno</span>
+        </div>
+      </div>
+
+      <div class="timer-box" title="Tiempo transcurrido">
+        <span class="timer-icon">⏱️</span>
+        <span id="liveTimer">00:00</span>
+      </div>
+
+      <button type="button" class="sound-toggle-btn" id="soundToggleBtn">
+        <span>🔊</span> Sonido: ON
+      </button>
+
+      <div class="progress-container">
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="background: linear-gradient(90deg, #ea580c, #c2410c);"></div>
+        </div>
+        <span class="progress-label" id="progressLabel">0 reactivos respondidos</span>
+      </div>
+    </aside>
+
+    <!-- PANTALLA 2: CONTENIDO DE LA PRUEBA -->
+    <main id="testContentSection" style="display: none;">
+
+      <!-- PARTE A: COMPLETA -->
+      <section class="card">
+        <div class="card-title">
+          <span class="icon">✏️</span>
+          <h2>A. Completa los espacios</h2>
+        </div>
+        <p class="instructions">
+          Escribe la palabra correcta en el espacio en blanco. Puedes hacer clic en las palabras del banco para colocarlas automáticamente.
+        </p>
+
+        <!-- BANCO DE PALABRAS -->
+        <div class="word-bank">
+          <div class="word-bank-header">
+            <span>💡</span> <strong>Banco de Palabras (haz clic para insertar):</strong>
+          </div>
+          <div class="word-chips-container" id="wordChipsContainer">
+            <!-- Chips generados dinámicamente -->
+          </div>
+        </div>
+
+        <div id="parteAQuestions">
+          <!-- Preguntas generadas aleatoriamente -->
+        </div>
+      </section>
+
+      <!-- PARTE B: SELECCIÓN MÚLTIPLE -->
+      <section class="card">
+        <div class="card-title">
+          <span class="icon">🔘</span>
+          <h2>B. Selección Múltiple</h2>
+        </div>
+        <p class="instructions">
+          Lee con atención cada pregunta y haz clic sobre la opción correcta.
+        </p>
+
+        <div id="parteBQuestions">
+          <!-- Preguntas generadas aleatoriamente -->
+        </div>
+      </section>
+
+      <!-- PARTE C: VERDADERO O FALSO -->
+      <section class="card">
+        <div class="card-title">
+          <span class="icon">⚖️</span>
+          <h2>C. Verdadero o Falso</h2>
+        </div>
+        <p class="instructions">
+          Lee cada afirmación e indica si es <strong>Verdadera (V)</strong> o <strong>Falsa (F)</strong> haciendo clic en el botón correspondiente.
+        </p>
+
+        <div id="parteCQuestions">
+          <!-- Preguntas generadas aleatoriamente -->
+        </div>
+      </section>
+
+      <!-- PARTE D: RELACIONA -->
+      <section class="card">
+        <div class="card-title">
+          <span class="icon">🔗</span>
+          <h2>D. Relaciona los Conceptos</h2>
+        </div>
+        <p class="instructions">
+          Selecciona en cada concepto la letra del significado o ejemplo correspondiente.
+        </p>
+
+        <div id="parteDQuestions">
+          <!-- Preguntas generadas aleatoriamente -->
+        </div>
+      </section>
+
+      <!-- PARTE E: RESPUESTA CORTA (4TO GRADO) -->
+      <section class="card" id="parteESection">
+        <div class="card-title">
+          <span class="icon">📝</span>
+          <h2>E. Respuesta Corta</h2>
+        </div>
+        <p class="instructions">
+          Escribe una respuesta breve y clara para cada pregunta con tus propias palabras.
+        </p>
+
+        <div id="parteEQuestions">
+          <!-- Preguntas generadas aleatoriamente -->
+        </div>
+      </section>
+
+      <!-- BOTÓN ENTREGAR -->
+      <div class="submit-section">
+        <button type="button" class="btn-submit" id="submitTestBtn" style="background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);">
+          <span>🏁</span> Entregar Prueba de 4to Grado
+        </button>
+      </div>
+
+    </main>
+
+    <!-- MODAL DE RESULTADOS / FELICITACIONES -->
+    <div class="modal-overlay" id="resultModal">
+      <div class="modal-card">
+        <div class="stars-row">⭐ 🥕 ⭐ 🍎 ⭐</div>
+        <div class="result-badge" id="modalResultBadge">¡Excelente Trabajo!</div>
+        
+        <h2 style="font-size: 1.8rem; margin-bottom: 6px;" id="modalStudentName">Estudiante</h2>
+        <p style="color: #4b5563; font-weight: 600;">Tu evaluación de 4to grado ha sido registrada exitosamente.</p>
+
+        <div class="score-display-box" style="background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); border-color: #fdba74;">
+          <div class="score-metric">
+            <div class="metric-val" id="modalNotaVal" style="color: #c2410c;">5.0</div>
+            <div class="metric-lbl">Calificación MEDUCA</div>
+          </div>
+          <div class="score-metric">
+            <div class="metric-val" id="modalPuntosVal" style="color: #c2410c;">24 / 24</div>
+            <div class="metric-lbl">Puntos Obtenidos</div>
+          </div>
+        </div>
+
+        <div class="time-metric-box">
+          <span>⏱️ Tiempo Total Empleado:</span>
+          <strong id="modalTimeVal">04:35 min</strong>
+        </div>
+
+        <p style="font-size: 0.95rem; color: #6b7280; margin-bottom: 24px;">
+          Esta prueba ha quedado registrada como tu único intento completado. ¡Buen trabajo en tu clase de Agricultura!
+        </p>
+
+        <button type="button" class="btn-primary" id="closeModalBtn" style="background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);">
+          <span>✔️</span> Aceptar y Salir
+        </button>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer-info">
+      <div>Ministerio de Educación (MEDUCA) • Panamá</div>
+      <div style="margin-top: 6px;">
+        <a href="./docente.html">🧑‍🏫 Panel Docente y Resultados</a>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>

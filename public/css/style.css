@@ -256,6 +256,77 @@ h1, h2, h3, h4, .font-heading {
   white-space: nowrap;
 }
 
+/* Píldora de estado de conexión (Online / Offline) */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  user-select: none;
+}
+
+.status-pill.online {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.status-pill.offline {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fcd34d;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Filtros de grupo (3°A, 3°B, 3°C) */
+.group-filters {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.group-filter-btn {
+  background: white;
+  border: 2px solid var(--border-light);
+  color: var(--text-muted);
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.group-filter-btn:hover {
+  border-color: var(--primary-light);
+  color: var(--primary);
+  background: #f0fdf4;
+}
+
+.group-filter-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 4px 10px rgba(22, 101, 52, 0.25);
+}
+
+.group-pill {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  margin-left: 6px;
+}
+
 /* --- TARJETAS --- */
 .card {
   background: var(--card-bg);
@@ -1054,4 +1125,188 @@ h1, h2, h3, h4, .font-heading {
 
 .btn-danger:hover {
   background: #fecaca;
+}
+/* --- PARTE E: RESPUESTA CORTA (4TO GRADO) --- */
+.short-answer-block {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: border-color 0.2s;
+}
+
+.short-answer-block.answered {
+  border-color: #86efac;
+  background: #fafdfb;
+}
+
+.short-answer-prompt {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #1f2937;
+  display: flex;
+  gap: 10px;
+}
+
+.short-answer-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  outline: none;
+  resize: vertical;
+  min-height: 85px;
+  line-height: 1.5;
+  transition: all 0.2s;
+}
+
+.short-answer-textarea:focus {
+  background: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.2);
+}
+
+/* Selector de Grado en el Header */
+.grade-switcher {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.grade-btn {
+  background: white;
+  border: 2.5px solid var(--border-light);
+  color: #374151;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  padding: 10px 22px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grade-btn:hover {
+  border-color: var(--primary-light);
+  background: #f0fdf4;
+  color: var(--primary);
+}
+
+.grade-btn.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  box-shadow: 0 6px 14px rgba(22, 101, 52, 0.3);
+}
+/* --- TARJETAS DE LECCIONES Y QR EN PANEL DOCENTE --- */
+.lessons-qr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.lesson-qr-card {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.lesson-qr-card:hover {
+  border-color: #16a34a;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(22, 101, 52, 0.14);
+  background: #f0fdf4;
+}
+
+.lesson-qr-card.grade-4:hover {
+  border-color: #ea580c;
+  background: #fff7ed;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.14);
+}
+
+.lesson-qr-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lesson-qr-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+
+.lesson-qr-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.lesson-qr-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.lesson-qr-footer {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-qr-action {
+  background: #16a34a;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-qr-action:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3);
+}
+
+.btn-qr-action.orange {
+  background: #ea580c;
+}
+
+.btn-qr-action.orange:hover {
+  box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3);
 }

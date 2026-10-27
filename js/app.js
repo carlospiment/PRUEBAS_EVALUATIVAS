@@ -109,24 +109,38 @@ function cleanText(str) {
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async () => {
   setupOnlineStatus();
-  detectGradeFromUrl();
-  setupGradeSwitcher();
-  await switchGrade(currentGrade);
+  detectGrade();
+  await initGrade(currentGrade);
   setupAutocomplete();
   setupEventListeners();
 });
 
-// Detect ?grado= in URL or pathname
-function detectGradeFromUrl() {
+// Detect Grade strictly from body dataset, pathname, or URL
+function detectGrade() {
+  // 1. Explicit body attribute (e.g. <body data-grade="4"> or <body data-grade="3">)
+  if (document.body && document.body.dataset && document.body.dataset.grade) {
+    currentGrade = parseInt(document.body.dataset.grade, 10);
+    return;
+  }
+  // 2. Pathname check
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes('cuarto')) {
+    currentGrade = 4;
+    return;
+  }
+  if (path.includes('tercer')) {
+    currentGrade = 3;
+    return;
+  }
+  // 3. Query string ?grado=
   const params = new URLSearchParams(window.location.search);
   const g = params.get('grado');
   if (g === '3' || g === '4') {
     currentGrade = parseInt(g, 10);
-  } else if (window.location.pathname.includes('cuarto')) {
-    currentGrade = 4;
-  } else if (window.location.pathname.includes('tercer')) {
-    currentGrade = 3;
+    return;
   }
+  // Default
+  currentGrade = 4;
 }
 
 function setupOnlineStatus() {
@@ -146,69 +160,19 @@ function setupOnlineStatus() {
   updateStatus();
 }
 
-// Grade Switcher buttons
-function setupGradeSwitcher() {
-  const btn3 = document.getElementById('gradeBtn3');
-  const btn4 = document.getElementById('gradeBtn4');
-  if (btn3 && btn4) {
-    btn3.addEventListener('click', () => switchGrade(3));
-    btn4.addEventListener('click', () => switchGrade(4));
-  }
-}
-
-async function switchGrade(gradeNum) {
+async function initGrade(gradeNum) {
   currentGrade = gradeNum;
-  playSound('click');
 
-  // Update switcher button styles
-  const btn3 = document.getElementById('gradeBtn3');
-  const btn4 = document.getElementById('gradeBtn4');
-  if (btn3 && btn4) {
-    if (gradeNum === 3) {
-      btn3.classList.add('active');
-      btn4.classList.remove('active');
-    } else {
-      btn4.classList.add('active');
-      btn3.classList.remove('active');
-    }
-  }
-
-  // Clear inputs
-  document.getElementById('studentNameInput').value = '';
-  document.getElementById('startTestBtn').disabled = true;
-  document.getElementById('alreadyDoneCard').style.display = 'none';
+  // Clear inputs if present
+  const nameInput = document.getElementById('studentNameInput');
+  if (nameInput) nameInput.value = '';
+  const startBtn = document.getElementById('startTestBtn');
+  if (startBtn) startBtn.disabled = true;
+  const alreadyCard = document.getElementById('alreadyDoneCard');
+  if (alreadyCard) alreadyCard.style.display = 'none';
 
   await loadConfig();
   await loadStudents();
-  renderGroupPills();
-}
-
-// Render dynamic group filter pills (3°A/B/C or 4°A/B/C)
-function renderGroupPills() {
-  const container = document.getElementById('groupFiltersContainer');
-  if (!container) return;
-
-  const letterList = ['A', 'B', 'C'];
-  let html = `<button type="button" class="group-filter-btn active" data-group="TODOS">Todos los salones</button>`;
-
-  letterList.forEach(l => {
-    const gKey = `${currentGrade}${l}`;
-    const gLabel = `${currentGrade}°${l}`;
-    html += `<button type="button" class="group-filter-btn" data-group="${gKey}">Grado ${gLabel}</button>`;
-  });
-
-  container.innerHTML = html;
-  selectedGroupFilter = 'TODOS';
-
-  container.querySelectorAll('.group-filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      container.querySelectorAll('.group-filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedGroupFilter = btn.dataset.group;
-      playSound('click');
-      document.getElementById('studentNameInput').dispatchEvent(new Event('input'));
-    });
-  });
 }
 
 // Load Config for current grade
@@ -320,7 +284,6 @@ function setupAutocomplete() {
     }
 
     let matches = allStudents.filter(s => {
-      if (selectedGroupFilter !== 'TODOS' && s.grupo !== selectedGroupFilter) return false;
       const matchName = cleanText(s.nombre).includes(query);
       const matchSimple = s.nombre_simple ? cleanText(s.nombre_simple).includes(query) : false;
       const matchApellido = s.apellidos ? cleanText(s.apellidos).includes(query) : false;

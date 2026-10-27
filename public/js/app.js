@@ -1,17 +1,31 @@
 /* ===================================================
-   LÓGICA DEL ESTUDIANTE - PRUEBA SUMATIVA 3ER GRADO
+   LÓGICA DEL ESTUDIANTE - PRUEBA SUMATIVA MEDUCA
+   Soporte Multi-Grado: 3er y 4to Grado de Primaria
+   PWA 100% Offline, GitHub Pages y Aleatorización
    =================================================== */
 
 // Global state
-let testConfig = null;
+let currentGrade = 4; // Default to 4th grade if not specified, or reads URL ?grado=
+let rawTestConfig = null;
+let randomizedConfig = null;
 let allStudents = [];
 let currentStudent = null;
 let testStartTime = null;
 let timerInterval = null;
 let elapsedSeconds = 0;
 let soundEnabled = true;
+let selectedGroupFilter = 'TODOS';
 
-// Web Audio API Sound Synthesizer
+// Register Service Worker for Offline PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('Service Worker activo:', reg.scope))
+      .catch((err) => console.warn('SW error:', err));
+  });
+}
+
+// Sound Synthesizer
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
 function playSound(type) {
@@ -24,7 +38,6 @@ function playSound(type) {
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     const now = audioCtx.currentTime;
 
     if (type === 'click') {
@@ -37,15 +50,14 @@ function playSound(type) {
       osc.stop(now + 0.08);
     } else if (type === 'chip') {
       osc.type = 'triangle';
-      osc.frequency.setValueAtTime(523.25, now); // C5
-      osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12); // E5
+      osc.frequency.setValueAtTime(523.25, now);
+      osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.12);
       gain.gain.setValueAtTime(0.15, now);
       gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
       osc.start(now);
       osc.stop(now + 0.12);
     } else if (type === 'success') {
-      // Fanfare chord
-      const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+      const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, idx) => {
         const o = audioCtx.createOscillator();
         const g = audioCtx.createGain();
@@ -60,53 +72,199 @@ function playSound(type) {
       });
     }
   } catch (e) {
-    console.warn('Audio not available:', e);
+    console.warn('Audio no disponible:', e);
   }
 }
 
-// Format seconds into MM:SS
+// Fisher-Yates Shuffle
+function shuffleArray(array) {
+  if (!array || !Array.isArray(array)) return [];
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 function formatTime(sec) {
   const m = Math.floor(sec / 60);
   const s = sec % 60;
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// Normalizer
 function cleanText(str) {
   if (!str) return '';
-  return str.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  let cleaned = str
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[.,;:!?¿¡"']/g, '')
+    .replace(/\s+/g, ' ');
+  cleaned = cleaned.replace(/^(el|la|los|las|un|una|unos|unas)\s+/, '');
+  return cleaned;
 }
 
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadConfig();
-  await loadStudents();
+  setupOnlineStatus();
+  detectGrade();
+  await initGrade(currentGrade);
   setupAutocomplete();
   setupEventListeners();
 });
 
-// Load test configuration from server
+// Detect Grade strictly from body dataset, pathname, or URL
+function detectGrade() {
+  // 1. Explicit body attribute (e.g. <body data-grade="4"> or <body data-grade="3">)
+  if (document.body && document.body.dataset && document.body.dataset.grade) {
+    currentGrade = parseInt(document.body.dataset.grade, 10);
+    return;
+  }
+  // 2. Pathname check
+  const path = window.location.pathname.toLowerCase();
+  if (path.includes('cuarto')) {
+    currentGrade = 4;
+    return;
+  }
+  if (path.includes('tercer')) {
+    currentGrade = 3;
+    return;
+  }
+  // 3. Query string ?grado=
+  const params = new URLSearchParams(window.location.search);
+  const g = params.get('grado');
+  if (g === '3' || g === '4') {
+    currentGrade = parseInt(g, 10);
+    return;
+  }
+  // Default
+  currentGrade = 4;
+}
+
+function setupOnlineStatus() {
+  const updateStatus = () => {
+    const badge = document.getElementById('offlineBadge');
+    if (!badge) return;
+    if (navigator.onLine) {
+      badge.innerHTML = '🟢 En línea';
+      badge.className = 'status-pill online';
+    } else {
+      badge.innerHTML = '⚡ Modo Offline (Sin Internet)';
+      badge.className = 'status-pill offline';
+    }
+  };
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+  updateStatus();
+}
+
+async function initGrade(gradeNum) {
+  currentGrade = gradeNum;
+
+  // Clear inputs if present
+  const nameInput = document.getElementById('studentNameInput');
+  if (nameInput) nameInput.value = '';
+  const startBtn = document.getElementById('startTestBtn');
+  if (startBtn) startBtn.disabled = true;
+  const alreadyCard = document.getElementById('alreadyDoneCard');
+  if (alreadyCard) alreadyCard.style.display = 'none';
+
+  await loadConfig();
+  await loadStudents();
+}
+
+// Load Config for current grade
 async function loadConfig() {
   try {
-    const res = await fetch('/api/prueba');
-    testConfig = await res.json();
-    renderTestSections();
+    let res = null;
+    const staticFile = currentGrade === 4 ? './data/prueba_4to.json' : './data/prueba_3ro.json';
+    try {
+      res = await fetch(`/api/prueba?grado=${currentGrade}`);
+      if (!res.ok) throw new Error('API no disponible');
+    } catch {
+      res = await fetch(staticFile);
+    }
+    rawTestConfig = await res.json();
+    updateHeaderLabels();
   } catch (err) {
-    console.error('Error cargando configuración de la prueba:', err);
+    console.error('Error cargando configuración:', err);
   }
 }
 
-// Load registered students
+function updateHeaderLabels() {
+  if (!rawTestConfig) return;
+  document.getElementById('testTitle').textContent = rawTestConfig.titulo;
+  document.getElementById('testTopic').textContent = `${rawTestConfig.tema} (${rawTestConfig.leccion})`;
+  document.getElementById('testGrade').textContent = rawTestConfig.grado;
+}
+
+// Load Students for current grade
 async function loadStudents() {
   try {
-    const res = await fetch('/api/estudiantes');
-    allStudents = await res.json();
+    let list = [];
+    try {
+      const res = await fetch(`/api/estudiantes?grado=${currentGrade}`);
+      if (res.ok) {
+        list = await res.json();
+      } else {
+        throw new Error('API no responde');
+      }
+    } catch {
+      const resStatic = await fetch('./data/estudiantes.json');
+      const all = await resStatic.json();
+      list = all.filter(s => s.grado === currentGrade);
+    }
+
+    const localResults = getLocalResults();
+    allStudents = list.map(student => {
+      const offlineRes = localResults.find(r => 
+        (r.estudiante_id && r.estudiante_id === student.id) ||
+        cleanText(r.estudiante_nombre) === cleanText(student.nombre)
+      );
+
+      if (offlineRes) {
+        return {
+          ...student,
+          completado: true,
+          fecha_completado: offlineRes.completado_at,
+          duracion: offlineRes.duracion_formato,
+          puntos: offlineRes.puntos_obtenidos,
+          nota_meduca: offlineRes.nota_meduca
+        };
+      }
+      return student;
+    });
+
   } catch (err) {
-    console.error('Error cargando lista de estudiantes:', err);
+    console.error('Error cargando estudiantes:', err);
   }
 }
 
-// Setup Student Autocomplete Input
+// LocalStorage Helper
+function getLocalResults() {
+  try {
+    const key = `meduca_agri_eval_${currentGrade}to_grado`;
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalResult(nuevoResultado) {
+  try {
+    const key = `meduca_agri_eval_${currentGrade}to_grado`;
+    const list = getLocalResults();
+    list.push(nuevoResultado);
+    localStorage.setItem(key, JSON.stringify(list));
+  } catch (e) {
+    console.warn(e);
+  }
+}
+
+// Autocomplete
 function setupAutocomplete() {
   const input = document.getElementById('studentNameInput');
   const dropdown = document.getElementById('autocompleteDropdown');
@@ -125,10 +283,15 @@ function setupAutocomplete() {
       return;
     }
 
-    const matches = allStudents.filter(s => cleanText(s.nombre).includes(query));
+    let matches = allStudents.filter(s => {
+      const matchName = cleanText(s.nombre).includes(query);
+      const matchSimple = s.nombre_simple ? cleanText(s.nombre_simple).includes(query) : false;
+      const matchApellido = s.apellidos ? cleanText(s.apellidos).includes(query) : false;
+      return matchName || matchSimple || matchApellido;
+    });
 
     if (matches.length === 0) {
-      dropdown.innerHTML = `<div class="autocomplete-item" style="color: #6b7280; font-style: italic;">No se encontró ningún estudiante con ese nombre</div>`;
+      dropdown.innerHTML = `<div class="autocomplete-item" style="color: #6b7280; font-style: italic;">No se encontró ningún estudiante de ${currentGrade}° grado con ese nombre</div>`;
       dropdown.style.display = 'block';
       return;
     }
@@ -136,14 +299,17 @@ function setupAutocomplete() {
     matches.forEach(student => {
       const item = document.createElement('div');
       item.className = 'autocomplete-item';
-      
+      const grupoBadge = student.grupo_label ? `<span class="group-pill">${student.grupo_label}</span>` : '';
       const statusBadge = student.completado 
         ? `<span class="status-tag completado">⚠️ Ya realizada (${student.nota_meduca ? 'Nota: ' + student.nota_meduca : 'Enviada'})</span>` 
         : `<span class="status-tag pendiente">✅ Disponible</span>`;
 
       item.innerHTML = `
         <span style="font-size: 1.2rem;">👤</span>
-        <span>${student.nombre}</span>
+        <div style="flex: 1;">
+          <strong>${student.nombre_simple || student.nombre}</strong>
+          ${grupoBadge}
+        </div>
         ${statusBadge}
       `;
 
@@ -157,14 +323,12 @@ function setupAutocomplete() {
     dropdown.style.display = 'block';
   });
 
-  // Hide dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!input.contains(e.target) && !dropdown.contains(e.target)) {
       dropdown.style.display = 'none';
     }
   });
 
-  // Start button click
   startBtn.addEventListener('click', () => {
     if (currentStudent && !currentStudent.completado) {
       startTest();
@@ -187,14 +351,14 @@ function selectStudent(student) {
     startBtn.disabled = true;
     alreadyDoneCard.innerHTML = `
       <h3>⚠️ Examen Ya Realizado</h3>
-      <p>Hola <strong>${student.nombre}</strong>, nuestro sistema registra que ya entregaste esta prueba evaluativa.</p>
-      <div style="margin-top: 10px; font-weight: 600; color: #7f1d1d; background: #fee2e2; padding: 10px; border-radius: 8px;">
+      <p>Hola <strong>${student.nombre}</strong>, el sistema registra que ya entregaste esta evaluación de ${currentGrade}° grado.</p>
+      <div style="margin-top: 10px; font-weight: 600; color: #7f1d1d; background: #fee2e2; padding: 12px; border-radius: 8px;">
         📅 Fecha: ${student.fecha_completado || 'Recientemente'}<br>
         ⏱️ Tiempo empleado: ${student.duracion || 'Registrado'}<br>
-        📊 Calificación obtenida: ${student.nota_meduca ? student.nota_meduca + ' / 5.0' : 'Calificada'}
+        📊 Calificación: ${student.nota_meduca ? student.nota_meduca + ' / 5.0' : 'Calificada'}
       </div>
       <p style="margin-top: 8px; font-size: 0.95rem; color: #991b1b;">
-        * Por normativa de la evaluación, solo se permite realizar la prueba una sola vez. Si crees que se trata de un error, por favor consulta con tu maestro(a).
+        * Solo se permite un intento por estudiante. Si requieres asistencia técnica, consulta con tu maestro.
       </p>
     `;
     alreadyDoneCard.style.display = 'block';
@@ -204,35 +368,70 @@ function selectStudent(student) {
   }
 }
 
-// Render Test Sections
-function renderTestSections() {
-  if (!testConfig) return;
+// Randomize Test Sections
+function randomizeTest(config) {
+  if (!config || !config.secciones) return null;
+  const clone = JSON.parse(JSON.stringify(config));
 
-  // Header Title
-  document.getElementById('testTitle').textContent = testConfig.titulo || 'Prueba Sumativa de Agricultura';
-  document.getElementById('testTopic').textContent = testConfig.tema || 'El huerto escolar, la salud y la nutrición';
-  document.getElementById('testGrade').textContent = testConfig.grado || 'Tercer Grado de Educación Primaria';
+  // Parte A
+  if (clone.secciones.parte_a) {
+    clone.secciones.parte_a.preguntas = shuffleArray(clone.secciones.parte_a.preguntas);
+    clone.secciones.parte_a.banco_palabras = shuffleArray(clone.secciones.parte_a.banco_palabras);
+  }
 
-  // Render Parte A: Completa
-  renderParteA(testConfig.secciones.parte_a);
+  // Parte B
+  if (clone.secciones.parte_b) {
+    const shuffledQuestions = shuffleArray(clone.secciones.parte_b.preguntas);
+    shuffledQuestions.forEach(q => {
+      q.opciones = shuffleArray(q.opciones);
+    });
+    clone.secciones.parte_b.preguntas = shuffledQuestions;
+  }
 
-  // Render Parte B: Selección Múltiple
-  renderParteB(testConfig.secciones.parte_b);
+  // Parte C
+  if (clone.secciones.parte_c) {
+    clone.secciones.parte_c.preguntas = shuffleArray(clone.secciones.parte_c.preguntas);
+  }
 
-  // Render Parte C: Verdadero o Falso
-  renderParteC(testConfig.secciones.parte_c);
+  // Parte D
+  if (clone.secciones.parte_d) {
+    clone.secciones.parte_d.conceptos = shuffleArray(clone.secciones.parte_d.conceptos);
+    clone.secciones.parte_d.significados = shuffleArray(clone.secciones.parte_d.significados);
+  }
 
-  // Render Parte D: Relaciona
-  renderParteD(testConfig.secciones.parte_d);
+  // Parte E (si existe)
+  if (clone.secciones.parte_e) {
+    clone.secciones.parte_e.preguntas = shuffleArray(clone.secciones.parte_e.preguntas);
+  }
+
+  return clone;
 }
 
-// RENDER PARTE A
+// Render Test Sections
+function renderTestSections() {
+  if (!randomizedConfig) return;
+  updateHeaderLabels();
+
+  renderParteA(randomizedConfig.secciones.parte_a);
+  renderParteB(randomizedConfig.secciones.parte_b);
+  renderParteC(randomizedConfig.secciones.parte_c);
+  renderParteD(randomizedConfig.secciones.parte_d);
+
+  const secE = document.getElementById('parteESection');
+  if (randomizedConfig.secciones.parte_e) {
+    if (secE) secE.style.display = 'block';
+    renderParteE(randomizedConfig.secciones.parte_e);
+  } else {
+    if (secE) secE.style.display = 'none';
+  }
+}
+
+// RENDER PARTE A (COMPLETA)
 function renderParteA(data) {
   const container = document.getElementById('parteAQuestions');
   const chipsContainer = document.getElementById('wordChipsContainer');
   if (!data || !container) return;
 
-  // Word Bank
   chipsContainer.innerHTML = '';
   (data.banco_palabras || []).forEach(word => {
     const chip = document.createElement('button');
@@ -246,24 +445,35 @@ function renderParteA(data) {
     chipsContainer.appendChild(chip);
   });
 
-  // Questions
   container.innerHTML = '';
-  data.preguntas.forEach(q => {
+  data.preguntas.forEach((q, idx) => {
     const div = document.createElement('div');
     div.className = 'fill-blank-item';
-    div.innerHTML = `
-      <span class="q-num">${q.numero}.</span>
-      <span>${q.texto_antes}</span>
-      <input type="text" class="blank-input" id="input_${q.id}" data-qid="${q.id}" placeholder="Escribe aquí" autocomplete="off" spellcheck="false">
-      <span>${q.texto_despues}</span>
-    `;
 
-    const input = div.querySelector('input');
-    input.addEventListener('focus', () => {
-      window.lastActiveInput = input;
-    });
-    input.addEventListener('input', () => {
-      updateProgress();
+    if (q.tipo === 'triple') {
+      // 3 blanks for item 2
+      div.innerHTML = `
+        <span class="q-num">${idx + 1}.</span>
+        <span>${q.texto_antes}</span>
+        <input type="text" class="blank-input" id="input_a2_1" data-qid="a2_1" placeholder="beneficio 1" autocomplete="off">
+        <span>${q.texto_medio1 || ','}</span>
+        <input type="text" class="blank-input" id="input_a2_2" data-qid="a2_2" placeholder="beneficio 2" autocomplete="off">
+        <span>${q.texto_medio2 || 'y'}</span>
+        <input type="text" class="blank-input" id="input_a2_3" data-qid="a2_3" placeholder="beneficio 3" autocomplete="off">
+        <span>${q.texto_despues || '.'}</span>
+      `;
+    } else {
+      div.innerHTML = `
+        <span class="q-num">${idx + 1}.</span>
+        <span>${q.texto_antes}</span>
+        <input type="text" class="blank-input" id="input_${q.id}" data-qid="${q.id}" placeholder="Escribe aquí" autocomplete="off">
+        <span>${q.texto_despues}</span>
+      `;
+    }
+
+    div.querySelectorAll('input').forEach(input => {
+      input.addEventListener('focus', () => { window.lastActiveInput = input; });
+      input.addEventListener('input', () => { updateProgress(); });
     });
 
     container.appendChild(div);
@@ -277,7 +487,6 @@ function insertWordIntoActiveBlank(word) {
     active.dispatchEvent(new Event('input'));
     active.focus();
   } else {
-    // Find first empty input
     const inputs = document.querySelectorAll('.blank-input');
     for (let input of inputs) {
       if (!input.value.trim()) {
@@ -291,22 +500,26 @@ function insertWordIntoActiveBlank(word) {
   }
 }
 
-// RENDER PARTE B
+// RENDER PARTE B (SELECCIÓN MÚLTIPLE)
 function renderParteB(data) {
   const container = document.getElementById('parteBQuestions');
   if (!data || !container) return;
 
   container.innerHTML = '';
-  data.preguntas.forEach(q => {
+  data.preguntas.forEach((q, qIdx) => {
     const block = document.createElement('div');
     block.className = 'mcq-question-block';
     block.id = `mcq_block_${q.id}`;
+    block.dataset.qid = q.id;
 
+    const letters = ['a', 'b', 'c'];
     let optionsHtml = '';
-    q.opciones.forEach(opt => {
+
+    q.opciones.forEach((opt, optIdx) => {
+      const displayLetter = letters[optIdx].toUpperCase();
       optionsHtml += `
         <div class="mcq-option-card" data-qid="${q.id}" data-optid="${opt.id}">
-          <div class="opt-letter">${opt.id.toUpperCase()}</div>
+          <div class="opt-letter">${displayLetter}</div>
           <div style="flex: 1;">${opt.texto}</div>
           <div style="font-size: 1.3rem;">${opt.icono || ''}</div>
         </div>
@@ -315,7 +528,7 @@ function renderParteB(data) {
 
     block.innerHTML = `
       <div class="mcq-prompt">
-        <span style="color: var(--primary);">${q.numero}.</span>
+        <span style="color: var(--primary);">${qIdx + 1}.</span>
         <span>${q.enunciado}</span>
       </div>
       <div class="mcq-options-grid">
@@ -338,20 +551,21 @@ function renderParteB(data) {
   });
 }
 
-// RENDER PARTE C
+// RENDER PARTE C (VERDADERO O FALSO)
 function renderParteC(data) {
   const container = document.getElementById('parteCQuestions');
   if (!data || !container) return;
 
   container.innerHTML = '';
-  data.preguntas.forEach(q => {
+  data.preguntas.forEach((q, idx) => {
     const item = document.createElement('div');
     item.className = 'tf-item';
     item.id = `tf_item_${q.id}`;
+    item.dataset.qid = q.id;
 
     item.innerHTML = `
       <div class="tf-text">
-        <span style="color: var(--primary); font-weight: 800; margin-right: 6px;">${q.numero}.</span>
+        <span style="color: var(--primary); font-weight: 800; margin-right: 6px;">${idx + 1}.</span>
         <span>${q.enunciado}</span>
       </div>
       <div class="tf-buttons">
@@ -389,34 +603,32 @@ function renderParteC(data) {
   });
 }
 
-// RENDER PARTE D
+// RENDER PARTE D (RELACIONA)
 function renderParteD(data) {
   const container = document.getElementById('parteDQuestions');
   if (!data || !container) return;
 
   container.innerHTML = '';
-
   const grid = document.createElement('div');
   grid.className = 'matching-container';
 
-  // Left column: Concepts to match
   const leftCol = document.createElement('div');
   leftCol.className = 'matching-card';
-  leftCol.innerHTML = `<h4><span>📌</span> Conceptos</h4>`;
+  leftCol.innerHTML = `<h4><span>📌</span> Beneficios</h4>`;
 
-  data.conceptos.forEach(c => {
+  data.conceptos.forEach((c, idx) => {
     const matchRow = document.createElement('div');
     matchRow.className = 'match-item';
     matchRow.id = `match_row_${c.id}`;
 
     let selectOptions = `<option value="">Selecciona...</option>`;
     (data.significados || []).forEach(s => {
-      selectOptions += `<option value="${s.letra}">${s.letra}. ${s.definicion.substring(0, 24)}...</option>`;
+      selectOptions += `<option value="${s.letra}">${s.letra}. ${s.definicion.substring(0, 26)}...</option>`;
     });
 
     matchRow.innerHTML = `
       <div class="match-item-left">
-        <span style="color: var(--primary); font-weight: 800;">${c.numero}.</span>
+        <span style="color: var(--primary); font-weight: 800;">${idx + 1}.</span>
         <span>${c.termino}</span>
       </div>
       <select class="match-select" id="select_${c.id}" data-qid="${c.id}">
@@ -433,10 +645,9 @@ function renderParteD(data) {
     leftCol.appendChild(matchRow);
   });
 
-  // Right column: Significado descriptions reference
   const rightCol = document.createElement('div');
   rightCol.className = 'matching-card';
-  rightCol.innerHTML = `<h4><span>📖</span> Significados</h4>`;
+  rightCol.innerHTML = `<h4><span>📖</span> Ejemplos</h4>`;
 
   (data.significados || []).forEach(s => {
     const defRow = document.createElement('div');
@@ -453,47 +664,88 @@ function renderParteD(data) {
   container.appendChild(grid);
 }
 
+// RENDER PARTE E (RESPUESTA CORTA - 4TO GRADO)
+function renderParteE(data) {
+  const container = document.getElementById('parteEQuestions');
+  if (!data || !container) return;
+
+  container.innerHTML = '';
+  data.preguntas.forEach((q, idx) => {
+    const block = document.createElement('div');
+    block.className = 'short-answer-block';
+    block.id = `short_block_${q.id}`;
+    block.dataset.qid = q.id;
+
+    block.innerHTML = `
+      <div class="short-answer-prompt">
+        <span style="color: var(--primary);">${idx + 1}.</span>
+        <span>${q.enunciado}</span>
+      </div>
+      <textarea class="short-answer-textarea" id="textarea_${q.id}" data-qid="${q.id}" placeholder="Escribe aquí tu respuesta con tus propias palabras..."></textarea>
+    `;
+
+    const ta = block.querySelector('textarea');
+    ta.addEventListener('input', () => {
+      if (ta.value.trim().length > 0) {
+        block.classList.add('answered');
+      } else {
+        block.classList.remove('answered');
+      }
+      updateProgress();
+    });
+
+    container.appendChild(block);
+  });
+}
+
 // Update Progress Bar
 function updateProgress() {
   let answered = 0;
-  const total = 19;
+  const total = rawTestConfig?.puntos_totales || (currentGrade === 4 ? 24 : 19);
 
-  // Parte A (5)
+  // Parte A
   document.querySelectorAll('.blank-input').forEach(input => {
     if (input.value.trim().length > 0) answered++;
   });
 
-  // Parte B (4)
+  // Parte B
   document.querySelectorAll('.mcq-question-block').forEach(block => {
     if (block.dataset.selected) answered++;
   });
 
-  // Parte C (6)
+  // Parte C
   document.querySelectorAll('.tf-item').forEach(item => {
     if (item.dataset.selected) answered++;
   });
 
-  // Parte D (4)
+  // Parte D
   document.querySelectorAll('.match-select').forEach(sel => {
     if (sel.value) answered++;
   });
 
-  const pct = Math.round((answered / total) * 100);
+  // Parte E
+  document.querySelectorAll('.short-answer-textarea').forEach(ta => {
+    if (ta.value.trim().length > 0) answered++;
+  });
+
+  const pct = Math.min(100, Math.round((answered / total) * 100));
   document.getElementById('progressFill').style.width = `${pct}%`;
-  document.getElementById('progressLabel').textContent = `${answered} de ${total} preguntas respondidas`;
+  document.getElementById('progressLabel').textContent = `${answered} de ${total} reactivos respondidos`;
 }
 
-// Start Test Action
+// Start Test
 function startTest() {
   playSound('chip');
+
+  randomizedConfig = randomizeTest(rawTestConfig);
+  renderTestSections();
+
   document.getElementById('loginSection').style.display = 'none';
   document.getElementById('testContentSection').style.display = 'block';
   document.getElementById('stickyHeader').style.display = 'flex';
 
-  // Fill student name
-  document.getElementById('activeStudentName').textContent = currentStudent.nombre;
+  document.getElementById('activeStudentName').textContent = currentStudent.nombre_simple || currentStudent.nombre;
 
-  // Start stopwatch
   testStartTime = new Date();
   elapsedSeconds = 0;
   timerInterval = setInterval(() => {
@@ -501,15 +753,12 @@ function startTest() {
     document.getElementById('liveTimer').textContent = formatTime(elapsedSeconds);
   }, 1000);
 
-  // Prevent accidental back/close
   window.onbeforeunload = () => "Tienes una prueba evaluativa en curso. Si sales ahora, podrías perder tus respuestas.";
-
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Event Listeners
 function setupEventListeners() {
-  // Sound toggle button
   const soundBtn = document.getElementById('soundToggleBtn');
   if (soundBtn) {
     soundBtn.addEventListener('click', () => {
@@ -518,13 +767,11 @@ function setupEventListeners() {
     });
   }
 
-  // Submit test button
   const submitBtn = document.getElementById('submitTestBtn');
   if (submitBtn) {
     submitBtn.addEventListener('click', confirmAndSubmitTest);
   }
 
-  // Close result modal button
   const closeModalBtn = document.getElementById('closeModalBtn');
   if (closeModalBtn) {
     closeModalBtn.addEventListener('click', () => {
@@ -533,70 +780,240 @@ function setupEventListeners() {
   }
 }
 
+// Evaluate Offline (Client-Side)
+function evaluateTestOffline(responses, durationSec) {
+  const cfg = rawTestConfig;
+  let puntosObtenidos = 0;
+  const evaluacionDetallada = {
+    parte_a: { puntos: 0, items: [] },
+    parte_b: { puntos: 0, items: [] },
+    parte_c: { puntos: 0, items: [] },
+    parte_d: { puntos: 0, items: [] },
+    parte_e: { puntos: 0, items: [] }
+  };
+
+  // Parte A
+  const pA = cfg.secciones.parte_a.preguntas;
+  pA.forEach(q => {
+    if (q.tipo === 'triple') {
+      const r1 = cleanText(responses.parte_a['a2_1']);
+      const r2 = cleanText(responses.parte_a['a2_2']);
+      const r3 = cleanText(responses.parte_a['a2_3']);
+      const dadas = [r1, r2, r3].filter(r => r.length > 0);
+
+      const targets = [
+        ['economicos', 'economico'],
+        ['nutritivos', 'nutritivo'],
+        ['comunitarios', 'comunitario']
+      ];
+
+      let matchCount = 0;
+      targets.forEach(targetGroup => {
+        const foundIndex = dadas.findIndex(d => targetGroup.includes(d));
+        if (foundIndex !== -1) {
+          matchCount++;
+          dadas.splice(foundIndex, 1);
+        }
+      });
+
+      puntosObtenidos += matchCount;
+      evaluacionDetallada.parte_a.puntos += matchCount;
+      evaluacionDetallada.parte_a.items.push({
+        id: q.id,
+        numero: q.numero,
+        respuesta_dada: `${r1 || '_'}, ${r2 || '_'}, ${r3 || '_'}`,
+        es_correcta: matchCount === 3,
+        respuesta_esperada: 'económicos, nutritivos, comunitarios',
+        puntos: matchCount
+      });
+    } else {
+      const answer = cleanText(responses.parte_a[q.id]);
+      const validas = (q.respuestas_validas || []).map(cleanText);
+      const esCorrecta = validas.includes(answer);
+      const pts = esCorrecta ? q.puntos : 0;
+      puntosObtenidos += pts;
+      evaluacionDetallada.parte_a.puntos += pts;
+      evaluacionDetallada.parte_a.items.push({
+        id: q.id,
+        numero: q.numero,
+        respuesta_dada: responses.parte_a[q.id] || '(En blanco)',
+        es_correcta: esCorrecta,
+        respuesta_esperada: q.respuestas_validas ? q.respuestas_validas[0] : '',
+        puntos: pts
+      });
+    }
+  });
+
+  // Parte B
+  cfg.secciones.parte_b.preguntas.forEach(q => {
+    const answer = (responses.parte_b[q.id] || '').toLowerCase();
+    const esCorrecta = answer === (q.respuesta_correcta || '').toLowerCase();
+    const pts = esCorrecta ? q.puntos : 0;
+    puntosObtenidos += pts;
+    evaluacionDetallada.parte_b.puntos += pts;
+    evaluacionDetallada.parte_b.items.push({
+      id: q.id,
+      numero: q.numero,
+      respuesta_dada: answer || '(Sin responder)',
+      es_correcta: esCorrecta,
+      respuesta_esperada: q.respuesta_correcta,
+      puntos: pts
+    });
+  });
+
+  // Parte C
+  cfg.secciones.parte_c.preguntas.forEach(q => {
+    const answer = (responses.parte_c[q.id] || '').toUpperCase();
+    const esCorrecta = answer === (q.respuesta_correcta || '').toUpperCase();
+    const pts = esCorrecta ? q.puntos : 0;
+    puntosObtenidos += pts;
+    evaluacionDetallada.parte_c.puntos += pts;
+    evaluacionDetallada.parte_c.items.push({
+      id: q.id,
+      numero: q.numero,
+      respuesta_dada: answer || '(Sin responder)',
+      es_correcta: esCorrecta,
+      respuesta_esperada: q.respuesta_correcta,
+      puntos: pts
+    });
+  });
+
+  // Parte D
+  cfg.secciones.parte_d.conceptos.forEach(c => {
+    const answer = (responses.parte_d[c.id] || '').toUpperCase();
+    const esCorrecta = answer === (c.respuesta_correcta || '').toUpperCase();
+    const pts = esCorrecta ? 1 : 0;
+    puntosObtenidos += pts;
+    evaluacionDetallada.parte_d.puntos += pts;
+    evaluacionDetallada.parte_d.items.push({
+      id: c.id,
+      numero: c.numero,
+      termino: c.termino,
+      respuesta_dada: answer || '(Sin asignar)',
+      es_correcta: esCorrecta,
+      respuesta_esperada: c.respuesta_correcta,
+      puntos: pts
+    });
+  });
+
+  // Parte E (si aplica)
+  if (cfg.secciones?.parte_e?.preguntas) {
+    cfg.secciones.parte_e.preguntas.forEach(q => {
+      const resp = responses.parte_e ? responses.parte_e[q.id] : '';
+      const textNorm = cleanText(resp);
+      const keywords = q.palabras_clave || [];
+      const hasKw = keywords.some(kw => textNorm.includes(cleanText(kw)));
+      const esCorrecta = textNorm.length >= 4 && (hasKw || textNorm.length >= 8);
+      const pts = esCorrecta ? 1 : 0;
+      puntosObtenidos += pts;
+      evaluacionDetallada.parte_e.puntos += pts;
+      evaluacionDetallada.parte_e.items.push({
+        id: q.id,
+        numero: q.numero,
+        enunciado: q.enunciado,
+        respuesta_dada: resp || '(En blanco)',
+        es_correcta: esCorrecta,
+        puntos: pts
+      });
+    });
+  }
+
+  const totalPts = cfg.puntos_totales || (currentGrade === 4 ? 24 : 19);
+  const notaMeduca = Number((1.0 + 4.0 * (puntosObtenidos / totalPts)).toFixed(1));
+  const porcentaje = Math.round((puntosObtenidos / totalPts) * 100);
+
+  let desempeno = 'Excelente';
+  if (notaMeduca < 3.0) desempeno = 'Necesita Reforzar';
+  else if (notaMeduca < 4.0) desempeno = 'Regular / Aprobado';
+  else if (notaMeduca < 4.5) desempeno = 'Bueno';
+
+  return {
+    id: 'res-off-' + Date.now(),
+    grado: currentGrade,
+    estudiante_id: currentStudent.id,
+    estudiante_nombre: currentStudent.nombre,
+    grupo: currentStudent.grupo || `${currentGrade}A`,
+    iniciado_at: testStartTime.toISOString(),
+    completado_at: new Date().toLocaleString('es-PA'),
+    completado_timestamp: Date.now(),
+    duracion_segundos: durationSec,
+    duracion_formato: formatTime(durationSec) + ' min',
+    puntos_obtenidos: puntosObtenidos,
+    puntos_totales: totalPts,
+    porcentaje: porcentaje,
+    nota_meduca: notaMeduca,
+    desempeno: desempeno,
+    detalles: evaluacionDetallada,
+    origen: 'offline_local'
+  };
+}
+
 // Confirm and Submit
 async function confirmAndSubmitTest() {
-  // Check answered count
-  let answered = 0;
-  const total = 19;
+  const total = rawTestConfig?.puntos_totales || (currentGrade === 4 ? 24 : 19);
 
+  let answered = 0;
   document.querySelectorAll('.blank-input').forEach(i => { if (i.value.trim()) answered++; });
   document.querySelectorAll('.mcq-question-block').forEach(b => { if (b.dataset.selected) answered++; });
   document.querySelectorAll('.tf-item').forEach(t => { if (t.dataset.selected) answered++; });
   document.querySelectorAll('.match-select').forEach(s => { if (s.value) answered++; });
+  document.querySelectorAll('.short-answer-textarea').forEach(ta => { if (ta.value.trim()) answered++; });
 
   if (answered < total) {
     const faltantes = total - answered;
-    const confirmSend = confirm(`Aún tienes ${faltantes} pregunta(s) sin responder.\n\n¿Estás seguro de que deseas entregar la prueba ahora?`);
+    const confirmSend = confirm(`Aún tienes ${faltantes} reactivo(s) sin responder.\n\n¿Estás seguro de que deseas entregar la prueba ahora?`);
     if (!confirmSend) return;
   } else {
-    const confirmSend = confirm(`¿Estás listo(a) para entregar tu prueba evaluativa?`);
+    const confirmSend = confirm(`¿Estás listo(a) para entregar tu prueba evaluativa de ${currentGrade}° grado?`);
     if (!confirmSend) return;
   }
 
-  // Disable button
   const submitBtn = document.getElementById('submitTestBtn');
   submitBtn.disabled = true;
   submitBtn.textContent = 'Enviando y calificando...';
 
-  // Stop Timer
   clearInterval(timerInterval);
   window.onbeforeunload = null;
 
-  // Gather responses
   const responses = {
     parte_a: {},
     parte_b: {},
     parte_c: {},
-    parte_d: {}
+    parte_d: {},
+    parte_e: {}
   };
 
-  // Parte A
   document.querySelectorAll('.blank-input').forEach(input => {
     responses.parte_a[input.dataset.qid] = input.value.trim();
   });
 
-  // Parte B
   document.querySelectorAll('.mcq-question-block').forEach(block => {
-    responses.parte_b[block.id.replace('mcq_block_', '')] = block.dataset.selected || '';
+    responses.parte_b[block.dataset.qid] = block.dataset.selected || '';
   });
 
-  // Parte C
   document.querySelectorAll('.tf-item').forEach(item => {
-    responses.parte_c[item.id.replace('tf_item_', '')] = item.dataset.selected || '';
+    responses.parte_c[item.dataset.qid] = item.dataset.selected || '';
   });
 
-  // Parte D
   document.querySelectorAll('.match-select').forEach(sel => {
     responses.parte_d[sel.dataset.qid] = sel.value || '';
   });
 
+  document.querySelectorAll('.short-answer-textarea').forEach(ta => {
+    responses.parte_e[ta.dataset.qid] = ta.value.trim();
+  });
+
   const payload = {
+    grado: currentGrade,
     estudiante_id: currentStudent.id,
     estudiante_nombre: currentStudent.nombre,
+    grupo: currentStudent.grupo || `${currentGrade}A`,
     respuestas: responses,
     duracion_segundos: elapsedSeconds,
     iniciado_at: testStartTime.toISOString()
   };
+
+  let finalResultado = null;
 
   try {
     const res = await fetch('/api/evaluar', {
@@ -605,26 +1022,28 @@ async function confirmAndSubmitTest() {
       body: JSON.stringify(payload)
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.mensaje || 'Error al enviar la prueba');
-      submitBtn.disabled = false;
-      submitBtn.textContent = '🏁 Entregar Prueba Sumativa';
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      finalResultado = data.resultado;
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      if (errData.error === 'UNICO_INTENTO_PERMITIDO') {
+        alert(errData.mensaje);
+        window.location.reload();
+        return;
+      }
+      throw new Error('Servidor no disponible');
     }
-
-    // Success! Show Result Modal
-    showResultModal(data.resultado);
   } catch (err) {
-    console.error('Error al enviar la prueba:', err);
-    alert('Ocurrió un error al enviar tu prueba. Por favor verifica tu conexión y avisa al docente.');
-    submitBtn.disabled = false;
-    submitBtn.textContent = '🏁 Entregar Prueba Sumativa';
+    console.log('Evaluando en modo offline / GitHub Pages...');
+    finalResultado = evaluateTestOffline(responses, elapsedSeconds);
   }
+
+  saveLocalResult(finalResultado);
+  showResultModal(finalResultado);
 }
 
-// Display Result Modal & Celebration
+// Display Result Modal
 function showResultModal(resultado) {
   playSound('success');
   startConfetti();
@@ -637,7 +1056,7 @@ function showResultModal(resultado) {
   const studentVal = document.getElementById('modalStudentName');
 
   studentVal.textContent = resultado.estudiante_nombre;
-  notaVal.textContent = resultado.nota_meduca.toFixed(1);
+  notaVal.textContent = Number(resultado.nota_meduca).toFixed(1);
   puntosVal.textContent = `${resultado.puntos_obtenidos} / ${resultado.puntos_totales}`;
   timeVal.textContent = resultado.duracion_formato;
 
@@ -662,7 +1081,7 @@ function showResultModal(resultado) {
   modal.classList.add('active');
 }
 
-// Simple Canvas Confetti Animation
+// Canvas Confetti
 function startConfetti() {
   const canvas = document.getElementById('confetti-canvas');
   if (!canvas) return;
@@ -686,9 +1105,7 @@ function startConfetti() {
     });
   }
 
-  let animationFrame;
   let duration = 0;
-
   function render() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => {
@@ -711,7 +1128,7 @@ function startConfetti() {
 
     duration++;
     if (duration < 360) {
-      animationFrame = requestAnimationFrame(render);
+      requestAnimationFrame(render);
     } else {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
