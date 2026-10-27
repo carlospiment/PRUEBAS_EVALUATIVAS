@@ -15,8 +15,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_DIR = path.join(__dirname, 'data');
 const CONFIG_FILE_3 = path.join(DATA_DIR, 'prueba_3ro.json');
 const CONFIG_FILE_4 = path.join(DATA_DIR, 'prueba_4to.json');
+const CONFIG_FILE_5 = path.join(DATA_DIR, 'prueba_5to.json');
 const ESTUDIANTES_FILE = path.join(DATA_DIR, 'estudiantes.json');
 const RESULTADOS_FILE = path.join(DATA_DIR, 'resultados.json');
+
+function getConfigFileForGrade(grado) {
+  const g = parseInt(grado, 10);
+  if (g === 5) return CONFIG_FILE_5;
+  if (g === 4) return CONFIG_FILE_4;
+  return CONFIG_FILE_3;
+}
 
 // Helper functions for reading/writing JSON
 function readJSON(file, defaultValue = []) {
@@ -88,8 +96,8 @@ function getPerformanceLevel(nota) {
 
 // 1. Get test config by grade (Safe for student)
 app.get('/api/prueba', (req, res) => {
-  const grado = req.query.grado === '4' ? '4' : '3';
-  const file = grado === '4' ? CONFIG_FILE_4 : CONFIG_FILE_3;
+  const grado = req.query.grado || '3';
+  const file = getConfigFileForGrade(grado);
   const config = readJSON(file, {});
 
   // Safe clone
@@ -154,7 +162,7 @@ app.get('/api/estudiantes', (req, res) => {
   res.json(lista);
 });
 
-// 3. Submit and Grade Test (Supports 3rd and 4th grade)
+// 3. Submit and Grade Test (Supports 3rd, 4th and 5th grade)
 app.post('/api/evaluar', (req, res) => {
   const { estudiante_nombre, estudiante_id, respuestas, duracion_segundos, iniciado_at, grado } = req.body;
 
@@ -162,8 +170,8 @@ app.post('/api/evaluar', (req, res) => {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
-  const gradoNum = grado === 4 || grado === '4' ? 4 : 3;
-  const configFile = gradoNum === 4 ? CONFIG_FILE_4 : CONFIG_FILE_3;
+  const gradoNum = parseInt(grado, 10) || 3;
+  const configFile = getConfigFileForGrade(gradoNum);
   const config = readJSON(configFile, {});
   const resultados = readJSON(RESULTADOS_FILE, []);
 

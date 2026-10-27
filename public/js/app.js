@@ -183,13 +183,17 @@ function setupTeacherAuthModal() {
 
 // Detect Grade strictly from body dataset, pathname, or URL
 function detectGrade() {
-  // 1. Explicit body attribute (e.g. <body data-grade="4"> or <body data-grade="3">)
+  // 1. Explicit body attribute (e.g. <body data-grade="5"> or <body data-grade="4"> or <body data-grade="3">)
   if (document.body && document.body.dataset && document.body.dataset.grade) {
     currentGrade = parseInt(document.body.dataset.grade, 10);
     return;
   }
   // 2. Pathname check
   const path = window.location.pathname.toLowerCase();
+  if (path.includes('quinto')) {
+    currentGrade = 5;
+    return;
+  }
   if (path.includes('cuarto')) {
     currentGrade = 4;
     return;
@@ -201,12 +205,12 @@ function detectGrade() {
   // 3. Query string ?grado=
   const params = new URLSearchParams(window.location.search);
   const g = params.get('grado');
-  if (g === '3' || g === '4') {
+  if (g === '3' || g === '4' || g === '5') {
     currentGrade = parseInt(g, 10);
     return;
   }
   // Default
-  currentGrade = 4;
+  currentGrade = 5;
 }
 
 function setupOnlineStatus() {
@@ -245,7 +249,10 @@ async function initGrade(gradeNum) {
 async function loadConfig() {
   try {
     let res = null;
-    const staticFile = currentGrade === 4 ? './data/prueba_4to.json' : './data/prueba_3ro.json';
+    let staticFile = './data/prueba_3ro.json';
+    if (currentGrade === 5) staticFile = './data/prueba_5to.json';
+    else if (currentGrade === 4) staticFile = './data/prueba_4to.json';
+
     try {
       res = await fetch(`/api/prueba?grado=${currentGrade}`);
       if (!res.ok) throw new Error('API no disponible');

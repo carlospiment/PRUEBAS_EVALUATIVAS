@@ -1,0 +1,290 @@
+{
+  "id": "eval-agri-5-3-1",
+  "grado_numero": 5,
+  "titulo": "Prueba Sumativa de Agricultura - 5to Grado",
+  "tema": "Métodos modernos de producción",
+  "grado": "Quinto Grado de Educación Primaria",
+  "leccion": "Lección 5.3.1",
+  "area": "Área 3 - Producción de alimentos para consumo humano",
+  "puntos_totales": 31,
+  "secciones": {
+    "parte_a": {
+      "titulo": "Parte A. Completa",
+      "instrucciones": "Escribe en el espacio en blanco la palabra que completa correctamente cada oración. Puedes hacer clic en las palabras del banco para colocarlas automáticamente.",
+      "banco_palabras": [
+        "selección",
+        "germinación",
+        "semillero",
+        "preparación",
+        "siembra",
+        "cosecha",
+        "bitácora"
+      ],
+      "preguntas": [
+        {
+          "id": "a1",
+          "numero": 1,
+          "tipo": "single",
+          "texto_antes": "La",
+          "texto_despues": "consiste en escoger semillas apropiadas.",
+          "respuestas_validas": ["seleccion", "selección", "seleccion de semillas", "selección de semillas"],
+          "puntos": 1
+        },
+        {
+          "id": "a2",
+          "numero": 2,
+          "tipo": "single",
+          "texto_antes": "La",
+          "texto_despues": "ocurre cuando una semilla inicia su crecimiento.",
+          "respuestas_validas": ["germinacion", "germinación"],
+          "puntos": 1
+        },
+        {
+          "id": "a3",
+          "numero": 3,
+          "tipo": "single",
+          "texto_antes": "Un",
+          "texto_despues": "permite cuidar determinadas plantas durante sus primeras etapas.",
+          "respuestas_validas": ["semillero"],
+          "puntos": 1
+        },
+        {
+          "id": "a4",
+          "numero": 4,
+          "tipo": "single",
+          "texto_antes": "Antes de cultivar debemos realizar la selección y",
+          "texto_despues": "del terreno.",
+          "respuestas_validas": ["preparacion", "preparación"],
+          "puntos": 1
+        },
+        {
+          "id": "a5",
+          "numero": 5,
+          "tipo": "single",
+          "texto_antes": "La época de",
+          "texto_despues": "indica cuándo resulta apropiado establecer un cultivo.",
+          "respuestas_validas": ["siembra"],
+          "puntos": 1
+        },
+        {
+          "id": "a6",
+          "numero": 6,
+          "tipo": "single",
+          "texto_antes": "La época de",
+          "texto_despues": "indica cuándo podemos recolectar el producto.",
+          "respuestas_validas": ["cosecha"],
+          "puntos": 1
+        },
+        {
+          "id": "a7",
+          "numero": 7,
+          "tipo": "single",
+          "texto_antes": "La",
+          "texto_despues": "agrícola permite registrar las actividades y observaciones.",
+          "respuestas_validas": ["bitacora", "bitácora"],
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_b": {
+      "titulo": "Parte B. Selección Múltiple",
+      "instrucciones": "Lee con atención cada enunciado y selecciona la opción correcta.",
+      "preguntas": [
+        {
+          "id": "b1",
+          "numero": 1,
+          "enunciado": "Antes de sembrar debemos:",
+          "opciones": [
+            { "id": "a", "texto": "Planificar." },
+            { "id": "b", "texto": "Actuar sin observar." },
+            { "id": "c", "texto": "Ignorar el terreno." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b2",
+          "numero": 2,
+          "enunciado": "Para seleccionar un terreno debemos observar:",
+          "opciones": [
+            { "id": "a", "texto": "Luz, agua, suelo y espacio." },
+            { "id": "b", "texto": "Solamente el color de una herramienta." },
+            { "id": "c", "texto": "Solamente el nombre del cultivo." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b3",
+          "numero": 3,
+          "enunciado": "El semillero permite:",
+          "opciones": [
+            { "id": "a", "texto": "Observar germinación y desarrollo inicial." },
+            { "id": "b", "texto": "Guardar herramientas." },
+            { "id": "c", "texto": "Almacenar residuos." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b4",
+          "numero": 4,
+          "enunciado": "Una bitácora sirve para:",
+          "opciones": [
+            { "id": "a", "texto": "Registrar información." },
+            { "id": "b", "texto": "Borrar observaciones." },
+            { "id": "c", "texto": "Reemplazar el cultivo." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        },
+        {
+          "id": "b5",
+          "numero": 5,
+          "enunciado": "La época de siembra:",
+          "opciones": [
+            { "id": "a", "texto": "Puede depender del cultivo y las condiciones." },
+            { "id": "b", "texto": "Es exactamente igual para todas las plantas." },
+            { "id": "c", "texto": "Nunca tiene relación con el ambiente." }
+          ],
+          "respuesta_correcta": "a",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_c": {
+      "titulo": "Parte C. Verdadero o Falso",
+      "instrucciones": "Indica si cada afirmación es Verdadera (V) o Falsa (F) haciendo clic en la opción que consideres correcta.",
+      "preguntas": [
+        {
+          "id": "c1",
+          "numero": 1,
+          "afirmacion": "Todas las semillas presentan exactamente las mismas condiciones.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c2",
+          "numero": 2,
+          "afirmacion": "La germinación es una etapa del desarrollo de una planta.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c3",
+          "numero": 3,
+          "afirmacion": "Algunos cultivos pueden establecerse utilizando semilleros.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c4",
+          "numero": 4,
+          "afirmacion": "Cualquier terreno es igualmente adecuado para cualquier cultivo.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c5",
+          "numero": 5,
+          "afirmacion": "La disponibilidad de agua puede influir en la selección del terreno.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c6",
+          "numero": 6,
+          "afirmacion": "La preparación del terreno forma parte del proceso productivo.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c7",
+          "numero": 7,
+          "afirmacion": "Todos los cultivos tienen la misma época de siembra.",
+          "respuesta_correcta": "F",
+          "puntos": 1
+        },
+        {
+          "id": "c8",
+          "numero": 8,
+          "afirmacion": "Una bitácora permite dar seguimiento al cultivo.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c9",
+          "numero": 9,
+          "afirmacion": "La planificación agrícola debe realizarse antes y durante la producción.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        },
+        {
+          "id": "c10",
+          "numero": 10,
+          "afirmacion": "Observar y registrar son actividades importantes en la agricultura.",
+          "respuesta_correcta": "V",
+          "puntos": 1
+        }
+      ]
+    },
+    "parte_d": {
+      "titulo": "Parte D. Relaciona",
+      "instrucciones": "Relaciona cada concepto de la izquierda con su función correspondiente de la derecha.",
+      "conceptos": [
+        { "id": "d1", "numero": 1, "termino": "Semillero", "respuesta_correcta": "B" },
+        { "id": "d2", "numero": 2, "termino": "Bitácora", "respuesta_correcta": "C" },
+        { "id": "d3", "numero": 3, "termino": "Preparación del terreno", "respuesta_correcta": "D" },
+        { "id": "d4", "numero": 4, "termino": "Época de siembra", "respuesta_correcta": "A" }
+      ],
+      "significados": [
+        { "letra": "A", "definicion": "Seleccionar período apropiado" },
+        { "letra": "B", "definicion": "Desarrollo inicial de determinadas plantas" },
+        { "letra": "C", "definicion": "Registrar información" },
+        { "letra": "D", "definicion": "Acondicionar área de cultivo" }
+      ],
+      "puntos_por_item": 1
+    },
+    "parte_e": {
+      "titulo": "Parte E. Respuesta Corta",
+      "instrucciones": "Escribe una respuesta breve y clara con tus propias palabras para cada pregunta.",
+      "preguntas": [
+        {
+          "id": "e1",
+          "numero": 1,
+          "enunciado": "¿Por qué debemos seleccionar las semillas?",
+          "puntos": 1,
+          "palabras_clave": ["calidad", "germinar", "germinacion", "sanas", "buenas", "crecimiento", "produccion", "rendimiento", "vigor", "desarrollo", "fuertes", "mejores"]
+        },
+        {
+          "id": "e2",
+          "numero": 2,
+          "enunciado": "¿Qué es la germinación?",
+          "puntos": 1,
+          "palabras_clave": ["inicio", "inicia", "comienza", "semilla", "crecimiento", "crecer", "desarrollo", "brotar", "planta", "nacer"]
+        },
+        {
+          "id": "e3",
+          "numero": 3,
+          "enunciado": "Escribe cuatro factores que podemos observar antes de seleccionar un terreno.",
+          "puntos": 1,
+          "palabras_clave": ["luz", "sol", "agua", "suelo", "tierra", "espacio", "drenaje", "viento", "sombra"]
+        },
+        {
+          "id": "e4",
+          "numero": 4,
+          "enunciado": "¿Para qué sirve una bitácora?",
+          "puntos": 1,
+          "palabras_clave": ["registrar", "anotar", "escribir", "informacion", "datos", "seguimiento", "control", "observaciones", "actividades", "fechas"]
+        },
+        {
+          "id": "e5",
+          "numero": 5,
+          "enunciado": "¿Por qué debemos conocer la época de siembra de un cultivo?",
+          "puntos": 1,
+          "palabras_clave": ["clima", "tiempo", "lluvia", "estacion", "apropiado", "cuando", "sembrar", "condiciones", "cosecha", "desarrollo", "crecer"]
+        }
+      ]
+    }
+  }
+}

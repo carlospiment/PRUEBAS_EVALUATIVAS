@@ -1,14 +1,15 @@
 /* ===================================================
-   SERVICE WORKER - PRUEBAS SUMATIVAS MEDUCA (3° Y 4° GRADO)
+   SERVICE WORKER - PRUEBAS SUMATIVAS MEDUCA (3°, 4° Y 5° GRADO)
    Soporte 100% Offline para PWA y GitHub Pages
    =================================================== */
 
-const CACHE_NAME = 'meduca-agri-eval-v5';
+const CACHE_NAME = 'meduca-agri-eval-v6';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './docente.html',
+  './quinto_grado.html',
   './cuarto_grado.html',
   './tercer_grado.html',
   './css/style.css',
@@ -18,6 +19,7 @@ const STATIC_ASSETS = [
   './data/estudiantes.json',
   './data/prueba_3ro.json',
   './data/prueba_4to.json',
+  './data/prueba_5to.json',
   './data/prueba_config.json',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap'

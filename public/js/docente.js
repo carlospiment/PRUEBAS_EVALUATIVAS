@@ -9,6 +9,17 @@ let serverInfo = null;
 
 const LESSONS_DATA = [
   {
+    grado: 5,
+    codigo: "Lección 5.3.1",
+    titulo: "Métodos modernos de producción",
+    icono: "🌽",
+    slug: "quinto_grado.html",
+    color: "#1e40af",
+    badgeBg: "#dbeafe",
+    badgeColor: "#1e40af",
+    gradoTexto: "Quinto Grado (5°)"
+  },
+  {
     grado: 4,
     codigo: "Lección 4.3.1",
     titulo: "Beneficios e importancia del huerto escolar",
@@ -478,15 +489,25 @@ function updateGroupFilterOptions() {
       <option value="4B">Salón 4°B</option>
       <option value="4C">Salón 4°C</option>
     `;
+  } else if (g === '5') {
+    sel.innerHTML = `
+      <option value="todos">Todos los salones de 5°</option>
+      <option value="5A">Salón 5°A</option>
+      <option value="5B">Salón 5°B</option>
+      <option value="5C">Salón 5°C</option>
+    `;
   } else {
     sel.innerHTML = `
-      <option value="todos">Todos los salones (3° y 4°)</option>
+      <option value="todos">Todos los salones (3°, 4° y 5°)</option>
       <option value="3A">Salón 3°A</option>
       <option value="3B">Salón 3°B</option>
       <option value="3C">Salón 3°C</option>
       <option value="4A">Salón 4°A</option>
       <option value="4B">Salón 4°B</option>
       <option value="4C">Salón 4°C</option>
+      <option value="5A">Salón 5°A</option>
+      <option value="5B">Salón 5°B</option>
+      <option value="5C">Salón 5°C</option>
     `;
   }
 }
@@ -496,6 +517,7 @@ function exportResultsCsv() {
   let target = allResults;
   if (gradeSel === '3') target = allResults.filter(r => r.grado === 3 || !r.grado);
   else if (gradeSel === '4') target = allResults.filter(r => r.grado === 4);
+  else if (gradeSel === '5') target = allResults.filter(r => r.grado === 5);
 
   if (target.length === 0) {
     alert('No hay evaluaciones registradas con los filtros actuales para exportar.');
@@ -503,7 +525,7 @@ function exportResultsCsv() {
   }
 
   let csv = '\uFEFF';
-  csv += 'N°,Grado,Salón,Estudiante,Fecha y Hora,Tiempo Empleado,Puntos,Nota MEDUCA,Nivel,Parte A,Parte B,Parte C,Parte D,Parte E (4to)\n';
+  csv += 'N°,Grado,Salón,Estudiante,Fecha y Hora,Tiempo Empleado,Puntos,Nota MEDUCA,Nivel,Parte A,Parte B,Parte C,Parte D,Parte E\n';
 
   target.forEach((r, idx) => {
     const ptsA = r.detalles?.parte_a?.puntos ?? '-';
