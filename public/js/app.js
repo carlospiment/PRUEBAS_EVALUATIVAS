@@ -1048,6 +1048,7 @@ function startTest() {
 
   testStartTime = new Date();
   elapsedSeconds = 0;
+  window.__MEDUCA_TEST_IN_PROGRESS = true;
   timerInterval = setInterval(() => {
     elapsedSeconds++;
     document.getElementById('liveTimer').textContent = formatTime(elapsedSeconds);
@@ -1282,6 +1283,7 @@ async function confirmAndSubmitTest() {
 
   clearInterval(timerInterval);
   window.onbeforeunload = null;
+  window.__MEDUCA_TEST_IN_PROGRESS = false;
 
   const responses = {
     parte_a: {},

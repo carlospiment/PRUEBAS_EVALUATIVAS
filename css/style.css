@@ -1366,3 +1366,612 @@ h1, h2, h3, h4, .font-heading {
   border: 3px solid #3b82f6;
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
+
+/* ===================================================
+   NAVEGACIÓN VERTICAL + CAJÓN RESPONSIVO + VISTA INICIAL
+   =================================================== */
+
+.visually-hidden:where(:not(:focus-within, :active)) {
+  position: absolute !important;
+  clip-path: inset(50%) !important;
+  overflow: hidden !important;
+  width: 1px !important;
+  height: 1px !important;
+  margin: -1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  white-space: nowrap !important;
+}
+
+.skip-link:focus-visible {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100001;
+  background: #1e3a8a;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 800;
+  text-decoration: none;
+  outline: 3px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+:where(a:any-link, button, input, select, textarea):focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+.app-shell {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Barra superior móvil (< 900px) */
+.mobile-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border-bottom: 2px solid #bbf7d0;
+  box-shadow: 0 4px 12px rgba(22, 101, 52, 0.08);
+}
+
+.menu-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  padding: 8px 14px;
+  background: #15803d;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.mobile-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #14532d;
+  text-decoration: none;
+}
+
+.mobile-docente-shortcut {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-block-size: 40px;
+  padding: 6px 12px;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+/* Cajón lateral móvil (Drawer con Popover manual + Scroll-Snap) */
+.app-nav-drawer {
+  --drawer-width: min(19.5rem, 84dvw, 100dvw - 24px);
+  --drawer-backdrop: 0;
+  inset: 0;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  overflow: visible;
+  z-index: 10000;
+}
+
+.app-nav-drawer::backdrop {
+  background: #0f172a;
+  opacity: calc(var(--drawer-backdrop) * 0.65);
+}
+
+.app-nav-drawer.is-fallback-open {
+  position: fixed;
+  display: block;
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.Drawer-scroller {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--drawer-width) 100%;
+  overflow-x: scroll;
+  overscroll-behavior: none;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .Drawer-scroller {
+    scroll-behavior: smooth;
+  }
+}
+
+.Drawer-scroller::after {
+  content: '';
+  scroll-snap-align: end;
+  scroll-initial-target: nearest;
+}
+
+.app-sidebar-sheet {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  background: #ffffff;
+  color: #1e293b;
+  border-right: 2px solid #dcfce7;
+  box-shadow: 12px 0 32px rgba(15, 23, 42, 0.16);
+  overflow-y: auto;
+  scroll-snap-align: start;
+  scrollbar-width: thin;
+  padding: 16px 14px 20px;
+  gap: 16px;
+}
+
+@supports (animation-timeline: scroll()) {
+  @property --drawer-backdrop {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+  }
+
+  @keyframes fade-drawer-backdrop {
+    0% { --drawer-backdrop: 1; }
+    100% { --drawer-backdrop: 0; }
+  }
+
+  .app-nav-drawer[popover] {
+    timeline-scope: --drawer-fade;
+    animation: fade-drawer-backdrop linear both;
+    animation-timeline: --drawer-fade;
+  }
+
+  .app-nav-drawer[popover] .Drawer-scroller {
+    scroll-timeline: --drawer-fade x;
+  }
+}
+
+.sidebar-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sidebar-brand-logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #166534, #22c55e);
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+
+.sidebar-brand-title {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #14532d;
+  line-height: 1.1;
+}
+
+.sidebar-brand-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.drawer-close-btn {
+  min-block-size: 44px;
+  min-inline-size: 44px;
+  border-radius: 10px;
+  border: 1.5px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 800;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+.nav-section-label {
+  font-size: 0.74rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  padding: 0 8px 6px;
+}
+
+.nav-vertical-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-item-link,
+.nav-item-btn {
+  --nav-accent: #15803d;
+  --nav-soft: #dcfce7;
+  width: 100%;
+  min-block-size: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 2px solid #e2e8f0;
+  border-left: 5px solid transparent;
+  background: #ffffff;
+  color: #1e293b;
+  text-decoration: none;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.16s, border-color 0.16s, transform 0.12s;
+}
+
+.nav-item-link:hover,
+.nav-item-btn:hover {
+  background: #f8fafc;
+  border-color: var(--nav-accent);
+  transform: translateX(2px);
+}
+
+.nav-item-docente {
+  --nav-accent: #1e40af;
+  --nav-soft: #dbeafe;
+  background: #f8fafc;
+}
+
+.nav-item-link[aria-current="page"],
+.nav-item-btn.is-selected {
+  background: var(--nav-soft);
+  border-color: var(--nav-accent);
+  border-left-color: var(--nav-accent);
+  color: #0f172a;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+}
+
+.nav-item-link[aria-current="page"] .nav-item-text strong::after,
+.nav-item-btn.is-selected .nav-item-text strong::after {
+  content: ' • Activa';
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--nav-accent);
+}
+
+.nav-item-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.nav-item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.nav-item-text strong {
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.96rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.nav-item-text small {
+  font-size: 0.76rem;
+  color: #475569;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.sidebar-footer-card {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.sidebar-footer-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.sidebar-footer-desc {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+/* Escritorio (>= 900px): Sidebar vertical fijo a la izquierda */
+@media (min-width: 900px) {
+  .app-shell {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .mobile-topbar,
+  .drawer-close-btn {
+    display: none !important;
+  }
+
+  .app-nav-drawer {
+    position: sticky;
+    top: 0;
+    inset: auto;
+    width: 288px;
+    flex-shrink: 0;
+    height: 100dvh;
+    display: block;
+    z-index: 40;
+  }
+
+  .Drawer-scroller {
+    display: block;
+    overflow: visible;
+    height: 100%;
+  }
+
+  .Drawer-scroller::after {
+    display: none;
+  }
+
+  .app-sidebar-sheet {
+    height: 100dvh;
+    box-shadow: 4px 0 18px rgba(15, 23, 42, 0.05);
+  }
+}
+
+/* Acceso Gmail en Vista Inicial y Botones Verticales de Grados */
+.home-auth-banner {
+  background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+  border: 2.5px solid #3b82f6;
+  border-radius: 18px;
+  padding: 18px 20px;
+  margin: 20px 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.1);
+}
+
+.home-auth-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 240px;
+}
+
+.home-auth-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #dbeafe;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.home-vertical-grades {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.home-grade-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  padding: 18px 22px;
+  background: #ffffff;
+  border: 2.5px solid var(--grade-border, #86efac);
+  border-left: 8px solid var(--grade-accent, #15803d);
+  border-radius: 18px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  flex-wrap: wrap;
+}
+
+.home-grade-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.1);
+  background: var(--grade-soft, #f0fdf4);
+}
+
+.home-grade-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 230px;
+}
+
+.home-grade-emoji {
+  font-size: 2.6rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.home-grade-pill {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  margin-bottom: 4px;
+}
+
+.home-grade-cta {
+  color: #ffffff;
+  padding: 11px 18px;
+  border-radius: 12px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 800;
+  font-size: 0.96rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+/* Panel Docente inline auth + Lista vertical de grados + Pruebas puestas */
+.teacher-lock-inline {
+  background: rgba(239, 246, 255, 0.8);
+  border: 2px dashed #93c5fd;
+  border-radius: 22px;
+  padding: 24px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.docente-grades-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.docente-grade-btn {
+  --grade-accent: #1e40af;
+  --grade-soft: #eff6ff;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 18px;
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-left: 7px solid var(--grade-accent);
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  font-family: inherit;
+}
+
+.docente-grade-btn:hover {
+  border-color: var(--grade-accent);
+  background: #f8fafc;
+}
+
+.docente-grade-btn.is-active {
+  background: var(--grade-soft);
+  border-color: var(--grade-accent);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.12);
+}
+
+.docente-grade-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 220px;
+}
+
+.docente-grade-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.grade-metric-chip {
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.deployed-tests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.deployed-test-row {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-left: 6px solid var(--grade-accent, #15803d);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (forced-colors: active) {
+  .nav-item-link[aria-current="page"],
+  .nav-item-btn.is-selected,
+  .docente-grade-btn.is-active {
+    border: 2px solid Highlight;
+    background: Highlight;
+    color: HighlightText;
+  }
+}

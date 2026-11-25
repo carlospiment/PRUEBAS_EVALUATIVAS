@@ -18,26 +18,18 @@ const TEACHER_PIN = '0476';
 
 const LESSONS_DATA = [
   {
-    grado: 6,
-    codigo: "Lección 6.3.1",
-    titulo: "Destino de la producción agrícola",
-    icono: "🍅",
-    slug: "sexto_grado.html",
-    color: "#7c3aed",
-    badgeBg: "#ede9fe",
-    badgeColor: "#5b21b6",
-    gradoTexto: "Sexto Grado (6°)"
-  },
-  {
-    grado: 5,
-    codigo: "Lección 5.3.1",
-    titulo: "Métodos modernos de producción",
-    icono: "🌽",
-    slug: "quinto_grado.html",
-    color: "#1e40af",
-    badgeBg: "#dbeafe",
-    badgeColor: "#1e40af",
-    gradoTexto: "Quinto Grado (5°)"
+    grado: 3,
+    codigo: "Lección 3.3.1",
+    titulo: "El huerto escolar, la salud y la nutrición",
+    icono: "🌿",
+    slug: "tercer_grado.html",
+    jsonPath: "./data/prueba_3ro.json",
+    puntos: 19,
+    color: "#15803d",
+    badgeBg: "#dcfce7",
+    badgeColor: "#166534",
+    softBg: "#f0fdf4",
+    gradoTexto: "Tercer Grado (3°)"
   },
   {
     grado: 4,
@@ -45,23 +37,45 @@ const LESSONS_DATA = [
     titulo: "Beneficios e importancia del huerto escolar",
     icono: "🥕",
     slug: "cuarto_grado.html",
+    jsonPath: "./data/prueba_4to.json",
+    puntos: 24,
     color: "#ea580c",
     badgeBg: "#ffedd5",
     badgeColor: "#c2410c",
+    softBg: "#fff7ed",
     gradoTexto: "Cuarto Grado (4°)"
   },
   {
-    grado: 3,
-    codigo: "Lección 3.3.1",
-    titulo: "El huerto escolar, la salud y la nutrición",
-    icono: "🌿",
-    slug: "tercer_grado.html",
-    color: "#15803d",
-    badgeBg: "#dcfce7",
-    badgeColor: "#166534",
-    gradoTexto: "Tercer Grado (3°)"
+    grado: 5,
+    codigo: "Lección 5.3.1",
+    titulo: "Métodos modernos de producción",
+    icono: "🌽",
+    slug: "quinto_grado.html",
+    jsonPath: "./data/prueba_5to.json",
+    puntos: 31,
+    color: "#1e40af",
+    badgeBg: "#dbeafe",
+    badgeColor: "#1e40af",
+    softBg: "#eff6ff",
+    gradoTexto: "Quinto Grado (5°)"
+  },
+  {
+    grado: 6,
+    codigo: "Lección 6.3.1",
+    titulo: "Destino de la producción agrícola",
+    icono: "🍅",
+    slug: "sexto_grado.html",
+    jsonPath: "./data/prueba_6to.json",
+    puntos: 32,
+    color: "#7c3aed",
+    badgeBg: "#ede9fe",
+    badgeColor: "#5b21b6",
+    softBg: "#f5f3ff",
+    gradoTexto: "Sexto Grado (6°)"
   }
 ];
+
+const testSpecsCache = new Map();
 
 function cleanStudentName(str) {
   if (!str) return '';
@@ -105,11 +119,22 @@ function computeRetakeCode(studentId, grado) {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const initialGradeParam = new URLSearchParams(window.location.search).get('grado');
+  const gradeSelect = document.getElementById('gradeFilterSelect');
+  if (gradeSelect && ['3', '4', '5', '6', 'todos'].includes(String(initialGradeParam))) {
+    gradeSelect.value = String(initialGradeParam);
+  }
+
   setupLockScreen();
   await loadServerInfo();
-  renderLessonsQrSection();
   setupDocenteEvents();
   setupQrModalEvents();
+  setupExamPreviewModal();
+  renderDocenteVerticalGrades();
+  renderLessonsQrSection();
+  if (window.MEDUCA_NAV) {
+    window.MEDUCA_NAV.syncDocenteActiveGrade(gradeSelect?.value || 'todos');
+  }
   initAuthAndData();
 });
 
@@ -119,6 +144,7 @@ function isTeacherUnlockedLocally() {
 
 function updateAuthUI(user, unauthorizedEmail) {
   const lockScreen = document.getElementById('teacherLockScreen');
+  const dashboardContent = document.getElementById('docenteDashboardContent');
   const authBadge = document.getElementById('teacherAuthBadge');
   const banner = document.getElementById('cloudStatusBanner');
   const bannerMsg = document.getElementById('cloudStatusMessage');
@@ -131,7 +157,9 @@ function updateAuthUI(user, unauthorizedEmail) {
 
   if (user) {
     if (lockScreen) lockScreen.style.display = 'none';
+    if (dashboardContent) dashboardContent.style.display = 'block';
     if (googleAuthErr) googleAuthErr.style.display = 'none';
+    if (window.MEDUCA_NAV) window.MEDUCA_NAV.setTeacherStatus(user.email);
     if (authBadge) {
       authBadge.innerHTML = `🟢 Conectado: ${escapeHtml(user.email)}`;
       authBadge.style.background = 'rgba(34, 197, 94, 0.25)';
@@ -139,8 +167,12 @@ function updateAuthUI(user, unauthorizedEmail) {
     if (banner && !hasCloudError) banner.style.display = 'none';
   } else {
     const localUnlocked = isTeacherUnlockedLocally();
+    if (window.MEDUCA_NAV) window.MEDUCA_NAV.setTeacherStatus(null);
     if (lockScreen) {
       lockScreen.style.display = localUnlocked ? 'none' : 'flex';
+    }
+    if (dashboardContent) {
+      dashboardContent.style.display = localUnlocked ? 'block' : 'none';
     }
     if (authBadge) {
       authBadge.innerHTML = localUnlocked
@@ -263,14 +295,10 @@ function setupLockScreen() {
       allResults = [];
       calculateAndRenderStats();
       renderTable();
-      if (lockScreen) {
-        if (pinInput) pinInput.value = '';
-        if (pinError) pinError.style.display = 'none';
-        if (googleAuthErr) googleAuthErr.style.display = 'none';
-        lockScreen.style.display = 'flex';
-      } else {
-        window.location.href = './index.html';
-      }
+      if (pinInput) pinInput.value = '';
+      if (pinError) pinError.style.display = 'none';
+      if (googleAuthErr) googleAuthErr.style.display = 'none';
+      updateAuthUI(null, null);
     });
   }
 }
@@ -284,47 +312,235 @@ async function loadServerInfo() {
   } catch {}
 }
 
-// Render Lesson Cards with QR Code buttons
+function selectDocenteGrade(gradeVal, shouldScroll = false) {
+  const gradeSelect = document.getElementById('gradeFilterSelect');
+  const nextVal = ['3', '4', '5', '6', 'todos'].includes(String(gradeVal)) ? String(gradeVal) : 'todos';
+  if (gradeSelect) {
+    gradeSelect.value = nextVal;
+  }
+  updateGroupFilterOptions();
+  renderDocenteVerticalGrades();
+  renderLessonsQrSection();
+  calculateAndRenderStats();
+  renderTable();
+  if (window.MEDUCA_NAV) {
+    window.MEDUCA_NAV.syncDocenteActiveGrade(nextVal);
+  }
+  if (shouldScroll) {
+    const target = document.getElementById('deployedTestsTitle') || document.getElementById('docenteDashboardContent');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+window.MEDUCA_DOCENTE_NAV = {
+  selectGrade: selectDocenteGrade
+};
+
+function renderDocenteVerticalGrades() {
+  const container = document.getElementById('docenteGradesVertical');
+  if (!container) return;
+
+  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const showAllBtn = document.getElementById('showAllGradesBtn');
+  if (showAllBtn) {
+    const isAll = activeGrade === 'todos';
+    showAllBtn.style.background = isAll ? '#1e3a8a' : '';
+    showAllBtn.style.color = isAll ? '#ffffff' : '';
+    showAllBtn.style.borderColor = isAll ? '#1e3a8a' : '';
+    showAllBtn.setAttribute('aria-pressed', isAll ? 'true' : 'false');
+  }
+
+  const allRows = getStudentRows();
+  container.innerHTML = LESSONS_DATA.map((lesson) => {
+    const gradeRows = allRows.filter((item) => Number(item.student.grado) === Number(lesson.grado));
+    const completed = gradeRows.filter((item) => Boolean(item.result));
+    const avg = completed.length > 0
+      ? (completed.reduce((acc, it) => acc + (Number(it.result.nota_meduca) || 1.0), 0) / completed.length).toFixed(2)
+      : '-';
+    const isSelected = String(lesson.grado) === String(activeGrade);
+
+    return `
+      <button
+        type="button"
+        class="docente-grade-btn ${isSelected ? 'is-active' : ''}"
+        data-grade-choice="${lesson.grado}"
+        aria-pressed="${isSelected ? 'true' : 'false'}"
+        style="--grade-accent: ${lesson.color}; --grade-soft: ${lesson.softBg};"
+      >
+        <div class="docente-grade-meta">
+          <span style="font-size: 2.1rem; line-height: 1;" aria-hidden="true">${lesson.icono}</span>
+          <div>
+            <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor};">
+              ${escapeHtml(lesson.gradoTexto)} • ${escapeHtml(lesson.codigo)}
+            </span>
+            <div style="font-family: 'Outfit', sans-serif; font-size: 1.08rem; font-weight: 800; color: #0f172a;">
+              ${escapeHtml(lesson.titulo)}
+            </div>
+          </div>
+        </div>
+        <div class="docente-grade-stats">
+          <span class="grade-metric-chip">✅ ${completed.length} / ${gradeRows.length} realizadas</span>
+          <span class="grade-metric-chip">⭐ Prom: ${avg}</span>
+          <span class="grade-metric-chip" style="background: ${isSelected ? lesson.color : '#eff6ff'}; color: ${isSelected ? '#ffffff' : '#1e40af'}; border-color: ${lesson.color};">
+            ${isSelected ? '✓ Seleccionado' : 'Ver grado →'}
+          </span>
+        </div>
+      </button>
+    `;
+  }).join('');
+}
+
+// Render deployed tests + QR / Question preview for the selected grade (or all grades)
 function renderLessonsQrSection() {
   const container = document.getElementById('lessonsLinksContainer');
+  const headingSpan = document.getElementById('deployedTestsHeadingText');
   if (!container) return;
+
+  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const lessonsToShow = activeGrade === 'todos'
+    ? LESSONS_DATA
+    : LESSONS_DATA.filter((l) => String(l.grado) === String(activeGrade));
+
+  if (headingSpan) {
+    headingSpan.textContent = activeGrade === 'todos'
+      ? 'Pruebas Puestas en la Plataforma (3° a 6° Grado)'
+      : `Prueba Puesta en ${lessonsToShow[0]?.gradoTexto || (activeGrade + '° Grado')}`;
+  }
 
   const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
-  let gridHtml = `<div class="lessons-qr-grid">`;
-
-  LESSONS_DATA.forEach(lesson => {
+  container.innerHTML = lessonsToShow.map((lesson) => {
     const fullUrl = baseUrl + lesson.slug;
-    gridHtml += `
-      <div class="lesson-qr-card ${lesson.grado === 4 ? 'grade-4' : ''}" onclick="openQrModal(${lesson.grado})">
-        <div>
-          <div class="lesson-qr-header">
-            <span class="lesson-qr-icon">${lesson.icono}</span>
-            <div>
-              <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor};">
-                ${lesson.gradoTexto} • ${lesson.codigo}
-              </span>
-              <h4 class="lesson-qr-title">${lesson.titulo}</h4>
-            </div>
+    return `
+      <div class="deployed-test-row" style="--grade-accent: ${lesson.color};">
+        <div style="flex: 1; min-width: 240px;">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+            <span style="font-size: 1.6rem;" aria-hidden="true">${lesson.icono}</span>
+            <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor}; margin: 0;">
+              ${escapeHtml(lesson.gradoTexto)} • ${escapeHtml(lesson.codigo)} • ${lesson.puntos} pts
+            </span>
           </div>
-
-          <div style="font-size: 0.88rem; color: #64748b; margin-top: 6px;">
-            🔗 Enlace: <span style="font-family: monospace; color: #1e3a8a; word-break: break-all;">${fullUrl}</span>
+          <h3 style="font-size: 1.12rem; color: #0f172a; margin-bottom: 4px;">
+            ${escapeHtml(lesson.titulo)}
+          </h3>
+          <div style="font-size: 0.84rem; color: #475569; word-break: break-all;">
+            🔗 <span style="font-family: monospace; color: #1e3a8a;">${escapeHtml(fullUrl)}</span>
           </div>
         </div>
-
-        <div class="lesson-qr-footer">
-          <span style="font-size: 0.85rem; font-weight: 700; color: #475569;">📱 Clic para ver Código QR</span>
-          <button type="button" class="btn-qr-action ${lesson.grado === 4 ? 'orange' : ''}" onclick="event.stopPropagation(); openQrModal(${lesson.grado});">
-            <span>📷</span> Ver QR
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          <button type="button" class="btn-secondary btn-preview-exam" data-exam-grade="${lesson.grado}" style="background: #ffffff; border-color: ${lesson.color}; color: ${lesson.color};">
+            <span aria-hidden="true">👁️</span> Ver Preguntas Puestas
           </button>
+          <button type="button" class="btn-qr-action" data-qr-grade="${lesson.grado}" style="background: ${lesson.color};">
+            <span aria-hidden="true">📷</span> Ver QR
+          </button>
+          <a href="./${escapeHtml(lesson.slug)}" target="_blank" class="btn-secondary">
+            <span aria-hidden="true">🚀</span> Abrir Prueba
+          </a>
         </div>
       </div>
     `;
-  });
+  }).join('');
+}
 
-  gridHtml += `</div>`;
-  container.innerHTML = gridHtml;
+async function openExamPreviewModal(gradeNum) {
+  const lesson = LESSONS_DATA.find((l) => l.grado === Number(gradeNum));
+  if (!lesson) return;
+
+  const modal = document.getElementById('examPreviewModal');
+  const badge = document.getElementById('examPreviewBadge');
+  const title = document.getElementById('examPreviewTitle');
+  const meta = document.getElementById('examPreviewMeta');
+  const body = document.getElementById('examPreviewBody');
+  if (!modal || !body) return;
+
+  if (badge) {
+    badge.textContent = `${lesson.gradoTexto} • ${lesson.codigo}`;
+    badge.style.background = lesson.badgeBg;
+    badge.style.color = lesson.badgeColor;
+  }
+  if (title) title.textContent = `${lesson.icono} ${lesson.titulo}`;
+  if (meta) meta.textContent = `Cargando reactivos de ${lesson.codigo}...`;
+  body.innerHTML = '<p style="color:#64748b;">Cargando preguntas de la prueba...</p>';
+  modal.classList.add('active');
+
+  try {
+    let spec = testSpecsCache.get(lesson.grado);
+    if (!spec) {
+      const res = await fetch(lesson.jsonPath);
+      if (!res.ok) throw new Error('No se pudo cargar el archivo de la prueba.');
+      spec = await res.json();
+      testSpecsCache.set(lesson.grado, spec);
+    }
+
+    if (meta) {
+      meta.textContent = `${spec.area || ''} • Puntaje total: ${spec.puntos_totales || lesson.puntos} puntos`;
+    }
+
+    const s = spec.secciones || {};
+    const blocks = [];
+
+    if (s.parte_a) {
+      const itemsHtml = (s.parte_a.preguntas || []).map((q) => {
+        const sentence = q.texto_antes !== undefined
+          ? `${escapeHtml(q.texto_antes)} <u>[_____]</u> ${escapeHtml(q.texto_despues || '')}`
+          : escapeHtml(q.enunciado || '');
+        const ans = Array.isArray(q.respuestas_validas)
+          ? q.respuestas_validas.join(' / ')
+          : (q.respuesta_correcta || '');
+        return `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${q.numero}.</strong> ${sentence} <span style="color:#15803d;font-weight:700;">(Resp: ${escapeHtml(ans)})</span></li>`;
+      }).join('');
+      blocks.push(`<div style="margin-bottom:16px;"><h4 style="color:${lesson.color};margin-bottom:6px;">${escapeHtml(s.parte_a.titulo)}</h4><ul style="list-style:none;padding-left:0;">${itemsHtml}</ul></div>`);
+    }
+
+    if (s.parte_b) {
+      const itemsHtml = (s.parte_b.preguntas || []).map((q) => {
+        const opts = (q.opciones || []).map((o) => `${escapeHtml(o.id)}) ${escapeHtml(o.texto)}`).join(' · ');
+        return `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${q.numero}.</strong> ${escapeHtml(q.enunciado)}<div style="font-size:0.86rem;color:#475569;margin-top:2px;">${opts} — <strong style="color:#15803d;">Correcta: ${escapeHtml(String(q.respuesta_correcta || '').toUpperCase())}</strong></div></li>`;
+      }).join('');
+      blocks.push(`<div style="margin-bottom:16px;"><h4 style="color:${lesson.color};margin-bottom:6px;">${escapeHtml(s.parte_b.titulo)}</h4><ul style="list-style:none;padding-left:0;">${itemsHtml}</ul></div>`);
+    }
+
+    if (s.parte_c) {
+      const itemsHtml = (s.parte_c.preguntas || []).map((q) =>
+        `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${q.numero}.</strong> ${escapeHtml(q.enunciado)} <strong style="color:#15803d;">(${escapeHtml(q.respuesta_correcta)})</strong></li>`
+      ).join('');
+      blocks.push(`<div style="margin-bottom:16px;"><h4 style="color:${lesson.color};margin-bottom:6px;">${escapeHtml(s.parte_c.titulo)}</h4><ul style="list-style:none;padding-left:0;">${itemsHtml}</ul></div>`);
+    }
+
+    if (s.parte_d) {
+      const meaningsMap = new Map((s.parte_d.significados || []).map((m) => [m.letra, m.definicion]));
+      const itemsHtml = (s.parte_d.conceptos || []).map((c) =>
+        `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${c.numero}. ${escapeHtml(c.termino)}</strong> → <strong style="color:#15803d;">${escapeHtml(c.respuesta_correcta)}: ${escapeHtml(meaningsMap.get(c.respuesta_correcta) || '')}</strong></li>`
+      ).join('');
+      blocks.push(`<div style="margin-bottom:16px;"><h4 style="color:${lesson.color};margin-bottom:6px;">${escapeHtml(s.parte_d.titulo)}</h4><ul style="list-style:none;padding-left:0;">${itemsHtml}</ul></div>`);
+    }
+
+    if (s.parte_e) {
+      const itemsHtml = (s.parte_e.preguntas || []).map((q) => {
+        const extra = q.respuesta_correcta
+          ? `<strong style="color:#15803d;">(Correcta: ${escapeHtml(q.respuesta_correcta)})</strong>`
+          : `<span style="color:#64748b;font-size:0.85rem;">(Palabras clave: ${escapeHtml((q.palabras_clave || []).slice(0, 5).join(', '))})</span>`;
+        return `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${q.numero}.</strong> ${escapeHtml(q.enunciado)} ${extra}</li>`;
+      }).join('');
+      blocks.push(`<div style="margin-bottom:12px;"><h4 style="color:${lesson.color};margin-bottom:6px;">${escapeHtml(s.parte_e.titulo)}</h4><ul style="list-style:none;padding-left:0;">${itemsHtml}</ul></div>`);
+    }
+
+    body.innerHTML = blocks.join('') || '<p>No se encontraron secciones en esta prueba.</p>';
+  } catch (err) {
+    body.innerHTML = `<p style="color:#b91c1c;">No se pudieron cargar las preguntas de esta prueba (${escapeHtml(err.message)}).</p>`;
+  }
+}
+
+function setupExamPreviewModal() {
+  const modal = document.getElementById('examPreviewModal');
+  const closeBtn = document.getElementById('closeExamPreviewModal');
+  if (closeBtn && modal) {
+    closeBtn.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('active');
+    });
+  }
 }
 
 // Open QR Modal and generate QR code
@@ -479,6 +695,8 @@ function rebuildCombinedState() {
   });
 
   allResults = Array.from(combinedMap.values());
+  renderDocenteVerticalGrades();
+  renderLessonsQrSection();
   calculateAndRenderStats();
   renderTable();
 }
@@ -754,11 +972,39 @@ function renderTable() {
 function setupDocenteEvents() {
   updateGroupFilterOptions();
   document.getElementById('searchInput').addEventListener('input', renderTable);
-  document.getElementById('gradeFilterSelect').addEventListener('change', () => {
-    updateGroupFilterOptions();
-    calculateAndRenderStats();
-    renderTable();
+  document.getElementById('gradeFilterSelect').addEventListener('change', (e) => {
+    selectDocenteGrade(e.target.value, false);
   });
+
+  const showAllBtn = document.getElementById('showAllGradesBtn');
+  if (showAllBtn) {
+    showAllBtn.addEventListener('click', () => selectDocenteGrade('todos', false));
+  }
+
+  const verticalGrades = document.getElementById('docenteGradesVertical');
+  if (verticalGrades) {
+    verticalGrades.addEventListener('click', (e) => {
+      const btn = e.target.closest('.docente-grade-btn');
+      if (btn) {
+        selectDocenteGrade(btn.dataset.gradeChoice, true);
+      }
+    });
+  }
+
+  const deployedBox = document.getElementById('lessonsLinksContainer');
+  if (deployedBox) {
+    deployedBox.addEventListener('click', (e) => {
+      const qrBtn = e.target.closest('.btn-qr-action');
+      if (qrBtn) {
+        openQrModal(Number(qrBtn.dataset.qrGrade));
+        return;
+      }
+      const previewBtn = e.target.closest('.btn-preview-exam');
+      if (previewBtn) {
+        openExamPreviewModal(Number(previewBtn.dataset.examGrade));
+      }
+    });
+  }
   document.getElementById('statusFilter').addEventListener('change', renderTable);
   document.getElementById('groupFilterSelect').addEventListener('change', () => {
     calculateAndRenderStats();

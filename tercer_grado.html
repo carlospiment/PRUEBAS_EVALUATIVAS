@@ -9,12 +9,17 @@
   <meta name="theme-color" content="#15803d">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌿</text></svg>">
 </head>
-<body data-grade="3">
+<body data-grade="3" data-page="grade-3">
+  <a href="#mainContent" class="skip-link visually-hidden">Ir al contenido principal</a>
 
   <!-- Canvas Confetti -->
   <canvas id="confetti-canvas"></canvas>
 
-  <div class="container">
+  <div class="app-shell" id="appShell">
+    <div id="appNavMount"></div>
+
+    <main id="mainContent" class="app-main" tabindex="-1">
+      <div class="container">
 
     <!-- HERO HEADER -->
     <header class="header-hero">
@@ -210,49 +215,21 @@
     <!-- FOOTER -->
     <footer class="footer-info">
       <div>Ministerio de Educación (MEDUCA) • Panamá</div>
-      <div style="margin-top: 6px;">
+      <div style="margin-top: 6px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="./index.html">🏠 Vista Inicial</a>
         <a href="./docente.html">🧑‍🏫 Panel Docente y Resultados</a>
       </div>
     </footer>
 
-    <!-- MODAL DE ACCESO DOCENTE (CLAVE: 0476) -->
-    <div class="modal-overlay" id="teacherPinModal">
-      <div class="modal-card" style="max-width: 420px; text-align: center; border-color: #3b82f6;">
-        <div style="font-size: 3rem; margin-bottom: 8px;">🔐</div>
-        <h2 style="font-size: 1.5rem; color: #1e293b; margin-bottom: 8px;">Acceso del Docente</h2>
-        <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 18px;">
-          Ingresa la clave de 4 dígitos para ingresar al panel y ver las calificaciones:
-        </p>
-
-        <input 
-          type="password" 
-          id="modalPinInput" 
-          class="pin-input-field" 
-          maxlength="4" 
-          placeholder="••••" 
-          autocomplete="off"
-        >
-        <div id="modalPinError" style="color: #ef4444; font-weight: 600; font-size: 0.9rem; margin-top: 10px; display: none;">
-          ❌ Clave incorrecta. Inténtalo de nuevo.
-        </div>
-
-        <div style="display: flex; gap: 10px; margin-top: 22px; justify-content: center;">
-          <button type="button" class="btn-secondary" id="cancelPinModalBtn" style="padding: 10px 20px;">
-            Cancelar
-          </button>
-          <button type="button" class="btn-primary" id="confirmPinModalBtn" style="padding: 10px 24px; background: #2563eb;">
-            <span>🔓</span> Acceder
-          </button>
-        </div>
       </div>
-    </div>
-
+    </main>
   </div>
 
   <!-- Firebase SDK Compat & Configuración Cloud Firestore -->
   <script src="./js/vendor/firebase-app-compat.js"></script>
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
   <script src="./js/firebase-config.js"></script>
+  <script src="./js/nav.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>
