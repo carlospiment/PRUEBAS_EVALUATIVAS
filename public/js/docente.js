@@ -141,12 +141,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupExamPreviewModal();
   renderDocenteVerticalGrades();
   renderEnabledQuickBar();
+  renderDocenteAreasBar();
   renderLessonsQrSection();
-  if (window.MEDUCA_NAV) {
-    const activeG = gradeSelect?.value || 'todos';
-    window.MEDUCA_NAV.syncDocenteActiveGrade(activeG);
-    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeG, activeAreaFilter, enabledTestsMap);
-  }
   initAuthAndData();
 });
 
@@ -338,13 +334,10 @@ function selectDocenteGrade(gradeVal, shouldScroll = false) {
   updateGroupFilterOptions();
   renderDocenteVerticalGrades();
   renderEnabledQuickBar();
+  renderDocenteAreasBar();
   renderLessonsQrSection();
   calculateAndRenderStats();
   renderTable();
-  if (window.MEDUCA_NAV) {
-    window.MEDUCA_NAV.syncDocenteActiveGrade(nextVal);
-    window.MEDUCA_NAV.renderDocenteAreas(catalogData, nextVal, activeAreaFilter, enabledTestsMap);
-  }
   if (shouldScroll) {
     const target = document.getElementById('deployedTestsTitle') || document.getElementById('docenteDashboardContent');
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -354,15 +347,55 @@ function selectDocenteGrade(gradeVal, shouldScroll = false) {
 function selectDocenteArea(areaVal, shouldScroll = false) {
   const nextArea = ['1', '2', '3', '4', 'todas'].includes(String(areaVal)) ? String(areaVal) : 'todas';
   activeAreaFilter = nextArea;
-  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  renderDocenteAreasBar();
   renderLessonsQrSection();
-  if (window.MEDUCA_NAV) {
-    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeGrade, activeAreaFilter, enabledTestsMap);
-  }
   if (shouldScroll) {
     const target = document.getElementById('deployedTestsTitle') || document.getElementById('lessonsLinksContainer');
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+}
+
+function renderDocenteAreasBar() {
+  const bar = document.getElementById('docenteAreasFilterBar');
+  if (!bar) return;
+
+  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const areas = window.MEDUCA_CATALOGO
+    ? window.MEDUCA_CATALOGO.getAreasForGrade(catalogData, activeGrade)
+    : [];
+
+  const totalCount = areas.reduce((acc, a) => acc + a.pruebas.length, 0);
+  const allBtn = `
+    <button
+      type="button"
+      class="docente-area-chip-btn ${activeAreaFilter === 'todas' ? 'is-selected' : ''}"
+      data-area-choice="todas"
+      aria-pressed="${activeAreaFilter === 'todas' ? 'true' : 'false'}"
+      style="--area-color: #1e3a8a; --area-soft: #dbeafe;"
+    >
+      <span aria-hidden="true">📚</span>
+      <span>Todas las áreas (${totalCount})</span>
+    </button>
+  `;
+
+  const areaBtns = areas.map((area) => {
+    const isSelected = area.disponible && String(area.numero) === String(activeAreaFilter);
+    return `
+      <button
+        type="button"
+        class="docente-area-chip-btn ${isSelected ? 'is-selected' : ''}"
+        data-area-choice="${area.numero}"
+        ${area.disponible ? '' : 'disabled aria-disabled="true"'}
+        aria-pressed="${isSelected ? 'true' : 'false'}"
+        style="--area-color: ${area.color}; --area-soft: ${area.softBg};"
+      >
+        <span aria-hidden="true">${area.icono}</span>
+        <span>Área ${area.numero}: ${escapeHtml(area.nombre)} (${area.disponible ? area.pruebas.length : 'Sin pruebas'})</span>
+      </button>
+    `;
+  }).join('');
+
+  bar.innerHTML = allBtn + areaBtns;
 }
 
 window.MEDUCA_DOCENTE_NAV = {
@@ -373,12 +406,9 @@ window.MEDUCA_DOCENTE_NAV = {
 async function handleTestClipToggle(testId, isChecked) {
   if (!testId || !window.MEDUCA_CATALOGO) return;
   enabledTestsMap = await window.MEDUCA_CATALOGO.setTestEnabled(testId, isChecked, catalogData);
-  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
   renderEnabledQuickBar();
+  renderDocenteAreasBar();
   renderLessonsQrSection();
-  if (window.MEDUCA_NAV) {
-    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeGrade, activeAreaFilter, enabledTestsMap);
-  }
 }
 
 function renderTestClipCheckboxHtml(test, idPrefix) {
@@ -500,7 +530,7 @@ function renderDocenteVerticalGrades() {
           <span class="grade-metric-chip">✅ ${completed.length} / ${gradeRows.length} realizadas</span>
           <span class="grade-metric-chip">⭐ Prom: ${avg}</span>
           <span class="grade-metric-chip" style="background: ${isSelected ? gMeta.color : '#eff6ff'}; color: ${isSelected ? '#ffffff' : '#1e40af'}; border-color: ${gMeta.color};">
-            ${isSelected ? '✓ Seleccionado' : 'Ver áreas y pruebas →'}
+            ${isSelected ? '✓ Seleccionado' : 'Ver áreas y pruebas'}
           </span>
         </div>
       </button>
@@ -701,7 +731,7 @@ async function openExamPreviewModal(testIdOrGrade) {
     if (s.parte_d) {
       const meaningsMap = new Map((s.parte_d.significados || []).map((m) => [m.letra, m.definicion]));
       const itemsHtml = (s.parte_d.conceptos || []).map((c) =>
-        `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${c.numero}. ${escapeHtml(c.termino)}</strong> → <strong style="color:#15803d;">${escapeHtml(c.respuesta_correcta)}: ${escapeHtml(meaningsMap.get(c.respuesta_correcta) || '')}</strong></li>`
+        `<li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><strong>${c.numero}. ${escapeHtml(c.termino)}</strong>: <strong style="color:#15803d;">${escapeHtml(c.respuesta_correcta)} (${escapeHtml(meaningsMap.get(c.respuesta_correcta) || '')})</strong></li>`
       ).join('');
       blocks.push(`<div style="margin-bottom:16px;"><h4 style="color:${lesson.color};margin-bottom:6px;">${escapeHtml(s.parte_d.titulo)}</h4><ul style="list-style:none;padding-left:0;">${itemsHtml}</ul></div>`);
     }
@@ -891,11 +921,8 @@ function rebuildCombinedState() {
   allResults = Array.from(combinedMap.values());
   renderDocenteVerticalGrades();
   renderEnabledQuickBar();
+  renderDocenteAreasBar();
   renderLessonsQrSection();
-  if (window.MEDUCA_NAV) {
-    const activeG = document.getElementById('gradeFilterSelect')?.value || 'todos';
-    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeG, activeAreaFilter, enabledTestsMap);
-  }
   calculateAndRenderStats();
   renderTable();
 }
@@ -1186,6 +1213,16 @@ function setupDocenteEvents() {
       const btn = e.target.closest('.docente-grade-btn');
       if (btn) {
         selectDocenteGrade(btn.dataset.gradeChoice, true);
+      }
+    });
+  }
+
+  const areasBar = document.getElementById('docenteAreasFilterBar');
+  if (areasBar) {
+    areasBar.addEventListener('click', (e) => {
+      const btn = e.target.closest('.docente-area-chip-btn');
+      if (btn && !btn.disabled) {
+        selectDocenteArea(btn.dataset.areaChoice || 'todas', false);
       }
     });
   }

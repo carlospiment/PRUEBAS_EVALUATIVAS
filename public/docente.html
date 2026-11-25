@@ -12,11 +12,7 @@
 <body style="background: #f1f5f9;" data-page="docente">
   <a href="#mainContent" class="skip-link visually-hidden">Ir al contenido principal</a>
 
-  <div class="app-shell" id="appShell">
-    <div id="appNavMount"></div>
-
-    <main id="mainContent" class="app-main" tabindex="-1">
-      <div class="container" style="max-width: 1080px;">
+  <main id="mainContent" class="container" style="max-width: 1080px;" tabindex="-1">
 
         <!-- HEADER DOCENTE -->
         <header class="teacher-header">
@@ -88,7 +84,7 @@
             </div>
 
             <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; color: #64748b; flex-wrap: wrap; gap: 8px;">
-              <a href="./index.html" style="color: #2563eb; font-weight: 700; text-decoration: none;">← Volver a Vista Inicial</a>
+              <a href="./index.html" style="color: #2563eb; font-weight: 700; text-decoration: none;">Volver a Vista Inicial</a>
               <span>Los alumnos no requieren cuenta</span>
             </div>
           </div>
@@ -130,7 +126,7 @@
                   <span aria-hidden="true">📚</span> Grados Disponibles (Selecciona un grado)
                 </h2>
                 <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-                  Al elegir un grado se agrupan sus pruebas por las 4 áreas del programa de agricultura en el menú izquierdo y aquí abajo:
+                  Al elegir un grado se agrupan sus pruebas por las 4 áreas del programa de agricultura:
                 </p>
               </div>
               <button type="button" id="showAllGradesBtn" class="btn-secondary" style="font-size: 0.88rem;">
@@ -162,9 +158,13 @@
                   ☑️ Solo habilitadas
                 </button>
                 <button type="button" id="resetAreaFilterBtn" class="btn-secondary" style="display: none; font-size: 0.85rem;">
-                  ↩ Ver las 4 áreas
+                  Ver las 4 áreas
                 </button>
               </div>
+            </div>
+
+            <div id="docenteAreasFilterBar" class="docente-areas-bar" style="margin-bottom: 14px;">
+              <!-- Botones de las 4 áreas del programa -->
             </div>
 
             <div id="lessonsLinksContainer" class="deployed-tests-list">
@@ -264,9 +264,7 @@
           </div>
 
         </div>
-      </div>
-    </main>
-  </div>
+  </main>
 
   <!-- MODAL: VER PREGUNTAS PUESTAS EN LA PRUEBA -->
   <div class="modal-overlay" id="examPreviewModal" role="dialog" aria-modal="true" aria-labelledby="examPreviewTitle">
@@ -389,7 +387,6 @@
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
   <script src="./js/firebase-config.js"></script>
   <script src="./js/catalogo.js"></script>
-  <script src="./js/nav.js"></script>
   <script src="./js/docente.js"></script>
 </body>
 </html>

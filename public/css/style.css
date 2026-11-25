@@ -2137,3 +2137,49 @@ h1, h2, h3, h4, .font-heading {
     outline-offset: 2px;
   }
 }
+
+.docente-areas-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.docente-area-chip-btn {
+  width: 100%;
+  min-block-size: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid #cbd5e1;
+  border-left: 6px solid var(--area-color, #15803d);
+  background: #ffffff;
+  color: #1e293b;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 0.94rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.docente-area-chip-btn:hover:not(:disabled) {
+  background: var(--area-soft, #f0fdf4);
+  border-color: var(--area-color, #15803d);
+}
+
+.docente-area-chip-btn.is-selected {
+  background: var(--area-soft, #dcfce7);
+  border-color: var(--area-color, #15803d);
+  color: #0f172a;
+}
+
+.docente-area-chip-btn:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  border-left-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
