@@ -107,6 +107,21 @@
             </button>
           </div>
 
+          <!-- PASO 0: PANEL RÁPIDO DE PRUEBAS HABILITADAS (CLIP DE SELECCIÓN) -->
+          <section id="enabledTestsQuickBar" class="card enabled-quick-bar" aria-labelledby="enabledQuickTitle">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <h2 id="enabledQuickTitle" style="font-size: 1.18rem; color: #14532d; margin-bottom: 2px;">
+                  <span aria-hidden="true">⚡</span> Pruebas Habilitadas para Aplicar (<span id="enabledTestsCount">0</span>)
+                </h2>
+                <p style="color: #475569; font-size: 0.88rem; margin: 0;">
+                  Acceso ágil a las pruebas marcadas con el clip de selección. Quita el check cuando termines de aplicarlas.
+                </p>
+              </div>
+            </div>
+            <div id="enabledTestsQuickList" class="deployed-tests-list"></div>
+          </section>
+
           <!-- PASO 1: BOTONES VERTICALES DE GRADOS (3°, 4°, 5°, 6°) -->
           <section class="card" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bfdbfe;" aria-labelledby="docenteGradesTitle">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
@@ -115,7 +130,7 @@
                   <span aria-hidden="true">📚</span> Grados Disponibles (Selecciona un grado)
                 </h2>
                 <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-                  Elige un grado en orden vertical para ver cuáles pruebas están puestas y los resultados de sus estudiantes:
+                  Al elegir un grado se agrupan sus pruebas por las 4 áreas del programa de agricultura en el menú izquierdo y aquí abajo:
                 </p>
               </div>
               <button type="button" id="showAllGradesBtn" class="btn-secondary" style="font-size: 0.88rem;">
@@ -128,17 +143,32 @@
             </div>
           </section>
 
-          <!-- PASO 2: PRUEBAS PUESTAS EN EL GRADO SELECCIONADO -->
-          <section class="card" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bbf7d0;" aria-labelledby="deployedTestsTitle">
-            <h2 id="deployedTestsTitle" style="font-size: 1.22rem; color: #166534; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
-              <span aria-hidden="true">📝</span> <span id="deployedTestsHeadingText">Pruebas Puestas en la Plataforma</span>
-            </h2>
-            <p style="color: #4b5563; font-size: 0.92rem; margin-bottom: 10px;">
-              Revisa las preguntas de la prueba asignada, proyecta el código QR o abre el enlace directo del grado:
-            </p>
+          <!-- PASO 2: PRUEBAS AGRUPADAS POR LAS 4 ÁREAS DEL PROGRAMA -->
+          <section class="card" id="deployedTestsSection" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bbf7d0;" aria-labelledby="deployedTestsTitle">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px;">
+              <div>
+                <h2 id="deployedTestsTitle" style="font-size: 1.22rem; color: #166534; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span aria-hidden="true">📝</span> <span id="deployedTestsHeadingText">Pruebas por Área del Programa</span>
+                </h2>
+                <p style="color: #4b5563; font-size: 0.9rem; margin: 0;">
+                  Solo las áreas con pruebas creadas están disponibles. Usa el clip de selección para habilitar o deshabilitar cada prueba.
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <button type="button" id="filterAllCreatedBtn" class="btn-secondary" aria-pressed="true" style="font-size: 0.85rem;">
+                  📚 Ver todas las creadas
+                </button>
+                <button type="button" id="filterEnabledOnlyBtn" class="btn-secondary" aria-pressed="false" style="font-size: 0.85rem;">
+                  ☑️ Solo habilitadas
+                </button>
+                <button type="button" id="resetAreaFilterBtn" class="btn-secondary" style="display: none; font-size: 0.85rem;">
+                  ↩ Ver las 4 áreas
+                </button>
+              </div>
+            </div>
 
             <div id="lessonsLinksContainer" class="deployed-tests-list">
-              <!-- Tarjetas verticales de pruebas puestas generadas dinámicamente -->
+              <!-- Grupos de las 4 áreas y pruebas ordenadas generadas dinámicamente -->
             </div>
           </section>
 
@@ -358,6 +388,7 @@
   <script src="./js/vendor/firebase-auth-compat.js"></script>
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
   <script src="./js/firebase-config.js"></script>
+  <script src="./js/catalogo.js"></script>
   <script src="./js/nav.js"></script>
   <script src="./js/docente.js"></script>
 </body>

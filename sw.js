@@ -3,7 +3,7 @@
    Soporte 100% Offline para PWA y GitHub Pages
    =================================================== */
 
-const CACHE_NAME = 'meduca-agri-eval-v15';
+const CACHE_NAME = 'meduca-agri-eval-v16';
 
 const STATIC_ASSETS = [
   './',
@@ -18,11 +18,13 @@ const STATIC_ASSETS = [
   './js/vendor/firebase-auth-compat.js',
   './js/vendor/firebase-firestore-compat.js',
   './js/firebase-config.js',
+  './js/catalogo.js',
   './js/nav.js',
   './js/app.js',
   './js/docente.js',
   './js/qrcode.min.js',
   './data/estudiantes.json',
+  './data/catalogo_pruebas.json',
   './data/prueba_3ro.json',
   './data/prueba_4to.json',
   './data/prueba_5to.json',

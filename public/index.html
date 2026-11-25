@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pruebas Sumativas de Agricultura | MEDUCA</title>
+  <title>Inicio y Acceso | Evaluaciones de Agricultura MEDUCA</title>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#15803d">
@@ -12,143 +12,149 @@
 <body data-page="home">
   <a href="#mainContent" class="skip-link visually-hidden">Ir al contenido principal</a>
 
-  <div class="app-shell" id="appShell">
-    <div id="appNavMount"></div>
+  <main id="mainContent" class="container" style="max-width: 680px; padding: 26px 20px;" tabindex="-1">
 
-    <main id="mainContent" class="app-main" tabindex="-1">
-      <div class="container" style="max-width: 820px; padding: 20px;">
-
-        <!-- HERO HEADER -->
-        <header class="header-hero">
-          <div class="badge-top">
-            <span aria-hidden="true">🏫</span>
-            <span>MEDUCA</span>
-            <span aria-hidden="true">•</span>
-            <span>Educación Primaria</span>
-          </div>
-          <h1>Evaluaciones de Agricultura</h1>
-          <div class="subtitle">Plataforma Digital de Pruebas Sumativas Escolares</div>
-        </header>
-
-        <!-- ACCESO DOCENTE CON GMAIL DESDE LA VISTA INICIAL -->
-        <section class="home-auth-banner" id="homeTeacherAuthCard" aria-labelledby="homeAuthTitle">
-          <div class="home-auth-info">
-            <div class="home-auth-icon" aria-hidden="true">🧑‍🏫</div>
-            <div>
-              <h2 id="homeAuthTitle" style="font-size: 1.15rem; color: #1e3a8a; margin-bottom: 2px;">
-                Acceso Docente con Gmail
-              </h2>
-              <p id="homeAuthSubtitle" style="font-size: 0.9rem; color: #475569; margin: 0;">
-                Inicia sesión con <strong>civanp004@gmail.com</strong> para ver los grados, las pruebas puestas y los resultados.
-              </p>
-              <div id="homeAuthError" style="display: none; color: #b91c1c; font-size: 0.86rem; font-weight: 700; margin-top: 6px;"></div>
-            </div>
-          </div>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <button type="button" id="homeGoogleSignInBtn" class="btn-primary" style="width: auto; padding: 10px 18px; font-size: 0.95rem; background: #1e3a8a;">
-              <span style="background: white; color: #1e3a8a; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900;" aria-hidden="true">G</span>
-              <span id="homeGoogleSignInText">Entrar con Gmail</span>
-            </button>
-            <a href="./docente.html" id="homeOpenDocenteLink" class="btn-secondary" style="padding: 10px 16px;">
-              Ir al Panel Docente
-            </a>
-          </div>
-        </section>
-
-        <!-- SELECCIÓN VERTICAL DE GRADOS PARA ESTUDIANTES -->
-        <section aria-labelledby="gradesListTitle">
-          <div style="margin: 8px 0 14px;">
-            <h2 id="gradesListTitle" style="font-size: 1.3rem; color: #1e293b; font-weight: 800;">
-              Pruebas por Grado (3° a 6°)
-            </h2>
-            <p style="color: #64748b; font-size: 0.94rem;">
-              Selecciona el grado correspondiente. Los estudiantes ingresan sin cuenta de Google.
-            </p>
-          </div>
-
-          <div class="home-vertical-grades">
-            <a href="./tercer_grado.html" class="home-grade-btn" style="--grade-border: #86efac; --grade-accent: #15803d; --grade-soft: #f0fdf4;">
-              <div class="home-grade-left">
-                <div class="home-grade-emoji" aria-hidden="true">🌿</div>
-                <div>
-                  <span class="home-grade-pill" style="background: #dcfce7; color: #166534;">TERCER GRADO • LECCIÓN 3.3.1</span>
-                  <h3 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 2px;">El huerto escolar, la salud y la nutrición</h3>
-                  <p style="color: #64748b; font-size: 0.88rem; margin: 0;">19 puntos • Completa, Selección Múltiple, V/F y Relaciona</p>
-                </div>
-              </div>
-              <span class="home-grade-cta" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);">
-                Abrir 3er Grado →
-              </span>
-            </a>
-
-            <a href="./cuarto_grado.html" class="home-grade-btn" style="--grade-border: #fdba74; --grade-accent: #c2410c; --grade-soft: #fff7ed;">
-              <div class="home-grade-left">
-                <div class="home-grade-emoji" aria-hidden="true">🥕</div>
-                <div>
-                  <span class="home-grade-pill" style="background: #ffedd5; color: #c2410c;">CUARTO GRADO • LECCIÓN 4.3.1</span>
-                  <h3 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 2px;">Beneficios e importancia del huerto escolar</h3>
-                  <p style="color: #64748b; font-size: 0.88rem; margin: 0;">24 puntos • Completa, Selección, V/F, Relaciona y Respuesta Corta</p>
-                </div>
-              </div>
-              <span class="home-grade-cta" style="background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);">
-                Abrir 4to Grado →
-              </span>
-            </a>
-
-            <a href="./quinto_grado.html" class="home-grade-btn" style="--grade-border: #93c5fd; --grade-accent: #1e40af; --grade-soft: #eff6ff;">
-              <div class="home-grade-left">
-                <div class="home-grade-emoji" aria-hidden="true">🌽</div>
-                <div>
-                  <span class="home-grade-pill" style="background: #dbeafe; color: #1e40af;">QUINTO GRADO • LECCIÓN 5.3.1</span>
-                  <h3 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 2px;">Métodos modernos de producción</h3>
-                  <p style="color: #64748b; font-size: 0.88rem; margin: 0;">31 puntos • Completa, Selección, V/F, Relaciona y Respuesta Corta</p>
-                </div>
-              </div>
-              <span class="home-grade-cta" style="background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);">
-                Abrir 5to Grado →
-              </span>
-            </a>
-
-            <a href="./sexto_grado.html" class="home-grade-btn" style="--grade-border: #c4b5fd; --grade-accent: #6d28d9; --grade-soft: #f5f3ff;">
-              <div class="home-grade-left">
-                <div class="home-grade-emoji" aria-hidden="true">🍅</div>
-                <div>
-                  <span class="home-grade-pill" style="background: #ede9fe; color: #5b21b6;">SEXTO GRADO • LECCIÓN 6.3.1</span>
-                  <h3 style="font-size: 1.2rem; color: #1e293b; margin-bottom: 2px;">Destino de la producción agrícola</h3>
-                  <p style="color: #64748b; font-size: 0.88rem; margin: 0;">32 puntos • Completa, Selección, V/F, Relaciona y Clasifica</p>
-                </div>
-              </div>
-              <span class="home-grade-cta" style="background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 100%);">
-                Abrir 6to Grado →
-              </span>
-            </a>
-          </div>
-        </section>
-
-        <!-- FOOTER -->
-        <footer class="footer-info">
-          <div>Ministerio de Educación (MEDUCA) • Panamá</div>
-          <div style="margin-top: 4px; font-size: 0.85rem; color: #94a3b8;">
-            Aplicación Web Progresiva (PWA) • Compatible con funcionamiento sin internet.
-          </div>
-        </footer>
+    <!-- HERO HEADER DE VISTA INICIAL -->
+    <header class="header-hero" style="text-align: center;">
+      <div class="badge-top" style="margin-bottom: 12px;">
+        <span aria-hidden="true">🏫</span>
+        <span>MEDUCA • Panamá</span>
+        <span aria-hidden="true">•</span>
+        <span>Agricultura (3° a 6°)</span>
       </div>
-    </main>
-  </div>
+      <h1>Evaluaciones de Agricultura</h1>
+      <div class="subtitle">Vista de Inicio • Acceso a la Plataforma Docente</div>
+    </header>
+
+    <!-- TARJETA PRINCIPAL: COLOCAR ACCESO PARA ENTRAR A LA APLICACIÓN -->
+    <section class="card start-access-card" id="homeTeacherAuthCard" aria-labelledby="homeAuthTitle">
+      <div style="font-size: 2.8rem; margin-bottom: 8px;" aria-hidden="true">🔐</div>
+      <h2 id="homeAuthTitle" style="font-size: 1.55rem; color: #1e3a8a; margin-bottom: 8px;">
+        Acceso a la Aplicación
+      </h2>
+      <p id="homeAuthSubtitle" style="color: #475569; font-size: 0.96rem; margin-bottom: 20px; line-height: 1.5;">
+        Inicia sesión con tu cuenta autorizada de Google (<strong>civanp004@gmail.com</strong>) para ingresar al panel por grados, las 4 áreas del programa y las pruebas habilitadas.
+      </p>
+
+      <div id="homeAuthError" style="display: none; color: #b91c1c; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 10px 12px; font-weight: 700; font-size: 0.88rem; margin-bottom: 14px; text-align: left;"></div>
+
+      <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
+        <button type="button" id="homeGoogleSignInBtn" class="btn-primary" style="max-width: 360px; padding: 14px 22px; font-size: 1.04rem; background: #1e3a8a;">
+          <span style="background: white; color: #1e3a8a; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900;" aria-hidden="true">G</span>
+          <span id="homeGoogleSignInText">Continuar con Gmail</span>
+        </button>
+
+        <a href="./docente.html" id="homeOpenDocenteLink" class="btn-primary" style="display: none; max-width: 360px; background: #15803d; padding: 14px 22px; font-size: 1.04rem;">
+          Entrar a Grados y Áreas →
+        </a>
+
+        <button type="button" id="homeSwitchAccountBtn" class="btn-secondary" style="display: none; font-size: 0.86rem;">
+          Cerrar sesión actual
+        </button>
+      </div>
+
+      <!-- ACCESO ALTERNATIVO POR PIN LOCAL / OFFLINE -->
+      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
+        <button type="button" id="homeTogglePinBtn" aria-expanded="false" aria-controls="homePinSection" style="background: none; border: none; color: #475569; font-weight: 700; font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
+          ¿Trabajas en modo local / sin internet? Colocar PIN docente
+        </button>
+
+        <div id="homePinSection" style="display: none; margin-top: 14px;">
+          <label for="homePinInput" class="visually-hidden">PIN docente de 4 dígitos</label>
+          <input
+            type="password"
+            id="homePinInput"
+            class="pin-input-field"
+            maxlength="4"
+            placeholder="••••"
+            autocomplete="off"
+          >
+          <div id="homePinError" style="color: #ef4444; font-weight: 700; font-size: 0.88rem; margin-top: 8px; display: none;">
+            ❌ PIN incorrecto. Inténtalo de nuevo.
+          </div>
+          <div style="margin-top: 12px;">
+            <button type="button" id="homePinSubmitBtn" class="btn-secondary" style="padding: 10px 22px;">
+              <span aria-hidden="true">🔓</span> Entrar con PIN Local
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACCESO PARA ESTUDIANTES (SIN CUENTA DE GOOGLE, SOLO PRUEBAS HABILITADAS) -->
+    <section class="card" style="padding: 18px 20px; background: #f8fafc; border: 2px solid #cbd5e1;" aria-labelledby="studentAccessHeading">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+        <div>
+          <h2 id="studentAccessHeading" style="font-size: 1.08rem; color: #14532d; margin-bottom: 2px;">
+            <span aria-hidden="true">🎓</span> Acceso para Estudiantes (Sin cuenta)
+          </h2>
+          <p style="font-size: 0.86rem; color: #64748b; margin: 0;">
+            Muestra únicamente las pruebas habilitadas para aplicar hoy.
+          </p>
+        </div>
+        <button type="button" id="toggleStudentTestsBtn" class="btn-secondary" aria-expanded="false" aria-controls="studentEnabledTestsPanel">
+          <span aria-hidden="true">📝</span> Ver Pruebas Habilitadas
+        </button>
+      </div>
+
+      <div id="studentEnabledTestsPanel" style="display: none; margin-top: 16px;">
+        <div id="studentEnabledTestsList" class="home-vertical-grades">
+          <!-- Pruebas habilitadas cargadas dinámicamente en orden curricular -->
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer-info">
+      <div>Ministerio de Educación (MEDUCA) • Panamá</div>
+      <div style="margin-top: 4px; font-size: 0.85rem; color: #94a3b8;">
+        Aplicación Web Progresiva (PWA) • Compatible con funcionamiento sin internet.
+      </div>
+    </footer>
+  </main>
 
   <script src="./js/vendor/firebase-app-compat.js"></script>
   <script src="./js/vendor/firebase-auth-compat.js"></script>
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
   <script src="./js/firebase-config.js"></script>
-  <script src="./js/nav.js"></script>
+  <script src="./js/catalogo.js"></script>
   <script>
     (function () {
+      const LOCAL_PIN = '0476';
       const signBtn = document.getElementById('homeGoogleSignInBtn');
       const signText = document.getElementById('homeGoogleSignInText');
+      const openDocLink = document.getElementById('homeOpenDocenteLink');
+      const switchBtn = document.getElementById('homeSwitchAccountBtn');
       const authTitle = document.getElementById('homeAuthTitle');
       const authSub = document.getElementById('homeAuthSubtitle');
       const authErr = document.getElementById('homeAuthError');
-      const openDocLink = document.getElementById('homeOpenDocenteLink');
+
+      const togglePinBtn = document.getElementById('homeTogglePinBtn');
+      const pinSec = document.getElementById('homePinSection');
+      const pinInput = document.getElementById('homePinInput');
+      const pinErr = document.getElementById('homePinError');
+      const pinSubmitBtn = document.getElementById('homePinSubmitBtn');
+
+      const toggleStudentBtn = document.getElementById('toggleStudentTestsBtn');
+      const studentPanel = document.getElementById('studentEnabledTestsPanel');
+      const studentList = document.getElementById('studentEnabledTestsList');
+
+      function showSignedInState(label) {
+        if (authErr) authErr.style.display = 'none';
+        if (authTitle) authTitle.textContent = `Sesión iniciada: ${label}`;
+        if (authSub) authSub.textContent = 'Tu acceso está verificado. Entra para ver los grados y las 4 áreas del programa.';
+        if (signBtn) signBtn.style.display = 'none';
+        if (openDocLink) openDocLink.style.display = 'inline-flex';
+        if (switchBtn) switchBtn.style.display = 'inline-flex';
+      }
+
+      function showLoggedOutState() {
+        if (authTitle) authTitle.textContent = 'Acceso a la Aplicación';
+        if (authSub) authSub.innerHTML = 'Inicia sesión con tu cuenta autorizada de Google (<strong>civanp004@gmail.com</strong>) para ingresar al panel por grados, las 4 áreas del programa y las pruebas habilitadas.';
+        if (signBtn) signBtn.style.display = 'inline-flex';
+        if (openDocLink) openDocLink.style.display = 'none';
+        if (switchBtn) switchBtn.style.display = 'none';
+      }
 
       if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.onAuthStateChanged) {
         window.MEDUCA_FIREBASE.onAuthStateChanged(({ user, unauthorizedEmail }) => {
@@ -157,28 +163,15 @@
             authErr.style.display = 'block';
           }
           if (user) {
-            if (window.MEDUCA_NAV) window.MEDUCA_NAV.setTeacherStatus(user.email);
-            if (authErr) authErr.style.display = 'none';
-            if (authTitle) authTitle.textContent = `Sesión docente activa: ${user.email}`;
-            if (authSub) authSub.textContent = 'Ya estás conectado. Abre el Panel Docente para ver los grados y las pruebas puestas.';
-            if (signBtn) signBtn.style.display = 'none';
-            if (openDocLink) {
-              openDocLink.className = 'btn-primary';
-              openDocLink.style.cssText = 'width:auto;padding:11px 20px;background:#15803d;font-size:0.95rem;';
-              openDocLink.textContent = 'Entrar a Grados y Pruebas →';
-            }
+            showSignedInState(user.email);
+          } else if (sessionStorage.getItem('meduca_docente_auth') === LOCAL_PIN) {
+            showSignedInState('Modo Local (PIN)');
           } else {
-            if (window.MEDUCA_NAV) window.MEDUCA_NAV.setTeacherStatus(null);
-            if (authTitle) authTitle.textContent = 'Acceso Docente con Gmail';
-            if (authSub) authSub.innerHTML = 'Inicia sesión con <strong>civanp004@gmail.com</strong> para ver los grados, las pruebas puestas y los resultados.';
-            if (signBtn) signBtn.style.display = 'inline-flex';
-            if (openDocLink) {
-              openDocLink.className = 'btn-secondary';
-              openDocLink.style.cssText = 'padding:10px 16px;';
-              openDocLink.textContent = 'Ir al Panel Docente';
-            }
+            showLoggedOutState();
           }
         });
+      } else if (sessionStorage.getItem('meduca_docente_auth') === LOCAL_PIN) {
+        showSignedInState('Modo Local (PIN)');
       }
 
       if (signBtn) {
@@ -189,15 +182,96 @@
           }
           if (authErr) authErr.style.display = 'none';
           signBtn.disabled = true;
-          if (signText) signText.textContent = 'Conectando...';
+          if (signText) signText.textContent = 'Conectando con Google...';
           const res = await window.MEDUCA_FIREBASE.signInWithGoogle();
           signBtn.disabled = false;
-          if (signText) signText.textContent = 'Entrar con Gmail';
+          if (signText) signText.textContent = 'Continuar con Gmail';
           if (res.ok) {
             window.location.href = './docente.html';
           } else if (authErr) {
             authErr.textContent = res.message || 'No se pudo iniciar sesión con Google.';
             authErr.style.display = 'block';
+          }
+        });
+      }
+
+      if (switchBtn) {
+        switchBtn.addEventListener('click', async () => {
+          sessionStorage.removeItem('meduca_docente_auth');
+          if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.signOut) {
+            await window.MEDUCA_FIREBASE.signOut();
+          }
+          showLoggedOutState();
+        });
+      }
+
+      if (togglePinBtn && pinSec) {
+        togglePinBtn.addEventListener('click', () => {
+          const open = pinSec.style.display !== 'none';
+          pinSec.style.display = open ? 'none' : 'block';
+          togglePinBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
+          if (!open && pinInput) setTimeout(() => pinInput.focus(), 80);
+        });
+      }
+
+      function tryPinAccess() {
+        if (!pinInput) return;
+        if (pinInput.value.trim() === LOCAL_PIN) {
+          sessionStorage.setItem('meduca_docente_auth', LOCAL_PIN);
+          if (pinErr) pinErr.style.display = 'none';
+          window.location.href = './docente.html';
+        } else {
+          if (pinErr) pinErr.style.display = 'block';
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      }
+
+      if (pinSubmitBtn) pinSubmitBtn.addEventListener('click', tryPinAccess);
+      if (pinInput) {
+        pinInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            tryPinAccess();
+          }
+        });
+      }
+
+      async function renderStudentEnabledTests() {
+        if (!studentList || !window.MEDUCA_CATALOGO) return;
+        const catalog = await window.MEDUCA_CATALOGO.loadCatalog();
+        const enabledMap = window.MEDUCA_CATALOGO.readEnabledMap(catalog);
+        const activeTests = catalog.pruebas.filter((p) => enabledMap[p.id] !== false);
+
+        if (activeTests.length === 0) {
+          studentList.innerHTML = '<p style="color:#64748b;font-size:0.9rem;text-align:center;padding:12px;">No hay pruebas habilitadas en este momento en este dispositivo.</p>';
+          return;
+        }
+
+        studentList.innerHTML = activeTests.map((p) => `
+          <a href="./${p.slug}" class="home-grade-btn" style="--grade-border: ${p.color}; --grade-accent: ${p.color}; --grade-soft: ${p.softBg}; padding: 14px 18px;">
+            <div class="home-grade-left">
+              <div class="home-grade-emoji" style="font-size:2rem;" aria-hidden="true">${p.icono}</div>
+              <div>
+                <span class="home-grade-pill" style="background:${p.badgeBg}; color:${p.badgeColor};">${p.gradoTexto} • ${p.codigo}</span>
+                <h3 style="font-size:1.05rem; color:#1e293b; margin-bottom:2px;">${p.titulo}</h3>
+                <p style="color:#64748b; font-size:0.82rem; margin:0;">${p.areaIcono} Área ${p.area}: ${p.areaNombre} • ${p.puntos} pts</p>
+              </div>
+            </div>
+            <span class="home-grade-cta" style="background:${p.color}; padding: 9px 14px; font-size:0.88rem;">
+              Entrar →
+            </span>
+          </a>
+        `).join('');
+      }
+
+      if (toggleStudentBtn && studentPanel) {
+        toggleStudentBtn.addEventListener('click', async () => {
+          const isOpen = studentPanel.style.display !== 'none';
+          studentPanel.style.display = isOpen ? 'none' : 'block';
+          toggleStudentBtn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+          if (!isOpen) {
+            await renderStudentEnabledTests();
           }
         });
       }

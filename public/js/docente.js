@@ -76,6 +76,10 @@ const LESSONS_DATA = [
 ];
 
 const testSpecsCache = new Map();
+let catalogData = null;
+let activeAreaFilter = 'todas';
+let showOnlyEnabledTests = false;
+let enabledTestsMap = {};
 
 function cleanStudentName(str) {
   if (!str) return '';
@@ -125,15 +129,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     gradeSelect.value = String(initialGradeParam);
   }
 
+  if (window.MEDUCA_CATALOGO) {
+    catalogData = await window.MEDUCA_CATALOGO.loadCatalog();
+    enabledTestsMap = window.MEDUCA_CATALOGO.readEnabledMap(catalogData);
+  }
+
   setupLockScreen();
   await loadServerInfo();
   setupDocenteEvents();
   setupQrModalEvents();
   setupExamPreviewModal();
   renderDocenteVerticalGrades();
+  renderEnabledQuickBar();
   renderLessonsQrSection();
   if (window.MEDUCA_NAV) {
-    window.MEDUCA_NAV.syncDocenteActiveGrade(gradeSelect?.value || 'todos');
+    const activeG = gradeSelect?.value || 'todos';
+    window.MEDUCA_NAV.syncDocenteActiveGrade(activeG);
+    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeG, activeAreaFilter, enabledTestsMap);
   }
   initAuthAndData();
 });
@@ -312,19 +324,26 @@ async function loadServerInfo() {
   } catch {}
 }
 
+function getActiveTestsCatalogList() {
+  return catalogData?.pruebas || LESSONS_DATA;
+}
+
 function selectDocenteGrade(gradeVal, shouldScroll = false) {
   const gradeSelect = document.getElementById('gradeFilterSelect');
   const nextVal = ['3', '4', '5', '6', 'todos'].includes(String(gradeVal)) ? String(gradeVal) : 'todos';
   if (gradeSelect) {
     gradeSelect.value = nextVal;
   }
+  activeAreaFilter = 'todas';
   updateGroupFilterOptions();
   renderDocenteVerticalGrades();
+  renderEnabledQuickBar();
   renderLessonsQrSection();
   calculateAndRenderStats();
   renderTable();
   if (window.MEDUCA_NAV) {
     window.MEDUCA_NAV.syncDocenteActiveGrade(nextVal);
+    window.MEDUCA_NAV.renderDocenteAreas(catalogData, nextVal, activeAreaFilter, enabledTestsMap);
   }
   if (shouldScroll) {
     const target = document.getElementById('deployedTestsTitle') || document.getElementById('docenteDashboardContent');
@@ -332,9 +351,102 @@ function selectDocenteGrade(gradeVal, shouldScroll = false) {
   }
 }
 
+function selectDocenteArea(areaVal, shouldScroll = false) {
+  const nextArea = ['1', '2', '3', '4', 'todas'].includes(String(areaVal)) ? String(areaVal) : 'todas';
+  activeAreaFilter = nextArea;
+  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  renderLessonsQrSection();
+  if (window.MEDUCA_NAV) {
+    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeGrade, activeAreaFilter, enabledTestsMap);
+  }
+  if (shouldScroll) {
+    const target = document.getElementById('deployedTestsTitle') || document.getElementById('lessonsLinksContainer');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
 window.MEDUCA_DOCENTE_NAV = {
-  selectGrade: selectDocenteGrade
+  selectGrade: selectDocenteGrade,
+  selectArea: selectDocenteArea
 };
+
+async function handleTestClipToggle(testId, isChecked) {
+  if (!testId || !window.MEDUCA_CATALOGO) return;
+  enabledTestsMap = await window.MEDUCA_CATALOGO.setTestEnabled(testId, isChecked, catalogData);
+  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  renderEnabledQuickBar();
+  renderLessonsQrSection();
+  if (window.MEDUCA_NAV) {
+    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeGrade, activeAreaFilter, enabledTestsMap);
+  }
+}
+
+function renderTestClipCheckboxHtml(test, idPrefix) {
+  const checked = enabledTestsMap[test.id] !== false;
+  const inputId = `${idPrefix}_${test.id}`;
+  return `
+    <label class="test-clip-label ${checked ? 'is-enabled' : ''}" for="${escapeHtml(inputId)}">
+      <input
+        type="checkbox"
+        id="${escapeHtml(inputId)}"
+        class="test-clip-checkbox visually-hidden-fallback"
+        data-clip-test-id="${escapeHtml(test.id)}"
+        ${checked ? 'checked' : ''}
+      >
+      <span class="test-clip-text">${checked ? 'Habilitada para aplicar' : 'Habilitar prueba'}</span>
+    </label>
+  `;
+}
+
+function renderEnabledQuickBar() {
+  const listEl = document.getElementById('enabledTestsQuickList');
+  const countEl = document.getElementById('enabledTestsCount');
+  if (!listEl) return;
+
+  const allTests = getActiveTestsCatalogList();
+  const enabledTests = allTests.filter((t) => enabledTestsMap[t.id] !== false);
+  if (countEl) countEl.textContent = String(enabledTests.length);
+
+  if (enabledTests.length === 0) {
+    listEl.innerHTML = '<p style="color:#64748b;font-size:0.9rem;padding:8px 4px;margin:0;">No hay pruebas marcadas con el clip de selección. Activa una casilla abajo para fijarla aquí y agilizar su aplicación.</p>';
+    return;
+  }
+
+  const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  listEl.innerHTML = enabledTests.map((t) => {
+    const fullUrl = baseUrl + t.slug;
+    return `
+      <div class="deployed-test-row quick-enabled-row" style="--grade-accent: ${t.color};">
+        <div style="flex: 1; min-width: 220px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+            <span aria-hidden="true" style="font-size: 1.35rem;">${t.icono}</span>
+            <span class="lesson-qr-tag" style="background:${t.badgeBg}; color:${t.badgeColor}; margin:0;">
+              ${escapeHtml(t.gradoTexto)} • Área ${t.area || 3} • ${escapeHtml(t.codigo)}
+            </span>
+          </div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;color:#0f172a;font-size:1.02rem;">
+            ${escapeHtml(t.titulo)}
+          </div>
+          <div style="font-size: 0.8rem; color: #475569; margin-top: 2px;">
+            ${escapeHtml(t.areaIcono || '🥬')} ${escapeHtml(t.areaNombre || '')} • ${t.puntos} pts • <a href="${escapeHtml(fullUrl)}" target="_blank" style="color:#1e3a8a;">Enlace directo</a>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+          ${renderTestClipCheckboxHtml(t, 'quick_clip')}
+          <button type="button" class="btn-secondary btn-preview-exam" data-exam-id="${escapeHtml(t.id)}" data-exam-grade="${t.grado}" style="background:#fff;border-color:${t.color};color:${t.color};">
+            <span aria-hidden="true">👁️</span> Preguntas
+          </button>
+          <button type="button" class="btn-qr-action" data-qr-id="${escapeHtml(t.id)}" data-qr-grade="${t.grado}" style="background:${t.color};">
+            <span aria-hidden="true">📷</span> QR
+          </button>
+          <a href="./${escapeHtml(t.slug)}" target="_blank" class="btn-secondary">
+            <span aria-hidden="true">🚀</span> Abrir
+          </a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
 function renderDocenteVerticalGrades() {
   const container = document.getElementById('docenteGradesVertical');
@@ -351,38 +463,44 @@ function renderDocenteVerticalGrades() {
   }
 
   const allRows = getStudentRows();
-  container.innerHTML = LESSONS_DATA.map((lesson) => {
-    const gradeRows = allRows.filter((item) => Number(item.student.grado) === Number(lesson.grado));
+  const gradesList = catalogData?.grados || LESSONS_DATA;
+  const testsCatalog = getActiveTestsCatalogList();
+
+  container.innerHTML = gradesList.map((gMeta) => {
+    const gNum = Number(gMeta.grado);
+    const gradeRows = allRows.filter((item) => Number(item.student.grado) === gNum);
     const completed = gradeRows.filter((item) => Boolean(item.result));
     const avg = completed.length > 0
       ? (completed.reduce((acc, it) => acc + (Number(it.result.nota_meduca) || 1.0), 0) / completed.length).toFixed(2)
       : '-';
-    const isSelected = String(lesson.grado) === String(activeGrade);
+    const gradeTests = testsCatalog.filter((t) => Number(t.grado) === gNum);
+    const activeAreasCount = new Set(gradeTests.map((t) => Number(t.area || 3))).size;
+    const isSelected = String(gNum) === String(activeGrade);
 
     return `
       <button
         type="button"
         class="docente-grade-btn ${isSelected ? 'is-active' : ''}"
-        data-grade-choice="${lesson.grado}"
+        data-grade-choice="${gNum}"
         aria-pressed="${isSelected ? 'true' : 'false'}"
-        style="--grade-accent: ${lesson.color}; --grade-soft: ${lesson.softBg};"
+        style="--grade-accent: ${gMeta.color}; --grade-soft: ${gMeta.softBg};"
       >
         <div class="docente-grade-meta">
-          <span style="font-size: 2.1rem; line-height: 1;" aria-hidden="true">${lesson.icono}</span>
+          <span style="font-size: 2.1rem; line-height: 1;" aria-hidden="true">${gMeta.icono}</span>
           <div>
-            <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor};">
-              ${escapeHtml(lesson.gradoTexto)} • ${escapeHtml(lesson.codigo)}
+            <span class="lesson-qr-tag" style="background: ${gMeta.badgeBg}; color: ${gMeta.badgeColor};">
+              ${escapeHtml(gMeta.nombre || gMeta.gradoTexto)} • ${activeAreasCount} de 4 áreas con pruebas
             </span>
-            <div style="font-family: 'Outfit', sans-serif; font-size: 1.08rem; font-weight: 800; color: #0f172a;">
-              ${escapeHtml(lesson.titulo)}
+            <div style="font-family: 'Outfit', sans-serif; font-size: 1.04rem; font-weight: 800; color: #0f172a;">
+              ${gradeTests.length} prueba${gradeTests.length === 1 ? '' : 's'} creada${gradeTests.length === 1 ? '' : 's'} (${gradeTests.map((t) => escapeHtml(t.codigo)).join(', ')})
             </div>
           </div>
         </div>
         <div class="docente-grade-stats">
           <span class="grade-metric-chip">✅ ${completed.length} / ${gradeRows.length} realizadas</span>
           <span class="grade-metric-chip">⭐ Prom: ${avg}</span>
-          <span class="grade-metric-chip" style="background: ${isSelected ? lesson.color : '#eff6ff'}; color: ${isSelected ? '#ffffff' : '#1e40af'}; border-color: ${lesson.color};">
-            ${isSelected ? '✓ Seleccionado' : 'Ver grado →'}
+          <span class="grade-metric-chip" style="background: ${isSelected ? gMeta.color : '#eff6ff'}; color: ${isSelected ? '#ffffff' : '#1e40af'}; border-color: ${gMeta.color};">
+            ${isSelected ? '✓ Seleccionado' : 'Ver áreas y pruebas →'}
           </span>
         </div>
       </button>
@@ -390,61 +508,133 @@ function renderDocenteVerticalGrades() {
   }).join('');
 }
 
-// Render deployed tests + QR / Question preview for the selected grade (or all grades)
+// Render deployed tests grouped by the 4 Agricultural Program areas (ordered by grade/area/lesson)
 function renderLessonsQrSection() {
   const container = document.getElementById('lessonsLinksContainer');
   const headingSpan = document.getElementById('deployedTestsHeadingText');
+  const resetAreaBtn = document.getElementById('resetAreaFilterBtn');
+  const btnAll = document.getElementById('filterAllCreatedBtn');
+  const btnEnabled = document.getElementById('filterEnabledOnlyBtn');
   if (!container) return;
 
+  if (btnAll && btnEnabled) {
+    btnAll.setAttribute('aria-pressed', showOnlyEnabledTests ? 'false' : 'true');
+    btnAll.style.background = !showOnlyEnabledTests ? '#1e3a8a' : '';
+    btnAll.style.color = !showOnlyEnabledTests ? '#ffffff' : '';
+    btnEnabled.setAttribute('aria-pressed', showOnlyEnabledTests ? 'true' : 'false');
+    btnEnabled.style.background = showOnlyEnabledTests ? '#15803d' : '';
+    btnEnabled.style.color = showOnlyEnabledTests ? '#ffffff' : '';
+  }
+
   const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
-  const lessonsToShow = activeGrade === 'todos'
-    ? LESSONS_DATA
-    : LESSONS_DATA.filter((l) => String(l.grado) === String(activeGrade));
+  if (resetAreaBtn) {
+    resetAreaBtn.style.display = activeAreaFilter !== 'todas' ? 'inline-flex' : 'none';
+  }
+
+  const areas = window.MEDUCA_CATALOGO
+    ? window.MEDUCA_CATALOGO.getAreasForGrade(catalogData, activeGrade)
+    : [{ numero: 3, nombre: 'Producción de alimentos para consumo humano', icono: '🥬', color: '#15803d', softBg: '#dcfce7', pruebas: LESSONS_DATA, disponible: true, leccionesPrograma: [] }];
+
+  const visibleAreas = activeAreaFilter === 'todas'
+    ? areas
+    : areas.filter((a) => String(a.numero) === String(activeAreaFilter));
 
   if (headingSpan) {
-    headingSpan.textContent = activeGrade === 'todos'
-      ? 'Pruebas Puestas en la Plataforma (3° a 6° Grado)'
-      : `Prueba Puesta en ${lessonsToShow[0]?.gradoTexto || (activeGrade + '° Grado')}`;
+    const gradeLabel = activeGrade === 'todos' ? 'Todos los Grados (3° a 6°)' : `${activeGrade}° Grado`;
+    const areaLabel = activeAreaFilter === 'todas'
+      ? '4 Áreas del Programa'
+      : `Área ${activeAreaFilter}: ${visibleAreas[0]?.nombre || ''}`;
+    headingSpan.textContent = `${gradeLabel} — ${areaLabel}`;
   }
 
   const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
-  container.innerHTML = lessonsToShow.map((lesson) => {
-    const fullUrl = baseUrl + lesson.slug;
+  container.innerHTML = visibleAreas.map((area) => {
+    const testsInArea = showOnlyEnabledTests
+      ? area.pruebas.filter((p) => enabledTestsMap[p.id] !== false)
+      : area.pruebas;
+
+    if (!area.disponible) {
+      const programHint = area.leccionesPrograma && area.leccionesPrograma.length > 0
+        ? `Temas del programa (Obsidian): ${area.leccionesPrograma.join(' · ')}`
+        : 'Disponible automáticamente al crear una prueba evaluativa para esta área.';
+      return `
+        <div class="area-group-card is-locked">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:1.5rem;opacity:0.65;" aria-hidden="true">${area.icono}</span>
+              <div>
+                <h3 style="font-size:1.05rem;color:#475569;margin:0;">Área ${area.numero}: ${escapeHtml(area.nombre)}</h3>
+                <p style="font-size:0.82rem;color:#64748b;margin:2px 0 0 0;">${escapeHtml(programHint)}</p>
+              </div>
+            </div>
+            <span class="grade-metric-chip" style="background:#f1f5f9;color:#64748b;">🔒 No disponible (0 pruebas creadas)</span>
+          </div>
+        </div>
+      `;
+    }
+
+    const cardsHtml = testsInArea.length === 0
+      ? '<p style="font-size:0.88rem;color:#64748b;margin:8px 0 0 0;">Ninguna prueba habilitada en esta área con el filtro actual.</p>'
+      : `<div class="deployed-tests-list" style="margin-top:10px;">
+          ${testsInArea.map((lesson) => {
+            const fullUrl = baseUrl + lesson.slug;
+            return `
+              <div class="deployed-test-row" style="--grade-accent: ${lesson.color};">
+                <div style="flex: 1; min-width: 240px;">
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
+                    <span style="font-size: 1.5rem;" aria-hidden="true">${lesson.icono}</span>
+                    <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor}; margin: 0;">
+                      ${escapeHtml(lesson.gradoTexto)} • ${escapeHtml(lesson.codigo)} • ${lesson.puntos} pts
+                    </span>
+                  </div>
+                  <h4 style="font-size: 1.08rem; color: #0f172a; margin-bottom: 4px;">
+                    ${escapeHtml(lesson.titulo)}
+                  </h4>
+                  <div style="font-size: 0.82rem; color: #475569; word-break: break-all;">
+                    🔗 <span style="font-family: monospace; color: #1e3a8a;">${escapeHtml(fullUrl)}</span>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                  ${renderTestClipCheckboxHtml(lesson, 'area_clip')}
+                  <button type="button" class="btn-secondary btn-preview-exam" data-exam-id="${escapeHtml(lesson.id)}" data-exam-grade="${lesson.grado}" style="background: #ffffff; border-color: ${lesson.color}; color: ${lesson.color};">
+                    <span aria-hidden="true">👁️</span> Ver Preguntas Puestas
+                  </button>
+                  <button type="button" class="btn-qr-action" data-qr-id="${escapeHtml(lesson.id)}" data-qr-grade="${lesson.grado}" style="background: ${lesson.color};">
+                    <span aria-hidden="true">📷</span> Ver QR
+                  </button>
+                  <a href="./${escapeHtml(lesson.slug)}" target="_blank" class="btn-secondary">
+                    <span aria-hidden="true">🚀</span> Abrir Prueba
+                  </a>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>`;
+
     return `
-      <div class="deployed-test-row" style="--grade-accent: ${lesson.color};">
-        <div style="flex: 1; min-width: 240px;">
-          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px;">
-            <span style="font-size: 1.6rem;" aria-hidden="true">${lesson.icono}</span>
-            <span class="lesson-qr-tag" style="background: ${lesson.badgeBg}; color: ${lesson.badgeColor}; margin: 0;">
-              ${escapeHtml(lesson.gradoTexto)} • ${escapeHtml(lesson.codigo)} • ${lesson.puntos} pts
-            </span>
+      <div class="area-group-card" style="--area-color: ${area.color}; --area-soft: ${area.softBg};">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:1.6rem;" aria-hidden="true">${area.icono}</span>
+            <div>
+              <h3 style="font-size:1.1rem;color:#0f172a;margin:0;">Área ${area.numero}: ${escapeHtml(area.nombre)}</h3>
+              <p style="font-size:0.83rem;color:#475569;margin:2px 0 0 0;">Ordenadas automáticamente por grado y lección</p>
+            </div>
           </div>
-          <h3 style="font-size: 1.12rem; color: #0f172a; margin-bottom: 4px;">
-            ${escapeHtml(lesson.titulo)}
-          </h3>
-          <div style="font-size: 0.84rem; color: #475569; word-break: break-all;">
-            🔗 <span style="font-family: monospace; color: #1e3a8a;">${escapeHtml(fullUrl)}</span>
-          </div>
+          <span class="grade-metric-chip" style="background:${area.softBg};color:${area.color};border-color:${area.color};">
+            ✅ ${area.pruebas.length} prueba${area.pruebas.length === 1 ? '' : 's'} disponible${area.pruebas.length === 1 ? '' : 's'}
+          </span>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-          <button type="button" class="btn-secondary btn-preview-exam" data-exam-grade="${lesson.grado}" style="background: #ffffff; border-color: ${lesson.color}; color: ${lesson.color};">
-            <span aria-hidden="true">👁️</span> Ver Preguntas Puestas
-          </button>
-          <button type="button" class="btn-qr-action" data-qr-grade="${lesson.grado}" style="background: ${lesson.color};">
-            <span aria-hidden="true">📷</span> Ver QR
-          </button>
-          <a href="./${escapeHtml(lesson.slug)}" target="_blank" class="btn-secondary">
-            <span aria-hidden="true">🚀</span> Abrir Prueba
-          </a>
-        </div>
+        ${cardsHtml}
       </div>
     `;
   }).join('');
 }
 
-async function openExamPreviewModal(gradeNum) {
-  const lesson = LESSONS_DATA.find((l) => l.grado === Number(gradeNum));
+async function openExamPreviewModal(testIdOrGrade) {
+  const testsCatalog = getActiveTestsCatalogList();
+  const lesson = testsCatalog.find((l) => l.id === testIdOrGrade || String(l.grado) === String(testIdOrGrade));
   if (!lesson) return;
 
   const modal = document.getElementById('examPreviewModal');
@@ -544,8 +734,9 @@ function setupExamPreviewModal() {
 }
 
 // Open QR Modal and generate QR code
-function openQrModal(gradeNum) {
-  const lesson = LESSONS_DATA.find(l => l.grado === gradeNum);
+function openQrModal(testIdOrGrade) {
+  const testsCatalog = getActiveTestsCatalogList();
+  const lesson = testsCatalog.find((l) => l.id === testIdOrGrade || String(l.grado) === String(testIdOrGrade));
   if (!lesson) return;
 
   const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
@@ -694,9 +885,17 @@ function rebuildCombinedState() {
     }
   });
 
+  if (window.MEDUCA_CATALOGO) {
+    enabledTestsMap = window.MEDUCA_CATALOGO.syncEnabledFromCloudItems(cloudItemsCache, catalogData);
+  }
   allResults = Array.from(combinedMap.values());
   renderDocenteVerticalGrades();
+  renderEnabledQuickBar();
   renderLessonsQrSection();
+  if (window.MEDUCA_NAV) {
+    const activeG = document.getElementById('gradeFilterSelect')?.value || 'todos';
+    window.MEDUCA_NAV.renderDocenteAreas(catalogData, activeG, activeAreaFilter, enabledTestsMap);
+  }
   calculateAndRenderStats();
   renderTable();
 }
@@ -996,14 +1195,60 @@ function setupDocenteEvents() {
     deployedBox.addEventListener('click', (e) => {
       const qrBtn = e.target.closest('.btn-qr-action');
       if (qrBtn) {
-        openQrModal(Number(qrBtn.dataset.qrGrade));
+        openQrModal(qrBtn.dataset.qrId || Number(qrBtn.dataset.qrGrade));
         return;
       }
       const previewBtn = e.target.closest('.btn-preview-exam');
       if (previewBtn) {
-        openExamPreviewModal(Number(previewBtn.dataset.examGrade));
+        openExamPreviewModal(previewBtn.dataset.examId || Number(previewBtn.dataset.examGrade));
       }
     });
+    deployedBox.addEventListener('change', (e) => {
+      const chk = e.target.closest('.test-clip-checkbox');
+      if (chk) {
+        handleTestClipToggle(chk.dataset.clipTestId, chk.checked);
+      }
+    });
+  }
+
+  const quickListBox = document.getElementById('enabledTestsQuickList');
+  if (quickListBox) {
+    quickListBox.addEventListener('click', (e) => {
+      const qrBtn = e.target.closest('.btn-qr-action');
+      if (qrBtn) {
+        openQrModal(qrBtn.dataset.qrId || Number(qrBtn.dataset.qrGrade));
+        return;
+      }
+      const previewBtn = e.target.closest('.btn-preview-exam');
+      if (previewBtn) {
+        openExamPreviewModal(previewBtn.dataset.examId || Number(previewBtn.dataset.examGrade));
+      }
+    });
+    quickListBox.addEventListener('change', (e) => {
+      const chk = e.target.closest('.test-clip-checkbox');
+      if (chk) {
+        handleTestClipToggle(chk.dataset.clipTestId, chk.checked);
+      }
+    });
+  }
+
+  const btnAllCreated = document.getElementById('filterAllCreatedBtn');
+  const btnEnabledOnly = document.getElementById('filterEnabledOnlyBtn');
+  const btnResetArea = document.getElementById('resetAreaFilterBtn');
+  if (btnAllCreated) {
+    btnAllCreated.addEventListener('click', () => {
+      showOnlyEnabledTests = false;
+      renderLessonsQrSection();
+    });
+  }
+  if (btnEnabledOnly) {
+    btnEnabledOnly.addEventListener('click', () => {
+      showOnlyEnabledTests = true;
+      renderLessonsQrSection();
+    });
+  }
+  if (btnResetArea) {
+    btnResetArea.addEventListener('click', () => selectDocenteArea('todas', false));
   }
   document.getElementById('statusFilter').addEventListener('change', renderTable);
   document.getElementById('groupFilterSelect').addEventListener('change', () => {

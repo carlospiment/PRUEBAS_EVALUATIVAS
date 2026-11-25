@@ -1,0 +1,120 @@
+{
+  "version": "2026-11-25",
+  "fuente_curricular": "Obsidian Mi cerebro/Agricultura — Programa Curricular MEDUCA 2026",
+  "areas": [
+    {
+      "numero": 1,
+      "id": "area-1",
+      "nombre": "Jardín y especies vegetales",
+      "icono": "🌺",
+      "color": "#db2777",
+      "softBg": "#fdf2f8"
+    },
+    {
+      "numero": 2,
+      "id": "area-2",
+      "nombre": "Tecnología práctica y funcional",
+      "icono": "🛠️",
+      "color": "#0284c7",
+      "softBg": "#e0f2fe"
+    },
+    {
+      "numero": 3,
+      "id": "area-3",
+      "nombre": "Producción de alimentos para consumo humano",
+      "icono": "🥬",
+      "color": "#15803d",
+      "softBg": "#dcfce7"
+    },
+    {
+      "numero": 4,
+      "id": "area-4",
+      "nombre": "Ambiente y Agricultura Sostenible",
+      "icono": "🌎",
+      "color": "#0d9488",
+      "softBg": "#ccfbf1"
+    }
+  ],
+  "grados": [
+    { "grado": 3, "nombre": "Tercer Grado (3°)", "icono": "🌿", "color": "#15803d", "badgeBg": "#dcfce7", "badgeColor": "#166534", "softBg": "#f0fdf4" },
+    { "grado": 4, "nombre": "Cuarto Grado (4°)", "icono": "🥕", "color": "#ea580c", "badgeBg": "#ffedd5", "badgeColor": "#c2410c", "softBg": "#fff7ed" },
+    { "grado": 5, "nombre": "Quinto Grado (5°)", "icono": "🌽", "color": "#1e40af", "badgeBg": "#dbeafe", "badgeColor": "#1e40af", "softBg": "#eff6ff" },
+    { "grado": 6, "nombre": "Sexto Grado (6°)", "icono": "🍅", "color": "#7c3aed", "badgeBg": "#ede9fe", "badgeColor": "#5b21b6", "softBg": "#f5f3ff" }
+  ],
+  "lecciones_programa": {
+    "3": {
+      "1": ["3.1.1 La jardinería: concepto, tipos e importancia", "3.1.2 Ciencias auxiliares de la jardinería"],
+      "2": ["3.2.1 Herramientas de jardinería y sus usos"],
+      "3": ["3.3.1 El huerto escolar, la salud y la nutrición", "3.3.2 Métodos tradicionales y modernos de producción agrícola"],
+      "4": ["3.4.1 Agricultura agrosostenible y cuidado del ambiente", "3.4.2 El suelo y sus componentes"]
+    },
+    "4": {
+      "1": ["4.1.1 Jardines ornamentales", "4.1.2 Hábitos de crecimiento de las plantas"],
+      "2": ["4.2.1 Herramientas agrícolas manuales: uso, función y agarre"],
+      "3": ["4.3.1 Beneficios e importancia del huerto escolar", "4.3.2 Métodos tradicionales de producción agrícola"],
+      "4": ["4.4.1 Materia orgánica, materia inorgánica y residuos", "4.4.2 Perfil y horizontes del suelo"]
+    },
+    "5": {
+      "1": ["5.1.1 Tipos de jardines: botánico, medicinal y alimenticio", "5.1.2 Necesidades de luz de las plantas", "5.1.3 Cuidados y mantenimiento de las plantas"],
+      "2": ["5.2.1 Uso, cuidado y mantenimiento de herramientas agrícolas"],
+      "3": ["5.3.1 Métodos modernos de producción", "5.3.2 Nuevas tecnologías en la producción agrícola", "5.3.3 Usos de la producción del huerto y emprendimiento"],
+      "4": ["5.4.1 Clasificación de los suelos", "5.4.2 Abonos orgánicos y agricultura ecológica"]
+    },
+    "6": {
+      "1": ["6.1.1 Planificación y diseño de un jardín", "6.1.2 Jardines exteriores e interiores", "6.1.3 Manejo integral de plagas y enfermedades"],
+      "2": ["6.2.1 Herramientas agrícolas y mecanización", "6.2.2 Tractor, equipos de tiro y mantenimiento"],
+      "3": ["6.3.1 Destino de la producción agrícola", "6.3.2 Tecnologías aplicadas a la producción agrícola"],
+      "4": ["6.4.1 Técnicas de producción orgánica y sistemas agrosostenibles", "6.4.2 Propiedades físicas y químicas del suelo"]
+    }
+  },
+  "pruebas": [
+    {
+      "id": "eval-agri-3-3-1",
+      "grado": 3,
+      "area": 3,
+      "leccion": "3.3.1",
+      "codigo": "Lección 3.3.1",
+      "titulo": "El huerto escolar, la salud y la nutrición",
+      "puntos": 19,
+      "slug": "tercer_grado.html",
+      "jsonPath": "./data/prueba_3ro.json",
+      "habilitada_por_defecto": true
+    },
+    {
+      "id": "eval-agri-4-3-1",
+      "grado": 4,
+      "area": 3,
+      "leccion": "4.3.1",
+      "codigo": "Lección 4.3.1",
+      "titulo": "Beneficios e importancia del huerto escolar",
+      "puntos": 24,
+      "slug": "cuarto_grado.html",
+      "jsonPath": "./data/prueba_4to.json",
+      "habilitada_por_defecto": true
+    },
+    {
+      "id": "eval-agri-5-3-1",
+      "grado": 5,
+      "area": 3,
+      "leccion": "5.3.1",
+      "codigo": "Lección 5.3.1",
+      "titulo": "Métodos modernos de producción",
+      "puntos": 31,
+      "slug": "quinto_grado.html",
+      "jsonPath": "./data/prueba_5to.json",
+      "habilitada_por_defecto": true
+    },
+    {
+      "id": "eval-agri-6-3-1",
+      "grado": 6,
+      "area": 3,
+      "leccion": "6.3.1",
+      "codigo": "Lección 6.3.1",
+      "titulo": "Destino de la producción agrícola",
+      "puntos": 32,
+      "slug": "sexto_grado.html",
+      "jsonPath": "./data/prueba_6to.json",
+      "habilitada_por_defecto": true
+    }
+  ]
+}

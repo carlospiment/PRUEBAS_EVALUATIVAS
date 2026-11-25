@@ -370,5 +370,22 @@ window.MEDUCA_FIREBASE = {
       console.error('Error al reiniciar en Firestore:', e);
       return false;
     }
+  },
+
+  // Guardar configuración de pruebas habilitadas por el docente ("clips de selección")
+  async saveEnabledTestsConfig(habilitadasMap) {
+    if (!firestoreDb || !this.isTeacherAuthenticated()) return false;
+    try {
+      await firestoreDb.collection('resultados_evaluaciones').doc('__config_pruebas_activas__').set({
+        tipo: 'config_pruebas_activas',
+        habilitadas: habilitadasMap || {},
+        updated_at: new Date().toISOString(),
+        actualizado_por: this.getCurrentUser()?.email || 'civanp004@gmail.com'
+      });
+      return true;
+    } catch (e) {
+      console.warn('No se pudo sincronizar selección de pruebas activas en Firestore:', e);
+      return false;
+    }
   }
 };
