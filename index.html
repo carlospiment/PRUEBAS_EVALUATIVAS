@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Evaluaciones de Agricultura | MEDUCA</title>
-  <link rel="stylesheet" href="./css/style.css">
+  <link rel="stylesheet" href="./css/style.css?v=21">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#15803d">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
@@ -40,7 +40,7 @@
           <span id="homeGoogleSignInText">Iniciar sesión con Gmail</span>
         </button>
 
-        <a href="./docente.html" id="homeOpenDocenteLink" class="btn-primary" style="display: none; max-width: 340px; padding: 15px 24px; font-size: 1.05rem; background: #15803d; justify-content: center;">
+        <a href="./docente.html" id="homeOpenDocenteLink" class="btn-primary" style="display: none; max-width: 340px; padding: 15px 24px; font-size: 1.05rem; background: #15803d; justify-content: center; text-decoration: none;">
           Entrar a Grados
         </a>
 
@@ -124,7 +124,10 @@
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('./sw.js')
-            .then((reg) => console.log('SW registrado:', reg.scope))
+            .then((reg) => {
+              console.log('SW registrado:', reg.scope);
+              return reg.update().catch(() => {});
+            })
             .catch((err) => console.warn('SW err:', err));
         });
       }

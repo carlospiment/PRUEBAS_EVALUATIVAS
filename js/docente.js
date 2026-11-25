@@ -333,7 +333,9 @@ function getActiveTestsCatalogList() {
 
 function showGradesOverviewView(shouldScroll = true) {
   const overviewEl = document.getElementById('gradesOverviewSection');
+  const areasEl = document.getElementById('gradeAreasSection');
   const detailEl = document.getElementById('gradeDetailSection');
+  const headerBackBtn = document.getElementById('headerBackToGradesBtn');
   const gradeSelect = document.getElementById('gradeFilterSelect');
   currentSelectedGrade = 'todos';
   if (gradeSelect) gradeSelect.value = 'todos';
@@ -342,7 +344,37 @@ function showGradesOverviewView(shouldScroll = true) {
   renderDocenteVerticalGrades();
   renderEnabledQuickBar();
   if (overviewEl) overviewEl.style.display = 'block';
+  if (areasEl) areasEl.style.display = 'none';
   if (detailEl) detailEl.style.display = 'none';
+  if (headerBackBtn) headerBackBtn.style.display = 'none';
+  if (shouldScroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function showGradeAreasView(shouldScroll = true) {
+  const overviewEl = document.getElementById('gradesOverviewSection');
+  const areasEl = document.getElementById('gradeAreasSection');
+  const detailEl = document.getElementById('gradeDetailSection');
+  const headerBackBtn = document.getElementById('headerBackToGradesBtn');
+  const areasTitleEl = document.getElementById('gradeAreasTitle');
+
+  if (currentSelectedGrade === 'todos') {
+    showGradesOverviewView(shouldScroll);
+    return;
+  }
+
+  activeAreaFilter = 'todas';
+  const gMeta = (catalogData?.grados || LESSONS_DATA).find((g) => String(g.grado) === String(currentSelectedGrade));
+  if (areasTitleEl) {
+    areasTitleEl.textContent = `${gMeta?.icono || ''} ${gMeta?.nombre || gMeta?.gradoTexto || (currentSelectedGrade + '° Grado')}`;
+  }
+
+  renderDocenteAreasVertical();
+  if (overviewEl) overviewEl.style.display = 'none';
+  if (areasEl) areasEl.style.display = 'block';
+  if (detailEl) detailEl.style.display = 'none';
+  if (headerBackBtn) headerBackBtn.style.display = 'inline-flex';
   if (shouldScroll) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -351,7 +383,10 @@ function showGradesOverviewView(shouldScroll = true) {
 function selectDocenteGrade(gradeVal, shouldScroll = true) {
   const gradeSelect = document.getElementById('gradeFilterSelect');
   const overviewEl = document.getElementById('gradesOverviewSection');
+  const areasEl = document.getElementById('gradeAreasSection');
   const detailEl = document.getElementById('gradeDetailSection');
+  const headerBackBtn = document.getElementById('headerBackToGradesBtn');
+  const areasTitleEl = document.getElementById('gradeAreasTitle');
   const selectedTitleEl = document.getElementById('selectedGradeTitle');
   const nextVal = ['3', '4', '5', '6', 'todos'].includes(String(gradeVal)) ? String(gradeVal) : 'todos';
   currentSelectedGrade = nextVal;
@@ -359,16 +394,79 @@ function selectDocenteGrade(gradeVal, shouldScroll = true) {
     gradeSelect.value = nextVal;
   }
   activeAreaFilter = 'todas';
-  if (overviewEl) overviewEl.style.display = 'none';
-  if (detailEl) detailEl.style.display = 'block';
+
+  const gMeta = (catalogData?.grados || LESSONS_DATA).find((g) => String(g.grado) === nextVal);
+  if (areasTitleEl) {
+    areasTitleEl.textContent = nextVal === 'todos'
+      ? 'Todos los Grados (3° a 6°)'
+      : `${gMeta?.icono || ''} ${gMeta?.nombre || gMeta?.gradoTexto || (nextVal + '° Grado')}`;
+  }
   if (selectedTitleEl) {
-    const gMeta = (catalogData?.grados || LESSONS_DATA).find((g) => String(g.grado) === nextVal);
     selectedTitleEl.textContent = nextVal === 'todos'
       ? 'Todos los Grados (3° a 6°) — Actividades y Resultados'
       : `${gMeta?.icono || ''} ${gMeta?.nombre || gMeta?.gradoTexto || (nextVal + '° Grado')} — Actividades y Resultados`;
   }
+
   updateGroupFilterOptions();
   renderDocenteVerticalGrades();
+  renderDocenteAreasVertical();
+  renderEnabledQuickBar();
+  renderDocenteAreasBar();
+  renderLessonsQrSection();
+  calculateAndRenderStats();
+  renderTable();
+
+  if (nextVal === 'todos') {
+    if (overviewEl) overviewEl.style.display = 'none';
+    if (areasEl) areasEl.style.display = 'none';
+    if (detailEl) detailEl.style.display = 'block';
+  } else {
+    if (overviewEl) overviewEl.style.display = 'none';
+    if (areasEl) areasEl.style.display = 'block';
+    if (detailEl) detailEl.style.display = 'none';
+  }
+  if (headerBackBtn) headerBackBtn.style.display = 'inline-flex';
+  if (shouldScroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function selectDocenteArea(areaVal, shouldScroll = true) {
+  const nextArea = ['1', '2', '3', '4', 'todas'].includes(String(areaVal)) ? String(areaVal) : 'todas';
+  if (nextArea === 'todas') {
+    showGradeAreasView(shouldScroll);
+    return;
+  }
+
+  activeAreaFilter = nextArea;
+  const overviewEl = document.getElementById('gradesOverviewSection');
+  const areasEl = document.getElementById('gradeAreasSection');
+  const detailEl = document.getElementById('gradeDetailSection');
+  const headerBackBtn = document.getElementById('headerBackToGradesBtn');
+  const selectedTitleEl = document.getElementById('selectedGradeTitle');
+
+  const activeGrade = getActiveGrade();
+  const gMeta = (catalogData?.grados || LESSONS_DATA).find((g) => String(g.grado) === String(activeGrade));
+  const areas = window.MEDUCA_CATALOGO
+    ? window.MEDUCA_CATALOGO.getAreasForGrade(catalogData, activeGrade)
+    : [];
+  const areaObj = areas.find((a) => String(a.numero) === nextArea);
+
+  if (selectedTitleEl) {
+    const gradeText = activeGrade === 'todos'
+      ? 'Todos los Grados'
+      : `${gMeta?.icono || ''} ${gMeta?.nombre || gMeta?.gradoTexto || (activeGrade + '° Grado')}`;
+    selectedTitleEl.textContent = areaObj
+      ? `${gradeText} • Área ${areaObj.numero}: ${areaObj.nombre}`
+      : `${gradeText} • Área ${nextArea}`;
+  }
+
+  if (overviewEl) overviewEl.style.display = 'none';
+  if (areasEl) areasEl.style.display = 'none';
+  if (detailEl) detailEl.style.display = 'block';
+  if (headerBackBtn) headerBackBtn.style.display = 'inline-flex';
+
+  renderDocenteAreasVertical();
   renderEnabledQuickBar();
   renderDocenteAreasBar();
   renderLessonsQrSection();
@@ -379,15 +477,32 @@ function selectDocenteGrade(gradeVal, shouldScroll = true) {
   }
 }
 
-function selectDocenteArea(areaVal, shouldScroll = false) {
-  const nextArea = ['1', '2', '3', '4', 'todas'].includes(String(areaVal)) ? String(areaVal) : 'todas';
-  activeAreaFilter = nextArea;
-  renderDocenteAreasBar();
-  renderLessonsQrSection();
-  if (shouldScroll) {
-    const target = document.getElementById('deployedTestsTitle') || document.getElementById('lessonsLinksContainer');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+function renderDocenteAreasVertical() {
+  const container = document.getElementById('docenteAreasButtonsVertical');
+  if (!container) return;
+
+  const activeGrade = getActiveGrade();
+  const areas = window.MEDUCA_CATALOGO
+    ? window.MEDUCA_CATALOGO.getAreasForGrade(catalogData, activeGrade)
+    : [];
+
+  container.innerHTML = areas.map((area) => {
+    const isSelected = area.disponible && String(area.numero) === String(activeAreaFilter);
+    return `
+      <button
+        type="button"
+        class="docente-grade-btn grade-simple-btn docente-area-select-btn ${isSelected ? 'is-active' : ''} ${area.disponible ? '' : 'is-disabled-area'}"
+        data-area-choice="${area.numero}"
+        ${area.disponible ? '' : 'disabled aria-disabled="true"'}
+        aria-pressed="${isSelected ? 'true' : 'false'}"
+        style="--grade-accent: ${area.color}; --grade-soft: ${area.softBg};"
+      >
+        <span class="grade-simple-icon" aria-hidden="true">${area.icono}</span>
+        <span class="grade-simple-label">Área ${area.numero}: ${escapeHtml(area.nombre)}</span>
+        ${area.disponible ? '' : '<span class="area-empty-tag">Sin pruebas</span>'}
+      </button>
+    `;
+  }).join('');
 }
 
 function renderDocenteAreasBar() {
@@ -470,9 +585,12 @@ function renderEnabledQuickBar() {
 
   const activeGrade = getActiveGrade();
   const allTests = getActiveTestsCatalogList();
-  const scopedTests = activeGrade === 'todos'
+  const gradeTests = activeGrade === 'todos'
     ? allTests
     : allTests.filter((t) => Number(t.grado) === Number(activeGrade));
+  const scopedTests = activeAreaFilter === 'todas'
+    ? gradeTests
+    : gradeTests.filter((t) => String(t.area || 3) === String(activeAreaFilter));
   const enabledTests = scopedTests.filter((t) => enabledTestsMap[t.id] !== false);
   if (countEl) countEl.textContent = String(enabledTests.length);
 
@@ -531,47 +649,23 @@ function renderDocenteVerticalGrades() {
     showAllBtn.setAttribute('aria-pressed', isAll ? 'true' : 'false');
   }
 
-  const allRows = getStudentRows();
   const gradesList = catalogData?.grados || LESSONS_DATA;
-  const testsCatalog = getActiveTestsCatalogList();
 
   container.innerHTML = gradesList.map((gMeta) => {
     const gNum = Number(gMeta.grado);
-    const gradeRows = allRows.filter((item) => Number(item.student.grado) === gNum);
-    const completed = gradeRows.filter((item) => Boolean(item.result));
-    const avg = completed.length > 0
-      ? (completed.reduce((acc, it) => acc + (Number(it.result.nota_meduca) || 1.0), 0) / completed.length).toFixed(2)
-      : '-';
-    const gradeTests = testsCatalog.filter((t) => Number(t.grado) === gNum);
-    const activeAreasCount = new Set(gradeTests.map((t) => Number(t.area || 3))).size;
     const isSelected = String(gNum) === String(activeGrade);
+    const gradeLabel = gMeta.nombre || gMeta.gradoTexto || `${gNum}° Grado`;
 
     return `
       <button
         type="button"
-        class="docente-grade-btn ${isSelected ? 'is-active' : ''}"
+        class="docente-grade-btn grade-simple-btn ${isSelected ? 'is-active' : ''}"
         data-grade-choice="${gNum}"
         aria-pressed="${isSelected ? 'true' : 'false'}"
         style="--grade-accent: ${gMeta.color}; --grade-soft: ${gMeta.softBg};"
       >
-        <div class="docente-grade-meta">
-          <span style="font-size: 2.1rem; line-height: 1;" aria-hidden="true">${gMeta.icono}</span>
-          <div>
-            <span class="lesson-qr-tag" style="background: ${gMeta.badgeBg}; color: ${gMeta.badgeColor};">
-              ${escapeHtml(gMeta.nombre || gMeta.gradoTexto)} • ${activeAreasCount} de 4 áreas con pruebas
-            </span>
-            <div style="font-family: 'Outfit', sans-serif; font-size: 1.04rem; font-weight: 800; color: #0f172a;">
-              ${gradeTests.length} prueba${gradeTests.length === 1 ? '' : 's'} creada${gradeTests.length === 1 ? '' : 's'} (${gradeTests.map((t) => escapeHtml(t.codigo)).join(', ')})
-            </div>
-          </div>
-        </div>
-        <div class="docente-grade-stats">
-          <span class="grade-metric-chip">✅ ${completed.length} / ${gradeRows.length} realizadas</span>
-          <span class="grade-metric-chip">⭐ Prom: ${avg}</span>
-          <span class="grade-metric-chip" style="background: ${gMeta.color}; color: #ffffff; border-color: ${gMeta.color};">
-            Entrar al grado
-          </span>
-        </div>
+        <span class="grade-simple-icon" aria-hidden="true">${gMeta.icono}</span>
+        <span class="grade-simple-label">${escapeHtml(gradeLabel)}</span>
       </button>
     `;
   }).join('');
@@ -1253,9 +1347,27 @@ function setupDocenteEvents() {
     showAllBtn.addEventListener('click', () => selectDocenteGrade('todos', true));
   }
 
+  const backToGradesFromAreasBtn = document.getElementById('backToGradesFromAreasBtn');
+  if (backToGradesFromAreasBtn) {
+    backToGradesFromAreasBtn.addEventListener('click', () => showGradesOverviewView(true));
+  }
   const backToGradesBtn = document.getElementById('backToGradesBtn');
   if (backToGradesBtn) {
-    backToGradesBtn.addEventListener('click', () => showGradesOverviewView(true));
+    backToGradesBtn.addEventListener('click', () => showGradeAreasView(true));
+  }
+  const headerBackBtn = document.getElementById('headerBackToGradesBtn');
+  if (headerBackBtn) {
+    headerBackBtn.addEventListener('click', () => {
+      if (currentSelectedGrade !== 'todos' && activeAreaFilter !== 'todas') {
+        showGradeAreasView(true);
+      } else {
+        showGradesOverviewView(true);
+      }
+    });
+  }
+  const bottomBackBtn = document.getElementById('bottomBackToGradesBtn');
+  if (bottomBackBtn) {
+    bottomBackBtn.addEventListener('click', () => showGradeAreasView(true));
   }
 
   const verticalGrades = document.getElementById('docenteGradesVertical');
@@ -1264,6 +1376,16 @@ function setupDocenteEvents() {
       const btn = e.target.closest('.docente-grade-btn');
       if (btn) {
         selectDocenteGrade(btn.dataset.gradeChoice, true);
+      }
+    });
+  }
+
+  const verticalAreas = document.getElementById('docenteAreasButtonsVertical');
+  if (verticalAreas) {
+    verticalAreas.addEventListener('click', (e) => {
+      const btn = e.target.closest('.docente-area-select-btn');
+      if (btn && !btn.disabled) {
+        selectDocenteArea(btn.dataset.areaChoice, true);
       }
     });
   }

@@ -503,6 +503,7 @@ h1, h2, h3, h4, .font-heading {
   font-size: 1.25rem;
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
+  text-decoration: none;
   cursor: pointer;
   box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
   transition: all 0.2s;
@@ -515,6 +516,7 @@ h1, h2, h3, h4, .font-heading {
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 22px rgba(22, 163, 74, 0.45);
+  text-decoration: none;
 }
 
 .btn-primary:active:not(:disabled) {
@@ -1887,7 +1889,9 @@ h1, h2, h3, h4, .font-heading {
 .docente-grades-vertical {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  max-width: 560px;
+  margin: 14px auto 0;
 }
 
 .docente-grade-btn {
@@ -1908,6 +1912,53 @@ h1, h2, h3, h4, .font-heading {
   cursor: pointer;
   transition: all 0.16s ease;
   font-family: inherit;
+}
+
+.docente-grade-btn.grade-simple-btn {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  padding: 18px 22px;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  text-decoration: none;
+}
+
+.grade-simple-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.grade-simple-label {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  flex: 1;
+}
+
+.docente-grade-btn.is-disabled-area:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  border-left-color: #cbd5e1;
+  color: #94a3b8;
+  opacity: 0.7;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.docente-grade-btn.is-disabled-area:disabled .grade-simple-label {
+  color: #64748b;
+}
+
+.area-empty-tag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #e2e8f0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
 }
 
 .docente-grade-btn:hover {
