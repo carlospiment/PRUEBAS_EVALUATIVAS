@@ -401,8 +401,17 @@
   <script src="./js/vendor/firebase-app-compat.js"></script>
   <script src="./js/vendor/firebase-auth-compat.js"></script>
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
-  <script src="./js/firebase-config.js"></script>
-  <script src="./js/catalogo.js"></script>
-  <script src="./js/docente.js"></script>
+  <script src="./js/firebase-config.js?v=20"></script>
+  <script src="./js/catalogo.js?v=20"></script>
+  <script src="./js/docente.js?v=20"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => reg.update().catch(() => {}))
+          .catch(() => {});
+      });
+    }
+  </script>
 </body>
 </html>

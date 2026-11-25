@@ -77,9 +77,14 @@ const LESSONS_DATA = [
 
 const testSpecsCache = new Map();
 let catalogData = null;
+let currentSelectedGrade = 'todos';
 let activeAreaFilter = 'todas';
 let showOnlyEnabledTests = false;
 let enabledTestsMap = {};
+
+function getActiveGrade() {
+  return currentSelectedGrade || 'todos';
+}
 
 function cleanStudentName(str) {
   if (!str) return '';
@@ -330,6 +335,7 @@ function showGradesOverviewView(shouldScroll = true) {
   const overviewEl = document.getElementById('gradesOverviewSection');
   const detailEl = document.getElementById('gradeDetailSection');
   const gradeSelect = document.getElementById('gradeFilterSelect');
+  currentSelectedGrade = 'todos';
   if (gradeSelect) gradeSelect.value = 'todos';
   activeAreaFilter = 'todas';
   updateGroupFilterOptions();
@@ -348,6 +354,7 @@ function selectDocenteGrade(gradeVal, shouldScroll = true) {
   const detailEl = document.getElementById('gradeDetailSection');
   const selectedTitleEl = document.getElementById('selectedGradeTitle');
   const nextVal = ['3', '4', '5', '6', 'todos'].includes(String(gradeVal)) ? String(gradeVal) : 'todos';
+  currentSelectedGrade = nextVal;
   if (gradeSelect) {
     gradeSelect.value = nextVal;
   }
@@ -387,7 +394,7 @@ function renderDocenteAreasBar() {
   const bar = document.getElementById('docenteAreasFilterBar');
   if (!bar) return;
 
-  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const activeGrade = getActiveGrade();
   const areas = window.MEDUCA_CATALOGO
     ? window.MEDUCA_CATALOGO.getAreasForGrade(catalogData, activeGrade)
     : [];
@@ -461,11 +468,11 @@ function renderEnabledQuickBar() {
   const countEl = document.getElementById('enabledTestsCount');
   if (!listEl) return;
 
-  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const activeGrade = getActiveGrade();
   const allTests = getActiveTestsCatalogList();
   const scopedTests = activeGrade === 'todos'
     ? allTests
-    : allTests.filter((t) => String(t.grado) === String(activeGrade));
+    : allTests.filter((t) => Number(t.grado) === Number(activeGrade));
   const enabledTests = scopedTests.filter((t) => enabledTestsMap[t.id] !== false);
   if (countEl) countEl.textContent = String(enabledTests.length);
 
@@ -514,7 +521,7 @@ function renderDocenteVerticalGrades() {
   const container = document.getElementById('docenteGradesVertical');
   if (!container) return;
 
-  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const activeGrade = getActiveGrade();
   const showAllBtn = document.getElementById('showAllGradesBtn');
   if (showAllBtn) {
     const isAll = activeGrade === 'todos';
@@ -588,14 +595,18 @@ function renderLessonsQrSection() {
     btnEnabled.style.color = showOnlyEnabledTests ? '#ffffff' : '';
   }
 
-  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const activeGrade = getActiveGrade();
   if (resetAreaBtn) {
     resetAreaBtn.style.display = activeAreaFilter !== 'todas' ? 'inline-flex' : 'none';
   }
 
+  const fallbackScoped = activeGrade === 'todos'
+    ? LESSONS_DATA
+    : LESSONS_DATA.filter((l) => Number(l.grado) === Number(activeGrade));
+
   const areas = window.MEDUCA_CATALOGO
     ? window.MEDUCA_CATALOGO.getAreasForGrade(catalogData, activeGrade)
-    : [{ numero: 3, nombre: 'Producción de alimentos para consumo humano', icono: '🥬', color: '#15803d', softBg: '#dcfce7', pruebas: LESSONS_DATA, disponible: true, leccionesPrograma: [] }];
+    : [{ numero: 3, nombre: 'Producción de alimentos para consumo humano', icono: '🥬', color: '#15803d', softBg: '#dcfce7', pruebas: fallbackScoped, disponible: fallbackScoped.length > 0, leccionesPrograma: [] }];
 
   const visibleAreas = activeAreaFilter === 'todas'
     ? areas
@@ -612,9 +623,12 @@ function renderLessonsQrSection() {
   const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
 
   container.innerHTML = visibleAreas.map((area) => {
+    const gradeScopedTests = activeGrade === 'todos'
+      ? area.pruebas
+      : area.pruebas.filter((p) => Number(p.grado) === Number(activeGrade));
     const testsInArea = showOnlyEnabledTests
-      ? area.pruebas.filter((p) => enabledTestsMap[p.id] !== false)
-      : area.pruebas;
+      ? gradeScopedTests.filter((p) => enabledTestsMap[p.id] !== false)
+      : gradeScopedTests;
 
     if (!area.disponible) {
       const programHint = area.leccionesPrograma && area.leccionesPrograma.length > 0
@@ -1048,7 +1062,7 @@ function getStudentRows() {
 }
 
 function calculateAndRenderStats() {
-  const gradeSel = document.getElementById('gradeFilterSelect')?.value || 'todos';
+  const gradeSel = getActiveGrade();
   const groupSel = document.getElementById('groupFilterSelect')?.value || 'todos';
 
   let rows = getStudentRows();
@@ -1092,7 +1106,7 @@ function calculateAndRenderStats() {
 
 function getFilteredRows() {
   const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
-  const gradeFilter = document.getElementById('gradeFilterSelect').value;
+  const gradeFilter = getActiveGrade();
   const statusFilter = document.getElementById('statusFilter').value;
   const groupFilter = document.getElementById('groupFilterSelect').value;
 
@@ -1352,7 +1366,11 @@ function setupDocenteEvents() {
 
   const rosterModal = document.getElementById('rosterModal');
   document.getElementById('openRosterBtn').addEventListener('click', () => {
-    const listText = allStudents.map(s => s.nombre).join('\n');
+    const activeGrade = getActiveGrade();
+    const scopedStudents = activeGrade === 'todos'
+      ? allStudents
+      : allStudents.filter((s) => Number(s.grado) === Number(activeGrade));
+    const listText = scopedStudents.map(s => s.nombre).join('\n');
     document.getElementById('rosterTextarea').value = listText;
     rosterModal.classList.add('active');
   });
@@ -1369,7 +1387,7 @@ function setupDocenteEvents() {
 }
 
 function updateGroupFilterOptions() {
-  const g = document.getElementById('gradeFilterSelect').value;
+  const g = getActiveGrade();
   const sel = document.getElementById('groupFilterSelect');
   if (g === '3') {
     sel.innerHTML = `

@@ -3,7 +3,7 @@
    Soporte 100% Offline para PWA y GitHub Pages
    =================================================== */
 
-const CACHE_NAME = 'meduca-agri-eval-v19';
+const CACHE_NAME = 'meduca-agri-eval-v20';
 
 const STATIC_ASSETS = [
   './',
