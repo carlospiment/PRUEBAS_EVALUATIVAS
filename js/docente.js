@@ -139,10 +139,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupDocenteEvents();
   setupQrModalEvents();
   setupExamPreviewModal();
-  renderDocenteVerticalGrades();
-  renderEnabledQuickBar();
-  renderDocenteAreasBar();
-  renderLessonsQrSection();
+  if (['3', '4', '5', '6'].includes(String(initialGradeParam))) {
+    selectDocenteGrade(String(initialGradeParam), false);
+  } else {
+    showGradesOverviewView(false);
+  }
   initAuthAndData();
 });
 
@@ -307,6 +308,7 @@ function setupLockScreen() {
       if (pinError) pinError.style.display = 'none';
       if (googleAuthErr) googleAuthErr.style.display = 'none';
       updateAuthUI(null, null);
+      window.location.href = './index.html';
     });
   }
 }
@@ -324,13 +326,40 @@ function getActiveTestsCatalogList() {
   return catalogData?.pruebas || LESSONS_DATA;
 }
 
-function selectDocenteGrade(gradeVal, shouldScroll = false) {
+function showGradesOverviewView(shouldScroll = true) {
+  const overviewEl = document.getElementById('gradesOverviewSection');
+  const detailEl = document.getElementById('gradeDetailSection');
   const gradeSelect = document.getElementById('gradeFilterSelect');
+  if (gradeSelect) gradeSelect.value = 'todos';
+  activeAreaFilter = 'todas';
+  updateGroupFilterOptions();
+  renderDocenteVerticalGrades();
+  renderEnabledQuickBar();
+  if (overviewEl) overviewEl.style.display = 'block';
+  if (detailEl) detailEl.style.display = 'none';
+  if (shouldScroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function selectDocenteGrade(gradeVal, shouldScroll = true) {
+  const gradeSelect = document.getElementById('gradeFilterSelect');
+  const overviewEl = document.getElementById('gradesOverviewSection');
+  const detailEl = document.getElementById('gradeDetailSection');
+  const selectedTitleEl = document.getElementById('selectedGradeTitle');
   const nextVal = ['3', '4', '5', '6', 'todos'].includes(String(gradeVal)) ? String(gradeVal) : 'todos';
   if (gradeSelect) {
     gradeSelect.value = nextVal;
   }
   activeAreaFilter = 'todas';
+  if (overviewEl) overviewEl.style.display = 'none';
+  if (detailEl) detailEl.style.display = 'block';
+  if (selectedTitleEl) {
+    const gMeta = (catalogData?.grados || LESSONS_DATA).find((g) => String(g.grado) === nextVal);
+    selectedTitleEl.textContent = nextVal === 'todos'
+      ? 'Todos los Grados (3° a 6°) — Actividades y Resultados'
+      : `${gMeta?.icono || ''} ${gMeta?.nombre || gMeta?.gradoTexto || (nextVal + '° Grado')} — Actividades y Resultados`;
+  }
   updateGroupFilterOptions();
   renderDocenteVerticalGrades();
   renderEnabledQuickBar();
@@ -339,8 +368,7 @@ function selectDocenteGrade(gradeVal, shouldScroll = false) {
   calculateAndRenderStats();
   renderTable();
   if (shouldScroll) {
-    const target = document.getElementById('deployedTestsTitle') || document.getElementById('docenteDashboardContent');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
 
@@ -1204,7 +1232,12 @@ function setupDocenteEvents() {
 
   const showAllBtn = document.getElementById('showAllGradesBtn');
   if (showAllBtn) {
-    showAllBtn.addEventListener('click', () => selectDocenteGrade('todos', false));
+    showAllBtn.addEventListener('click', () => selectDocenteGrade('todos', true));
+  }
+
+  const backToGradesBtn = document.getElementById('backToGradesBtn');
+  if (backToGradesBtn) {
+    backToGradesBtn.addEventListener('click', () => showGradesOverviewView(true));
   }
 
   const verticalGrades = document.getElementById('docenteGradesVertical');

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Inicio y Acceso | Evaluaciones de Agricultura MEDUCA</title>
+  <title>Evaluaciones de Agricultura | MEDUCA</title>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#15803d">
@@ -12,104 +12,47 @@
 <body data-page="home">
   <a href="#mainContent" class="skip-link visually-hidden">Ir al contenido principal</a>
 
-  <main id="mainContent" class="container" style="max-width: 680px; padding: 26px 20px;" tabindex="-1">
+  <main id="mainContent" class="container" style="max-width: 620px; padding: 36px 20px;" tabindex="-1">
 
-    <!-- HERO HEADER DE VISTA INICIAL -->
+    <!-- ENCABEZADO INICIAL -->
     <header class="header-hero" style="text-align: center;">
       <div class="badge-top" style="margin-bottom: 12px;">
         <span aria-hidden="true">🏫</span>
         <span>MEDUCA • Panamá</span>
         <span aria-hidden="true">•</span>
-        <span>Agricultura (3° a 6°)</span>
+        <span>Agricultura</span>
       </div>
       <h1>Evaluaciones de Agricultura</h1>
-      <div class="subtitle">Vista de Inicio • Acceso a la Plataforma Docente</div>
     </header>
 
-    <!-- TARJETA PRINCIPAL: COLOCAR ACCESO PARA ENTRAR A LA APLICACIÓN -->
-    <section class="card start-access-card" id="homeTeacherAuthCard" aria-labelledby="homeAuthTitle">
-      <div style="font-size: 2.8rem; margin-bottom: 8px;" aria-hidden="true">🔐</div>
-      <h2 id="homeAuthTitle" style="font-size: 1.55rem; color: #1e3a8a; margin-bottom: 8px;">
-        Acceso a la Aplicación
-      </h2>
-      <p id="homeAuthSubtitle" style="color: #475569; font-size: 0.96rem; margin-bottom: 20px; line-height: 1.5;">
-        Inicia sesión con tu cuenta autorizada de Google (<strong>civanp004@gmail.com</strong>) para ingresar al panel por grados, las 4 áreas del programa y las pruebas habilitadas.
-      </p>
-
-      <div id="homeAuthError" style="display: none; color: #b91c1c; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 10px 12px; font-weight: 700; font-size: 0.88rem; margin-bottom: 14px; text-align: left;"></div>
+    <!-- ACCESO EXCLUSIVO CON GMAIL -->
+    <section class="card start-access-card" id="homeTeacherAuthCard" aria-label="Acceso con Gmail" style="padding: 36px 24px;">
+      <div id="homeAuthError" style="display: none; color: #b91c1c; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 10px 12px; font-weight: 700; font-size: 0.88rem; margin-bottom: 16px; text-align: left;"></div>
 
       <div style="display: flex; flex-direction: column; gap: 12px; align-items: center;">
-        <button type="button" id="homeGoogleSignInBtn" class="btn-primary" style="max-width: 360px; padding: 14px 22px; font-size: 1.04rem; background: #1e3a8a;">
-          <span style="background: white; color: #1e3a8a; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900;" aria-hidden="true">G</span>
-          <span id="homeGoogleSignInText">Continuar con Gmail</span>
+        <button type="button" id="homeGoogleSignInBtn" class="btn-primary" style="max-width: 340px; padding: 15px 24px; font-size: 1.05rem; background: #1e3a8a; display: inline-flex; align-items: center; justify-content: center; gap: 12px;">
+          <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" style="background: #ffffff; border-radius: 50%; padding: 3px; flex-shrink: 0;">
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          </svg>
+          <span id="homeGoogleSignInText">Iniciar sesión con Gmail</span>
         </button>
 
-        <a href="./docente.html" id="homeOpenDocenteLink" class="btn-primary" style="display: none; max-width: 360px; background: #15803d; padding: 14px 22px; font-size: 1.04rem;">
-          Entrar a Grados y Áreas
+        <a href="./docente.html" id="homeOpenDocenteLink" class="btn-primary" style="display: none; max-width: 340px; padding: 15px 24px; font-size: 1.05rem; background: #15803d; justify-content: center;">
+          Entrar a Grados
         </a>
 
-        <button type="button" id="homeSwitchAccountBtn" class="btn-secondary" style="display: none; font-size: 0.86rem;">
+        <button type="button" id="homeSwitchAccountBtn" class="btn-secondary" style="display: none; font-size: 0.9rem;">
           Cerrar sesión actual
         </button>
-      </div>
-
-      <!-- ACCESO ALTERNATIVO POR PIN LOCAL / OFFLINE -->
-      <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
-        <button type="button" id="homeTogglePinBtn" aria-expanded="false" aria-controls="homePinSection" style="background: none; border: none; color: #475569; font-weight: 700; font-size: 0.9rem; cursor: pointer; text-decoration: underline;">
-          ¿Trabajas en modo local / sin internet? Colocar PIN docente
-        </button>
-
-        <div id="homePinSection" style="display: none; margin-top: 14px;">
-          <label for="homePinInput" class="visually-hidden">PIN docente de 4 dígitos</label>
-          <input
-            type="password"
-            id="homePinInput"
-            class="pin-input-field"
-            maxlength="4"
-            placeholder="••••"
-            autocomplete="off"
-          >
-          <div id="homePinError" style="color: #ef4444; font-weight: 700; font-size: 0.88rem; margin-top: 8px; display: none;">
-            ❌ PIN incorrecto. Inténtalo de nuevo.
-          </div>
-          <div style="margin-top: 12px;">
-            <button type="button" id="homePinSubmitBtn" class="btn-secondary" style="padding: 10px 22px;">
-              <span aria-hidden="true">🔓</span> Entrar con PIN Local
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ACCESO PARA ESTUDIANTES (SIN CUENTA DE GOOGLE, SOLO PRUEBAS HABILITADAS) -->
-    <section class="card" style="padding: 18px 20px; background: #f8fafc; border: 2px solid #cbd5e1;" aria-labelledby="studentAccessHeading">
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
-        <div>
-          <h2 id="studentAccessHeading" style="font-size: 1.08rem; color: #14532d; margin-bottom: 2px;">
-            <span aria-hidden="true">🎓</span> Acceso para Estudiantes (Sin cuenta)
-          </h2>
-          <p style="font-size: 0.86rem; color: #64748b; margin: 0;">
-            Muestra únicamente las pruebas habilitadas para aplicar hoy.
-          </p>
-        </div>
-        <button type="button" id="toggleStudentTestsBtn" class="btn-secondary" aria-expanded="false" aria-controls="studentEnabledTestsPanel">
-          <span aria-hidden="true">📝</span> Ver Pruebas Habilitadas
-        </button>
-      </div>
-
-      <div id="studentEnabledTestsPanel" style="display: none; margin-top: 16px;">
-        <div id="studentEnabledTestsList" class="home-vertical-grades">
-          <!-- Pruebas habilitadas cargadas dinámicamente en orden curricular -->
-        </div>
       </div>
     </section>
 
     <!-- FOOTER -->
     <footer class="footer-info">
       <div>Ministerio de Educación (MEDUCA) • Panamá</div>
-      <div style="margin-top: 4px; font-size: 0.85rem; color: #94a3b8;">
-        Aplicación Web Progresiva (PWA) • Compatible con funcionamiento sin internet.
-      </div>
     </footer>
   </main>
 
@@ -117,43 +60,18 @@
   <script src="./js/vendor/firebase-auth-compat.js"></script>
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
   <script src="./js/firebase-config.js"></script>
-  <script src="./js/catalogo.js"></script>
   <script>
     (function () {
-      const LOCAL_PIN = '0476';
       const signBtn = document.getElementById('homeGoogleSignInBtn');
       const signText = document.getElementById('homeGoogleSignInText');
       const openDocLink = document.getElementById('homeOpenDocenteLink');
-      const switchBtn = document.getElementById('homeSwitchAccountBtn');
-      const authTitle = document.getElementById('homeAuthTitle');
-      const authSub = document.getElementById('homeAuthSubtitle');
+      const logoutBtn = document.getElementById('homeSwitchAccountBtn');
       const authErr = document.getElementById('homeAuthError');
 
-      const togglePinBtn = document.getElementById('homeTogglePinBtn');
-      const pinSec = document.getElementById('homePinSection');
-      const pinInput = document.getElementById('homePinInput');
-      const pinErr = document.getElementById('homePinError');
-      const pinSubmitBtn = document.getElementById('homePinSubmitBtn');
-
-      const toggleStudentBtn = document.getElementById('toggleStudentTestsBtn');
-      const studentPanel = document.getElementById('studentEnabledTestsPanel');
-      const studentList = document.getElementById('studentEnabledTestsList');
-
-      function showSignedInState(label) {
-        if (authErr) authErr.style.display = 'none';
-        if (authTitle) authTitle.textContent = `Sesión iniciada: ${label}`;
-        if (authSub) authSub.textContent = 'Tu acceso está verificado. Entra para ver los grados y las 4 áreas del programa.';
-        if (signBtn) signBtn.style.display = 'none';
-        if (openDocLink) openDocLink.style.display = 'inline-flex';
-        if (switchBtn) switchBtn.style.display = 'inline-flex';
-      }
-
-      function showLoggedOutState() {
-        if (authTitle) authTitle.textContent = 'Acceso a la Aplicación';
-        if (authSub) authSub.innerHTML = 'Inicia sesión con tu cuenta autorizada de Google (<strong>civanp004@gmail.com</strong>) para ingresar al panel por grados, las 4 áreas del programa y las pruebas habilitadas.';
-        if (signBtn) signBtn.style.display = 'inline-flex';
-        if (openDocLink) openDocLink.style.display = 'none';
-        if (switchBtn) switchBtn.style.display = 'none';
+      function updateHomeButtons(isAuthed) {
+        if (signBtn) signBtn.style.display = isAuthed ? 'none' : 'inline-flex';
+        if (openDocLink) openDocLink.style.display = isAuthed ? 'inline-flex' : 'none';
+        if (logoutBtn) logoutBtn.style.display = isAuthed ? 'inline-flex' : 'none';
       }
 
       if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.onAuthStateChanged) {
@@ -163,15 +81,12 @@
             authErr.style.display = 'block';
           }
           if (user) {
-            showSignedInState(user.email);
-          } else if (sessionStorage.getItem('meduca_docente_auth') === LOCAL_PIN) {
-            showSignedInState('Modo Local (PIN)');
+            if (authErr) authErr.style.display = 'none';
+            updateHomeButtons(true);
           } else {
-            showLoggedOutState();
+            updateHomeButtons(false);
           }
         });
-      } else if (sessionStorage.getItem('meduca_docente_auth') === LOCAL_PIN) {
-        showSignedInState('Modo Local (PIN)');
       }
 
       if (signBtn) {
@@ -182,97 +97,27 @@
           }
           if (authErr) authErr.style.display = 'none';
           signBtn.disabled = true;
-          if (signText) signText.textContent = 'Conectando con Google...';
+          if (signText) signText.textContent = 'Conectando...';
           const res = await window.MEDUCA_FIREBASE.signInWithGoogle();
           signBtn.disabled = false;
-          if (signText) signText.textContent = 'Continuar con Gmail';
+          if (signText) signText.textContent = 'Iniciar sesión con Gmail';
           if (res.ok) {
             window.location.href = './docente.html';
           } else if (authErr) {
-            authErr.textContent = res.message || 'No se pudo iniciar sesión con Google.';
+            authErr.textContent = res.message || 'No se pudo iniciar sesión con Gmail.';
             authErr.style.display = 'block';
           }
         });
       }
 
-      if (switchBtn) {
-        switchBtn.addEventListener('click', async () => {
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
           sessionStorage.removeItem('meduca_docente_auth');
           if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.signOut) {
             await window.MEDUCA_FIREBASE.signOut();
           }
-          showLoggedOutState();
-        });
-      }
-
-      if (togglePinBtn && pinSec) {
-        togglePinBtn.addEventListener('click', () => {
-          const open = pinSec.style.display !== 'none';
-          pinSec.style.display = open ? 'none' : 'block';
-          togglePinBtn.setAttribute('aria-expanded', open ? 'false' : 'true');
-          if (!open && pinInput) setTimeout(() => pinInput.focus(), 80);
-        });
-      }
-
-      function tryPinAccess() {
-        if (!pinInput) return;
-        if (pinInput.value.trim() === LOCAL_PIN) {
-          sessionStorage.setItem('meduca_docente_auth', LOCAL_PIN);
-          if (pinErr) pinErr.style.display = 'none';
-          window.location.href = './docente.html';
-        } else {
-          if (pinErr) pinErr.style.display = 'block';
-          pinInput.value = '';
-          pinInput.focus();
-        }
-      }
-
-      if (pinSubmitBtn) pinSubmitBtn.addEventListener('click', tryPinAccess);
-      if (pinInput) {
-        pinInput.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            tryPinAccess();
-          }
-        });
-      }
-
-      async function renderStudentEnabledTests() {
-        if (!studentList || !window.MEDUCA_CATALOGO) return;
-        const catalog = await window.MEDUCA_CATALOGO.loadCatalog();
-        const enabledMap = window.MEDUCA_CATALOGO.readEnabledMap(catalog);
-        const activeTests = catalog.pruebas.filter((p) => enabledMap[p.id] !== false);
-
-        if (activeTests.length === 0) {
-          studentList.innerHTML = '<p style="color:#64748b;font-size:0.9rem;text-align:center;padding:12px;">No hay pruebas habilitadas en este momento en este dispositivo.</p>';
-          return;
-        }
-
-        studentList.innerHTML = activeTests.map((p) => `
-          <a href="./${p.slug}" class="home-grade-btn" style="--grade-border: ${p.color}; --grade-accent: ${p.color}; --grade-soft: ${p.softBg}; padding: 14px 18px;">
-            <div class="home-grade-left">
-              <div class="home-grade-emoji" style="font-size:2rem;" aria-hidden="true">${p.icono}</div>
-              <div>
-                <span class="home-grade-pill" style="background:${p.badgeBg}; color:${p.badgeColor};">${p.gradoTexto} • ${p.codigo}</span>
-                <h3 style="font-size:1.05rem; color:#1e293b; margin-bottom:2px;">${p.titulo}</h3>
-                <p style="color:#64748b; font-size:0.82rem; margin:0;">${p.areaIcono} Área ${p.area}: ${p.areaNombre} • ${p.puntos} pts</p>
-              </div>
-            </div>
-            <span class="home-grade-cta" style="background:${p.color}; padding: 9px 14px; font-size:0.88rem;">
-              Entrar
-            </span>
-          </a>
-        `).join('');
-      }
-
-      if (toggleStudentBtn && studentPanel) {
-        toggleStudentBtn.addEventListener('click', async () => {
-          const isOpen = studentPanel.style.display !== 'none';
-          studentPanel.style.display = isOpen ? 'none' : 'block';
-          toggleStudentBtn.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-          if (!isOpen) {
-            await renderStudentEnabledTests();
-          }
+          if (authErr) authErr.style.display = 'none';
+          updateHomeButtons(false);
         });
       }
 

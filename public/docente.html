@@ -103,164 +103,184 @@
             </button>
           </div>
 
-          <!-- PASO 0: PANEL RÁPIDO DE PRUEBAS HABILITADAS (CLIP DE SELECCIÓN) -->
-          <section id="enabledTestsQuickBar" class="card enabled-quick-bar" aria-labelledby="enabledQuickTitle">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
-              <div>
-                <h2 id="enabledQuickTitle" style="font-size: 1.18rem; color: #14532d; margin-bottom: 2px;">
-                  <span aria-hidden="true">⚡</span> Pruebas Habilitadas para Aplicar (<span id="enabledTestsCount">0</span>)
-                </h2>
-                <p style="color: #475569; font-size: 0.88rem; margin: 0;">
-                  Acceso ágil a las pruebas marcadas con el clip de selección. Quita el check cuando termines de aplicarlas.
-                </p>
-              </div>
-            </div>
-            <div id="enabledTestsQuickList" class="deployed-tests-list"></div>
-          </section>
-
-          <!-- PASO 1: BOTONES VERTICALES DE GRADOS (3°, 4°, 5°, 6°) -->
-          <section class="card" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bfdbfe;" aria-labelledby="docenteGradesTitle">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-              <div>
-                <h2 id="docenteGradesTitle" style="font-size: 1.25rem; color: #1e3a8a; margin-bottom: 2px;">
-                  <span aria-hidden="true">📚</span> Grados Disponibles (Selecciona un grado)
-                </h2>
-                <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-                  Al elegir un grado se agrupan sus pruebas por las 4 áreas del programa de agricultura:
-                </p>
-              </div>
-              <button type="button" id="showAllGradesBtn" class="btn-secondary" style="font-size: 0.88rem;">
-                📊 Ver Todos (3° a 6°)
-              </button>
-            </div>
-
-            <div id="docenteGradesVertical" class="docente-grades-vertical">
-              <!-- Botones verticales generados dinámicamente por grado -->
-            </div>
-          </section>
-
-          <!-- PASO 2: PRUEBAS AGRUPADAS POR LAS 4 ÁREAS DEL PROGRAMA -->
-          <section class="card" id="deployedTestsSection" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bbf7d0;" aria-labelledby="deployedTestsTitle">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px;">
-              <div>
-                <h2 id="deployedTestsTitle" style="font-size: 1.22rem; color: #166534; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                  <span aria-hidden="true">📝</span> <span id="deployedTestsHeadingText">Pruebas por Área del Programa</span>
-                </h2>
-                <p style="color: #4b5563; font-size: 0.9rem; margin: 0;">
-                  Solo las áreas con pruebas creadas están disponibles. Usa el clip de selección para habilitar o deshabilitar cada prueba.
-                </p>
-              </div>
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                <button type="button" id="filterAllCreatedBtn" class="btn-secondary" aria-pressed="true" style="font-size: 0.85rem;">
-                  📚 Ver todas las creadas
-                </button>
-                <button type="button" id="filterEnabledOnlyBtn" class="btn-secondary" aria-pressed="false" style="font-size: 0.85rem;">
-                  ☑️ Solo habilitadas
-                </button>
-                <button type="button" id="resetAreaFilterBtn" class="btn-secondary" style="display: none; font-size: 0.85rem;">
-                  Ver las 4 áreas
+          <!-- VISTA 1 AL ENTRAR: SELECCIÓN DE GRADOS Y PRUEBAS HABILITADAS -->
+          <div id="gradesOverviewSection">
+            <!-- BOTONES VERTICALES DE GRADOS (3°, 4°, 5°, 6°) -->
+            <section class="card" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bfdbfe;" aria-labelledby="docenteGradesTitle">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                <div>
+                  <h2 id="docenteGradesTitle" style="font-size: 1.25rem; color: #1e3a8a; margin-bottom: 2px;">
+                    <span aria-hidden="true">📚</span> Selecciona un Grado
+                  </h2>
+                  <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
+                    Al entrar a un grado se desplegarán sus actividades, las 4 áreas del programa y los resultados de estudiantes:
+                  </p>
+                </div>
+                <button type="button" id="showAllGradesBtn" class="btn-secondary" style="font-size: 0.88rem;">
+                  📊 Ver Todos (3° a 6°)
                 </button>
               </div>
-            </div>
 
-            <div id="docenteAreasFilterBar" class="docente-areas-bar" style="margin-bottom: 14px;">
-              <!-- Botones de las 4 áreas del programa -->
-            </div>
+              <div id="docenteGradesVertical" class="docente-grades-vertical">
+                <!-- Botones verticales generados dinámicamente por grado -->
+              </div>
+            </section>
 
-            <div id="lessonsLinksContainer" class="deployed-tests-list">
-              <!-- Grupos de las 4 áreas y pruebas ordenadas generadas dinámicamente -->
-            </div>
-          </section>
-
-          <!-- ESTADÍSTICAS GENERALES DEL GRADO ACTIVO -->
-          <section class="stats-grid" aria-label="Resumen numérico">
-            <div class="stat-card">
-              <div class="stat-number" id="statTotal">0</div>
-              <div class="stat-label">👥 Total en Lista</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number" id="statRealizadas" style="color: #16a34a;">0</div>
-              <div class="stat-label">✅ Pruebas Realizadas</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number" id="statPendientes" style="color: #ea580c;">0</div>
-              <div class="stat-label">⏳ Pendientes</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number" id="statPromedioNota" style="color: #2563eb;">-</div>
-              <div class="stat-label">⭐ Promedio (1.0 - 5.0)</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number" id="statPromedioTiempo" style="color: #9333ea; font-size: 1.8rem;">-</div>
-              <div class="stat-label">⏱️ Tiempo Promedio</div>
-            </div>
-          </section>
-
-          <!-- BARRA DE ACCIONES Y FILTROS -->
-          <div class="card" style="padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-            <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 240px;">
-              <label for="searchInput" class="visually-hidden">Buscar estudiante</label>
-              <input 
-                type="text" 
-                id="searchInput" 
-                placeholder="🔍 Buscar estudiante por nombre o apellido..." 
-                style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; width: 100%; font-family: inherit; font-size: 0.95rem; outline: none;"
-              >
-            </div>
-
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              <label for="gradeFilterSelect" class="visually-hidden">Filtrar por grado</label>
-              <select id="gradeFilterSelect" style="padding: 10px 14px; border: 2px solid #1e3a8a; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 800; outline: none; background: #eff6ff; color: #1e3a8a;">
-                <option value="todos" selected>Todos los Grados (3°, 4°, 5° y 6°)</option>
-                <option value="3">🌿 Tercer Grado (3°)</option>
-                <option value="4">🥕 Cuarto Grado (4°)</option>
-                <option value="5">🌽 Quinto Grado (5°)</option>
-                <option value="6">🍅 Sexto Grado (6°)</option>
-              </select>
-
-              <label for="groupFilterSelect" class="visually-hidden">Filtrar por salón</label>
-              <select id="groupFilterSelect" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white; color: #334155;">
-                <option value="todos">Todos los salones (3°, 4°, 5° y 6°)</option>
-              </select>
-
-              <label for="statusFilter" class="visually-hidden">Filtrar por estado</label>
-              <select id="statusFilter" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white;">
-                <option value="todos">Todos los estados</option>
-                <option value="realizadas">Solo pruebas realizadas</option>
-                <option value="pendientes">Solo pendientes</option>
-              </select>
-
-              <button type="button" id="openRosterBtn" class="btn-secondary">
-                <span aria-hidden="true">📋</span> Ver Lista
-              </button>
-
-              <button type="button" id="refreshBtn" class="btn-secondary">
-                <span aria-hidden="true">🔄</span> Refrescar
-              </button>
-            </div>
+            <!-- PANEL RÁPIDO DE PRUEBAS HABILITADAS (CLIP DE SELECCIÓN) -->
+            <section id="enabledTestsQuickBar" class="card enabled-quick-bar" aria-labelledby="enabledQuickTitle">
+              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                <div>
+                  <h2 id="enabledQuickTitle" style="font-size: 1.18rem; color: #14532d; margin-bottom: 2px;">
+                    <span aria-hidden="true">⚡</span> Pruebas Habilitadas para Aplicar (<span id="enabledTestsCount">0</span>)
+                  </h2>
+                  <p style="color: #475569; font-size: 0.88rem; margin: 0;">
+                    Acceso ágil a las pruebas marcadas con el clip de selección. Quita el check cuando termines de aplicarlas.
+                  </p>
+                </div>
+              </div>
+              <div id="enabledTestsQuickList" class="deployed-tests-list"></div>
+            </section>
           </div>
 
-          <!-- TABLA DE RESULTADOS -->
-          <div class="table-responsive" id="resultsTableContainer">
-            <table class="results-table">
-              <caption class="visually-hidden">Resultados de pruebas sumativas de Agricultura por estudiante</caption>
-              <thead>
-                <tr>
-                  <th scope="col" style="width: 36px;">#</th>
-                  <th scope="col">Grado</th>
-                  <th scope="col">Estudiante</th>
-                  <th scope="col">Estado</th>
-                  <th scope="col">Fecha y Hora</th>
-                  <th scope="col">Tiempo</th>
-                  <th scope="col">Puntos</th>
-                  <th scope="col">Nota MEDUCA</th>
-                  <th scope="col">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="resultsTableBody">
-                <!-- Filas generadas dinámicamente -->
-              </tbody>
-            </table>
+          <!-- VISTA 2 AL ELEGIR GRADO: ACTIVIDADES DEL GRADO POR ÁREA Y RESULTADOS -->
+          <div id="gradeDetailSection" style="display: none;">
+            <div class="card" style="padding: 14px 20px; margin-bottom: 18px; background: #eff6ff; border: 2px solid #93c5fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <div style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Grado seleccionado
+                </div>
+                <h2 id="selectedGradeTitle" style="font-size: 1.3rem; color: #0f172a; margin: 0;">
+                  Actividades del Grado
+                </h2>
+              </div>
+              <button type="button" id="backToGradesBtn" class="btn-secondary" style="background: #ffffff; border-color: #1e3a8a; color: #1e3a8a;">
+                Cambiar de grado
+              </button>
+            </div>
+
+            <!-- ACTIVIDADES / PRUEBAS AGRUPADAS POR LAS 4 ÁREAS DEL PROGRAMA -->
+            <section class="card" id="deployedTestsSection" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bbf7d0;" aria-labelledby="deployedTestsTitle">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px;">
+                <div>
+                  <h2 id="deployedTestsTitle" style="font-size: 1.22rem; color: #166534; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span aria-hidden="true">📝</span> <span id="deployedTestsHeadingText">Actividades por Área del Programa</span>
+                  </h2>
+                  <p style="color: #4b5563; font-size: 0.9rem; margin: 0;">
+                    Solo las áreas con pruebas creadas están disponibles. Usa el clip de selección para habilitar o deshabilitar cada prueba.
+                  </p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                  <button type="button" id="filterAllCreatedBtn" class="btn-secondary" aria-pressed="true" style="font-size: 0.85rem;">
+                    📚 Ver todas las creadas
+                  </button>
+                  <button type="button" id="filterEnabledOnlyBtn" class="btn-secondary" aria-pressed="false" style="font-size: 0.85rem;">
+                    ☑️ Solo habilitadas
+                  </button>
+                  <button type="button" id="resetAreaFilterBtn" class="btn-secondary" style="display: none; font-size: 0.85rem;">
+                    Ver las 4 áreas
+                  </button>
+                </div>
+              </div>
+
+              <div id="docenteAreasFilterBar" class="docente-areas-bar" style="margin-bottom: 14px;">
+                <!-- Botones de las 4 áreas del programa -->
+              </div>
+
+              <div id="lessonsLinksContainer" class="deployed-tests-list">
+                <!-- Grupos de las 4 áreas y pruebas ordenadas generadas dinámicamente -->
+              </div>
+            </section>
+
+            <!-- ESTADÍSTICAS GENERALES DEL GRADO ACTIVO -->
+            <section class="stats-grid" aria-label="Resumen numérico">
+              <div class="stat-card">
+                <div class="stat-number" id="statTotal">0</div>
+                <div class="stat-label">👥 Total en Lista</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="statRealizadas" style="color: #16a34a;">0</div>
+                <div class="stat-label">✅ Pruebas Realizadas</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="statPendientes" style="color: #ea580c;">0</div>
+                <div class="stat-label">⏳ Pendientes</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="statPromedioNota" style="color: #2563eb;">-</div>
+                <div class="stat-label">⭐ Promedio (1.0 - 5.0)</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-number" id="statPromedioTiempo" style="color: #9333ea; font-size: 1.8rem;">-</div>
+                <div class="stat-label">⏱️ Tiempo Promedio</div>
+              </div>
+            </section>
+
+            <!-- BARRA DE ACCIONES Y FILTROS -->
+            <div class="card" style="padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 240px;">
+                <label for="searchInput" class="visually-hidden">Buscar estudiante</label>
+                <input 
+                  type="text" 
+                  id="searchInput" 
+                  placeholder="🔍 Buscar estudiante por nombre o apellido..." 
+                  style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; width: 100%; font-family: inherit; font-size: 0.95rem; outline: none;"
+                >
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <label for="gradeFilterSelect" class="visually-hidden">Filtrar por grado</label>
+                <select id="gradeFilterSelect" style="padding: 10px 14px; border: 2px solid #1e3a8a; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 800; outline: none; background: #eff6ff; color: #1e3a8a;">
+                  <option value="todos" selected>Todos los Grados (3°, 4°, 5° y 6°)</option>
+                  <option value="3">🌿 Tercer Grado (3°)</option>
+                  <option value="4">🥕 Cuarto Grado (4°)</option>
+                  <option value="5">🌽 Quinto Grado (5°)</option>
+                  <option value="6">🍅 Sexto Grado (6°)</option>
+                </select>
+
+                <label for="groupFilterSelect" class="visually-hidden">Filtrar por salón</label>
+                <select id="groupFilterSelect" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white; color: #334155;">
+                  <option value="todos">Todos los salones (3°, 4°, 5° y 6°)</option>
+                </select>
+
+                <label for="statusFilter" class="visually-hidden">Filtrar por estado</label>
+                <select id="statusFilter" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white;">
+                  <option value="todos">Todos los estados</option>
+                  <option value="realizadas">Solo pruebas realizadas</option>
+                  <option value="pendientes">Solo pendientes</option>
+                </select>
+
+                <button type="button" id="openRosterBtn" class="btn-secondary">
+                  <span aria-hidden="true">📋</span> Ver Lista
+                </button>
+
+                <button type="button" id="refreshBtn" class="btn-secondary">
+                  <span aria-hidden="true">🔄</span> Refrescar
+                </button>
+              </div>
+            </div>
+
+            <!-- TABLA DE RESULTADOS -->
+            <div class="table-responsive" id="resultsTableContainer">
+              <table class="results-table">
+                <caption class="visually-hidden">Resultados de pruebas sumativas de Agricultura por estudiante</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" style="width: 36px;">#</th>
+                    <th scope="col">Grado</th>
+                    <th scope="col">Estudiante</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Fecha y Hora</th>
+                    <th scope="col">Tiempo</th>
+                    <th scope="col">Puntos</th>
+                    <th scope="col">Nota MEDUCA</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                  <!-- Filas generadas dinámicamente -->
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
