@@ -32,11 +32,8 @@
             <a href="./index.html" class="btn-secondary" style="background: white; color: #1e3a8a;">
               <span aria-hidden="true">🏠</span> Vista Inicial
             </a>
-            <button type="button" id="exportCsvBtn" class="btn-secondary" style="background: #22c55e; color: white; border: none; cursor: pointer;">
-              <span aria-hidden="true">📥</span> Descargar Excel (CSV)
-            </button>
             <button type="button" id="logoutDocenteBtn" class="btn-secondary" style="background: #ef4444; color: white; border: none; cursor: pointer;">
-              <span aria-hidden="true">🔒</span> Cerrar / Bloquear
+              <span aria-hidden="true">🔒</span> Cerrar sesión
             </button>
           </div>
         </header>
@@ -103,67 +100,66 @@
             </button>
           </div>
 
-          <!-- VISTA 1 AL ENTRAR: SELECCIÓN DE GRADOS Y PRUEBAS HABILITADAS -->
+          <!-- VISTA POSTERIOR AL INICIO: SOLO BOTONES VERTICALES DE LOS GRADOS -->
           <div id="gradesOverviewSection">
-            <!-- BOTONES VERTICALES DE GRADOS (3°, 4°, 5°, 6°) -->
-            <section class="card" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bfdbfe;" aria-labelledby="docenteGradesTitle">
-              <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
-                <div>
-                  <h2 id="docenteGradesTitle" style="font-size: 1.25rem; color: #1e3a8a; margin-bottom: 2px;">
-                    <span aria-hidden="true">📚</span> Selecciona un Grado
-                  </h2>
-                  <p style="color: #64748b; font-size: 0.9rem; margin: 0;">
-                    Al entrar a un grado se desplegarán sus actividades, las 4 áreas del programa y los resultados de estudiantes:
-                  </p>
-                </div>
-                <button type="button" id="showAllGradesBtn" class="btn-secondary" style="font-size: 0.88rem;">
-                  📊 Ver Todos (3° a 6°)
-                </button>
+            <section class="card" style="padding: 24px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bfdbfe;" aria-labelledby="docenteGradesTitle">
+              <div style="margin-bottom: 16px;">
+                <h2 id="docenteGradesTitle" style="font-size: 1.32rem; color: #1e3a8a; margin-bottom: 4px;">
+                  <span aria-hidden="true">📚</span> Selecciona un Grado
+                </h2>
+                <p style="color: #64748b; font-size: 0.92rem; margin: 0;">
+                  Elige el grado para ver sus áreas, pruebas habilitadas, códigos QR y calificaciones.
+                </p>
               </div>
 
               <div id="docenteGradesVertical" class="docente-grades-vertical">
-                <!-- Botones verticales generados dinámicamente por grado -->
+                <!-- Botones verticales de 3°, 4°, 5° y 6° grado -->
               </div>
             </section>
+          </div>
 
-            <!-- PANEL RÁPIDO DE PRUEBAS HABILITADAS (CLIP DE SELECCIÓN) -->
+          <!-- VISTA AL ENTRAR AL GRADO: TODO LO DEL GRADO EN CUESTIÓN -->
+          <div id="gradeDetailSection" style="display: none;">
+            <div class="card" style="padding: 16px 20px; margin-bottom: 18px; background: #eff6ff; border: 2px solid #93c5fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <div style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
+                  Grado seleccionado
+                </div>
+                <h2 id="selectedGradeTitle" style="font-size: 1.35rem; color: #0f172a; margin: 0;">
+                  Contenido del Grado
+                </h2>
+              </div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                <button type="button" id="exportCsvBtn" class="btn-secondary" style="background: #22c55e; color: white; border: none; cursor: pointer;">
+                  <span aria-hidden="true">📥</span> Descargar Excel (CSV)
+                </button>
+                <button type="button" id="backToGradesBtn" class="btn-secondary" style="background: #ffffff; border-color: #1e3a8a; color: #1e3a8a;">
+                  Cambiar de grado
+                </button>
+              </div>
+            </div>
+
+            <!-- PRUEBAS HABILITADAS DEL GRADO (CLIP DE SELECCIÓN) -->
             <section id="enabledTestsQuickBar" class="card enabled-quick-bar" aria-labelledby="enabledQuickTitle">
               <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                 <div>
-                  <h2 id="enabledQuickTitle" style="font-size: 1.18rem; color: #14532d; margin-bottom: 2px;">
-                    <span aria-hidden="true">⚡</span> Pruebas Habilitadas para Aplicar (<span id="enabledTestsCount">0</span>)
+                  <h2 id="enabledQuickTitle" style="font-size: 1.16rem; color: #14532d; margin-bottom: 2px;">
+                    <span aria-hidden="true">⚡</span> Pruebas Habilitadas del Grado (<span id="enabledTestsCount">0</span>)
                   </h2>
                   <p style="color: #475569; font-size: 0.88rem; margin: 0;">
-                    Acceso ágil a las pruebas marcadas con el clip de selección. Quita el check cuando termines de aplicarlas.
+                    Acceso rápido a las pruebas activas para aplicar hoy en este grado.
                   </p>
                 </div>
               </div>
               <div id="enabledTestsQuickList" class="deployed-tests-list"></div>
             </section>
-          </div>
-
-          <!-- VISTA 2 AL ELEGIR GRADO: ACTIVIDADES DEL GRADO POR ÁREA Y RESULTADOS -->
-          <div id="gradeDetailSection" style="display: none;">
-            <div class="card" style="padding: 14px 20px; margin-bottom: 18px; background: #eff6ff; border: 2px solid #93c5fd; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-              <div>
-                <div style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
-                  Grado seleccionado
-                </div>
-                <h2 id="selectedGradeTitle" style="font-size: 1.3rem; color: #0f172a; margin: 0;">
-                  Actividades del Grado
-                </h2>
-              </div>
-              <button type="button" id="backToGradesBtn" class="btn-secondary" style="background: #ffffff; border-color: #1e3a8a; color: #1e3a8a;">
-                Cambiar de grado
-              </button>
-            </div>
 
             <!-- ACTIVIDADES / PRUEBAS AGRUPADAS POR LAS 4 ÁREAS DEL PROGRAMA -->
             <section class="card" id="deployedTestsSection" style="padding: 20px 22px; margin-bottom: 20px; background: #ffffff; border: 2px solid #bbf7d0;" aria-labelledby="deployedTestsTitle">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px;">
                 <div>
                   <h2 id="deployedTestsTitle" style="font-size: 1.22rem; color: #166534; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span aria-hidden="true">📝</span> <span id="deployedTestsHeadingText">Actividades por Área del Programa</span>
+                    <span aria-hidden="true">📝</span> <span id="deployedTestsHeadingText">Áreas y Pruebas del Grado</span>
                   </h2>
                   <p style="color: #4b5563; font-size: 0.9rem; margin: 0;">
                     Solo las áreas con pruebas creadas están disponibles. Usa el clip de selección para habilitar o deshabilitar cada prueba.
@@ -215,31 +211,31 @@
               </div>
             </section>
 
-            <!-- BARRA DE ACCIONES Y FILTROS -->
+            <!-- BARRA DE ACCIONES Y FILTROS DEL GRADO -->
             <div class="card" style="padding: 16px 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
               <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 240px;">
                 <label for="searchInput" class="visually-hidden">Buscar estudiante</label>
                 <input 
                   type="text" 
                   id="searchInput" 
-                  placeholder="🔍 Buscar estudiante por nombre o apellido..." 
+                  placeholder="🔍 Buscar estudiante de este grado..." 
                   style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; width: 100%; font-family: inherit; font-size: 0.95rem; outline: none;"
                 >
               </div>
 
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <label for="gradeFilterSelect" class="visually-hidden">Filtrar por grado</label>
-                <select id="gradeFilterSelect" style="padding: 10px 14px; border: 2px solid #1e3a8a; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 800; outline: none; background: #eff6ff; color: #1e3a8a;">
-                  <option value="todos" selected>Todos los Grados (3°, 4°, 5° y 6°)</option>
-                  <option value="3">🌿 Tercer Grado (3°)</option>
-                  <option value="4">🥕 Cuarto Grado (4°)</option>
-                  <option value="5">🌽 Quinto Grado (5°)</option>
-                  <option value="6">🍅 Sexto Grado (6°)</option>
+                <label for="gradeFilterSelect" class="visually-hidden">Grado activo</label>
+                <select id="gradeFilterSelect" style="display: none;">
+                  <option value="todos" selected>Todos</option>
+                  <option value="3">3°</option>
+                  <option value="4">4°</option>
+                  <option value="5">5°</option>
+                  <option value="6">6°</option>
                 </select>
 
                 <label for="groupFilterSelect" class="visually-hidden">Filtrar por salón</label>
                 <select id="groupFilterSelect" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white; color: #334155;">
-                  <option value="todos">Todos los salones (3°, 4°, 5° y 6°)</option>
+                  <option value="todos">Todos los salones</option>
                 </select>
 
                 <label for="statusFilter" class="visually-hidden">Filtrar por estado</label>
@@ -259,7 +255,7 @@
               </div>
             </div>
 
-            <!-- TABLA DE RESULTADOS -->
+            <!-- TABLA DE RESULTADOS DEL GRADO -->
             <div class="table-responsive" id="resultsTableContainer">
               <table class="results-table">
                 <caption class="visually-hidden">Resultados de pruebas sumativas de Agricultura por estudiante</caption>

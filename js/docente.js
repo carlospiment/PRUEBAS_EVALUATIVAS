@@ -461,12 +461,16 @@ function renderEnabledQuickBar() {
   const countEl = document.getElementById('enabledTestsCount');
   if (!listEl) return;
 
+  const activeGrade = document.getElementById('gradeFilterSelect')?.value || 'todos';
   const allTests = getActiveTestsCatalogList();
-  const enabledTests = allTests.filter((t) => enabledTestsMap[t.id] !== false);
+  const scopedTests = activeGrade === 'todos'
+    ? allTests
+    : allTests.filter((t) => String(t.grado) === String(activeGrade));
+  const enabledTests = scopedTests.filter((t) => enabledTestsMap[t.id] !== false);
   if (countEl) countEl.textContent = String(enabledTests.length);
 
   if (enabledTests.length === 0) {
-    listEl.innerHTML = '<p style="color:#64748b;font-size:0.9rem;padding:8px 4px;margin:0;">No hay pruebas marcadas con el clip de selección. Activa una casilla abajo para fijarla aquí y agilizar su aplicación.</p>';
+    listEl.innerHTML = '<p style="color:#64748b;font-size:0.9rem;padding:8px 4px;margin:0;">No hay pruebas habilitadas en este grado. Activa una casilla abajo para fijarla aquí.</p>';
     return;
   }
 
@@ -557,8 +561,8 @@ function renderDocenteVerticalGrades() {
         <div class="docente-grade-stats">
           <span class="grade-metric-chip">✅ ${completed.length} / ${gradeRows.length} realizadas</span>
           <span class="grade-metric-chip">⭐ Prom: ${avg}</span>
-          <span class="grade-metric-chip" style="background: ${isSelected ? gMeta.color : '#eff6ff'}; color: ${isSelected ? '#ffffff' : '#1e40af'}; border-color: ${gMeta.color};">
-            ${isSelected ? '✓ Seleccionado' : 'Ver áreas y pruebas'}
+          <span class="grade-metric-chip" style="background: ${gMeta.color}; color: #ffffff; border-color: ${gMeta.color};">
+            Entrar al grado
           </span>
         </div>
       </button>
