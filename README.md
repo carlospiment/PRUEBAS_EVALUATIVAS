@@ -53,8 +53,8 @@ El sistema está desplegado y disponible para ser utilizado en computadoras, tab
   $$\text{Nota} = 1.0 + \frac{4.0 \times \text{Puntos Obtenidos}}{\text{Puntos Totales}}$$
 - Retroalimentación formativa y animación festiva de confeti al completar la entrega.
 
-### 5. Panel Docente Protegido con PIN (`0000`)
-- **Acceso seguro:** Requiere clave de acceso numérico tanto desde el pie de página como por acceso directo.
+### 5. Panel Docente Protegido (Google Auth + PIN de Respaldo `0476`)
+- **Acceso seguro:** Autenticación oficial mediante cuenta autorizada de Google (`civanp004@gmail.com`) para leer y gestionar resultados en Cloud Firestore, más respaldo local con clave `0476` para modo offline/servidor local.
 - **Códigos QR integrados:** Permite proyectar o imprimir el código QR y enlace directo de cada grado.
 - **Métricas y estadísticas dinámicas:** Filtra por grado (`Todos`, `3°`, `4°`, `5°`, `6°`) y por sección (`A`, `B`, `C`), calculando en tiempo real:
   - Total de estudiantes matriculados en la sección o grado.

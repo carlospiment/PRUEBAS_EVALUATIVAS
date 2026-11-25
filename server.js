@@ -136,7 +136,7 @@ app.get('/api/prueba', (req, res) => {
 app.get('/api/estudiantes', (req, res) => {
   const grado = req.query.grado ? parseInt(req.query.grado, 10) : null;
   const estudiantes = readJSON(ESTUDIANTES_FILE, []);
-  const resultados = readJSON(RESULTADOS_FILE, []);
+  const resultados = readJSON(RESULTADOS_FILE, []).filter(r => !r.archivado_por_reintento && r.activo !== false);
 
   let listaFiltrada = estudiantes;
   if (grado) {
@@ -144,9 +144,11 @@ app.get('/api/estudiantes', (req, res) => {
   }
 
   const lista = listaFiltrada.map(est => {
-    const resExistente = resultados.find(r => 
-      (r.estudiante_id && r.estudiante_id === est.id) ||
-      normalizeText(r.estudiante_nombre) === normalizeText(est.nombre)
+    const resExistente = resultados.find(r =>
+      ((Number(r.grado) === Number(est.grado)) || (!r.grado && Number(est.grado) === 3)) && (
+        (r.estudiante_id && r.estudiante_id === est.id) ||
+        normalizeText(r.estudiante_nombre) === normalizeText(est.nombre)
+      )
     );
     return {
       id: est.id,
@@ -168,9 +170,9 @@ app.get('/api/estudiantes', (req, res) => {
   res.json(lista);
 });
 
-// 3. Submit and Grade Test (Supports 3rd, 4th and 5th grade)
+// 3. Submit and Grade Test (Supports 3rd, 4th, 5th and 6th grade)
 app.post('/api/evaluar', (req, res) => {
-  const { estudiante_nombre, estudiante_id, respuestas, duracion_segundos, iniciado_at, grado } = req.body;
+  const { estudiante_nombre, estudiante_id, grupo, respuestas, duracion_segundos, iniciado_at, grado } = req.body;
 
   if (!estudiante_nombre || !respuestas) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
@@ -181,9 +183,11 @@ app.post('/api/evaluar', (req, res) => {
   const config = readJSON(configFile, {});
   const resultados = readJSON(RESULTADOS_FILE, []);
 
-  // Check single attempt
-  const previo = resultados.find(r => 
-    (r.grado === gradoNum || !r.grado) && (
+  // Check single active attempt (ignorando intentos archivados por reintento autorizado)
+  const previo = resultados.find(r =>
+    !r.archivado_por_reintento &&
+    r.activo !== false &&
+    (Number(r.grado) === gradoNum || (!r.grado && gradoNum === 3)) && (
       normalizeText(r.estudiante_nombre) === normalizeText(estudiante_nombre) ||
       (estudiante_id && r.estudiante_id === estudiante_id)
     )
@@ -351,7 +355,8 @@ app.post('/api/evaluar', (req, res) => {
     });
   }
 
-  const puntosTotales = config.puntos_totales || (gradoNum === 4 ? 24 : 19);
+  const DEFAULT_TOTALS = { 3: 19, 4: 24, 5: 31, 6: 32 };
+  const puntosTotales = config.puntos_totales || DEFAULT_TOTALS[gradoNum] || 19;
   const notaMeduca = calculateMeducaGrade(puntosObtenidos, puntosTotales);
   const porcentaje = Math.round((puntosObtenidos / puntosTotales) * 100);
   const duracionSeg = parseInt(duracion_segundos, 10) || 0;
@@ -360,6 +365,7 @@ app.post('/api/evaluar', (req, res) => {
   const nuevoResultado = {
     id: 'res-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     grado: gradoNum,
+    grupo: grupo || null,
     estudiante_id: estudiante_id || null,
     estudiante_nombre: estudiante_nombre.trim(),
     iniciado_at: iniciado_at || new Date().toISOString(),
@@ -378,11 +384,12 @@ app.post('/api/evaluar', (req, res) => {
   resultados.push(nuevoResultado);
   writeJSON(RESULTADOS_FILE, resultados);
 
-  // Desactivar cualquier autorización activa para este estudiante
+  // Desactivar cualquier autorización activa para este estudiante en este grado
   let autorizaciones = readJSON(AUTORIZACIONES_FILE, []);
   let authModificada = false;
   autorizaciones = autorizaciones.map(a => {
-    if (a.activo && normalizeText(a.estudiante_nombre) === normalizeText(estudiante_nombre)) {
+    const sameGrade = !a.grado || Number(a.grado) === gradoNum;
+    if (a.activo && sameGrade && normalizeText(a.estudiante_nombre) === normalizeText(estudiante_nombre)) {
       authModificada = true;
       return { ...a, activo: false, utilizado_at: new Date().toLocaleString('es-PA'), resultado_id: nuevoResultado.id };
     }
@@ -448,13 +455,15 @@ app.get('/api/autorizaciones', (req, res) => {
 // 5. Reset attempt / Authorize retake
 app.post('/api/resultados/reiniciar', (req, res) => {
   const { id, estudiante_nombre, grado } = req.body;
+  const gradoNum = grado ? Number(grado) : null;
   let resultados = readJSON(RESULTADOS_FILE, []);
   const now = new Date();
   const fechaStr = now.toLocaleString('es-PA');
 
-  // Archivar el resultado previo
+  // Archivar el resultado previo del mismo grado
   resultados = resultados.map(r => {
-    if ((id && r.id === id) || (estudiante_nombre && normalizeText(r.estudiante_nombre) === normalizeText(estudiante_nombre))) {
+    const sameGrade = !gradoNum || !r.grado || Number(r.grado) === gradoNum;
+    if (sameGrade && ((id && r.id === id) || (estudiante_nombre && normalizeText(r.estudiante_nombre) === normalizeText(estudiante_nombre)))) {
       return {
         ...r,
         estado: 'reintento_autorizado',
@@ -473,7 +482,7 @@ app.post('/api/resultados/reiniciar', (req, res) => {
   const nuevaAuth = {
     id: `auth_${Date.now()}`,
     estudiante_nombre: estudiante_nombre || 'Estudiante',
-    grado: Number(grado) || 3,
+    grado: gradoNum || 3,
     autorizado_at: fechaStr,
     autorizado_iso: now.toISOString(),
     autorizado_timestamp: Date.now(),

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Panel Docente - Resultados de Pruebas Sumativas (3er y 4to Grado)</title>
+  <title>Panel Docente - Resultados de Pruebas Sumativas (3° a 6° Grado)</title>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧑‍🏫</text></svg>">
@@ -21,20 +21,33 @@
         <h1 style="color: white; font-size: 1.85rem; margin-top: 4px;">
           🧑‍🏫 Panel Docente - Pruebas Sumativas
         </h1>
+        <div id="teacherAuthBadge" style="margin-top: 8px; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.16); padding: 4px 12px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;">
+          ⏳ Verificando sesión...
+        </div>
       </div>
 
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
         <a href="./index.html" class="btn-secondary" style="background: white; color: #1e3a8a;">
           <span>🌱</span> Vista del Estudiante
         </a>
         <button type="button" id="exportCsvBtn" class="btn-secondary" style="background: #22c55e; color: white; border: none; cursor: pointer;">
           <span>📥</span> Descargar Excel (CSV)
         </button>
-        <button type="button" id="logoutDocenteBtn" class="btn-secondary" style="background: #ef4444; color: white; border: none; cursor: pointer;" title="Bloquear panel docente">
-          <span>🔒</span> Bloquear
+        <button type="button" id="logoutDocenteBtn" class="btn-secondary" style="background: #ef4444; color: white; border: none; cursor: pointer;" title="Cerrar sesión y bloquear panel docente">
+          <span>🔒</span> Cerrar / Bloquear
         </button>
       </div>
     </header>
+
+    <!-- BANNER DE ESTADO / AUTENTICACIÓN FIREBASE -->
+    <div id="cloudStatusBanner" class="card" style="display: none; padding: 14px 20px; margin-bottom: 18px; background: #fffbeb; border: 2px solid #f59e0b; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div id="cloudStatusMessage" style="color: #92400e; font-size: 0.95rem; font-weight: 600; flex: 1;">
+        Inicia sesión con Google para ver los resultados en la nube.
+      </div>
+      <button type="button" id="bannerGoogleSignInBtn" class="btn-primary" style="width: auto; padding: 9px 18px; font-size: 0.92rem; background: #2563eb;">
+        <span>🔐</span> Iniciar sesión con Google
+      </button>
+    </div>
 
     <!-- ESTADÍSTICAS GENERALES -->
     <section class="stats-grid">
@@ -88,19 +101,16 @@
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
         <!-- Filtro por grado -->
         <select id="gradeFilterSelect" style="padding: 10px 14px; border: 2px solid #1e3a8a; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 800; outline: none; background: #eff6ff; color: #1e3a8a;">
-          <option value="todos">Todos los Grados (3°, 4°, 5° y 6°)</option>
+          <option value="todos" selected>Todos los Grados (3°, 4°, 5° y 6°)</option>
           <option value="6">🍅 Sexto Grado (6°)</option>
           <option value="5">🌽 Quinto Grado (5°)</option>
-          <option value="4" selected>🥕 Cuarto Grado (4°)</option>
+          <option value="4">🥕 Cuarto Grado (4°)</option>
           <option value="3">🌿 Tercer Grado (3°)</option>
         </select>
 
         <!-- Filtro por salón -->
         <select id="groupFilterSelect" style="padding: 10px 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 600; outline: none; background: white; color: #334155;">
-          <option value="todos">Todos los salones de 4°</option>
-          <option value="4A">Salón 4°A</option>
-          <option value="4B">Salón 4°B</option>
-          <option value="4C">Salón 4°C</option>
+          <option value="todos">Todos los salones (3°, 4°, 5° y 6°)</option>
         </select>
 
         <!-- Filtro por estado -->
@@ -198,7 +208,7 @@
         <span>📋</span> Lista Oficial de Estudiantes
       </h3>
       <p style="color: #4b5563; font-size: 0.95rem; margin-bottom: 14px;">
-        Estudiantes sincronizados desde <em>Libreta de Calificaciones</em>:
+        Estudiantes registrados en la plataforma (330 alumnos en 3°, 4°, 5° y 6°):
       </p>
 
       <textarea 
@@ -245,46 +255,58 @@
     </div>
   </div>
 
-  <!-- PANTALLA DE BLOQUEO / CLAVE DE ACCESO DOCENTE (0476) -->
-  <div id="teacherLockScreen" class="teacher-lock-overlay" style="display: none;">
-    <div class="teacher-lock-card">
-      <div style="font-size: 3.5rem; margin-bottom: 12px;">🔐</div>
-      <h2 style="font-size: 1.6rem; color: #1e293b; margin-bottom: 8px;">Panel del Docente Protegido</h2>
-      <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 22px;">
-        Ingresa la clave de 4 dígitos para acceder al panel de calificaciones y códigos QR:
+  <!-- PANTALLA DE ACCESO DOCENTE (GOOGLE AUTH PRINCIPAL + PIN OFFLINE DE RESPALDO) -->
+  <div id="teacherLockScreen" class="teacher-lock-overlay" style="display: flex;">
+    <div class="teacher-lock-card" style="max-width: 480px;">
+      <div style="font-size: 3.3rem; margin-bottom: 10px;">🔐</div>
+      <h2 style="font-size: 1.6rem; color: #1e293b; margin-bottom: 8px;">Panel del Docente</h2>
+      <p style="color: #475569; font-size: 0.95rem; margin-bottom: 18px; line-height: 1.45;">
+        Inicia sesión con tu cuenta autorizada de Google (<strong>civanp004@gmail.com</strong>) para consultar y administrar todos los resultados en Firebase.
       </p>
 
-      <input 
-        type="password" 
-        id="lockPinInput" 
-        class="pin-input-field" 
-        maxlength="4" 
-        placeholder="••••" 
-        autocomplete="off"
-        autofocus
-      >
-      <div id="lockPinError" style="color: #ef4444; font-weight: 700; font-size: 0.92rem; margin-top: 12px; display: none;">
-        ❌ Clave incorrecta. Inténtalo de nuevo.
-      </div>
+      <button type="button" id="googleSignInBtn" class="btn-primary" style="width: 100%; padding: 13px 20px; background: #1e3a8a; display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem;">
+        <span style="background: white; color: #1e3a8a; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-weight: 900;">G</span>
+        <span id="googleSignInBtnText">Continuar con Google</span>
+      </button>
 
-      <div style="display: flex; gap: 12px; margin-top: 26px; justify-content: center;">
-        <a href="./index.html" class="btn-secondary" style="padding: 12px 24px; text-decoration: none;">
-          ← Volver
-        </a>
-        <button type="button" id="submitLockPinBtn" class="btn-primary" style="padding: 12px 28px; background: #2563eb;">
-          <span>🔓</span> Desbloquear
+      <div id="googleAuthError" style="color: #b91c1c; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 10px; padding: 10px 12px; font-weight: 600; font-size: 0.88rem; margin-top: 12px; display: none; text-align: left;"></div>
+
+      <div style="margin-top: 18px; padding-top: 16px; border-top: 1px dashed #cbd5e1;">
+        <button type="button" id="toggleOfflinePinBtn" style="background: none; border: none; color: #475569; font-weight: 700; font-size: 0.88rem; cursor: pointer; text-decoration: underline;">
+          ¿Trabajas sin internet / servidor local? Ingresar con PIN
         </button>
+
+        <div id="offlinePinSection" style="display: none; margin-top: 14px;">
+          <input 
+            type="password" 
+            id="lockPinInput" 
+            class="pin-input-field" 
+            maxlength="4" 
+            placeholder="••••" 
+            autocomplete="off"
+          >
+          <div id="lockPinError" style="color: #ef4444; font-weight: 700; font-size: 0.9rem; margin-top: 10px; display: none;">
+            ❌ Clave incorrecta. Inténtalo de nuevo.
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 14px; justify-content: center;">
+            <button type="button" id="submitLockPinBtn" class="btn-secondary" style="padding: 10px 22px;">
+              <span>🔓</span> Desbloquear Modo Local
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div style="margin-top: 26px; font-size: 0.85rem; color: #94a3b8;">
-        Ministerio de Educación (MEDUCA) • Panamá
+      <div style="margin-top: 18px; display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; color: #64748b;">
+        <a href="./index.html" style="color: #2563eb; font-weight: 700; text-decoration: none;">← Vista Estudiante</a>
+        <span>Los alumnos no requieren cuenta</span>
       </div>
     </div>
   </div>
 
-  <!-- Script QR Code Generator y Firebase SDK Compat -->
+  <!-- Script QR Code Generator y Firebase SDK Compat (incluye Auth) -->
   <script src="./js/qrcode.min.js"></script>
   <script src="./js/vendor/firebase-app-compat.js"></script>
+  <script src="./js/vendor/firebase-auth-compat.js"></script>
   <script src="./js/vendor/firebase-firestore-compat.js"></script>
   <script src="./js/firebase-config.js"></script>
   <script src="./js/docente.js"></script>

@@ -1,12 +1,20 @@
 /* ===================================================
    LÓGICA DEL PANEL DOCENTE - ADMINISTRACIÓN Y REPORTES
-   Soporte Multi-Grado, Códigos QR y Enlaces Directos
+   Soporte Multi-Grado, Códigos QR, Firebase Auth y Enlaces Directos
    =================================================== */
 
 let allResults = [];
-let allStudents = [];
 let allAuthorizations = [];
+let allStudents = [];
+let serverResultsCache = [];
+let serverAuthorizationsCache = [];
+let cloudItemsCache = [];
 let serverInfo = null;
+let firestoreUnsubscribe = null;
+let hasCloudError = false;
+let cloudErrorMessage = '';
+
+const TEACHER_PIN = '0476';
 
 const LESSONS_DATA = [
   {
@@ -55,17 +63,121 @@ const LESSONS_DATA = [
   }
 ];
 
-const TEACHER_PIN = '0476';
+function cleanStudentName(str) {
+  if (!str) return '';
+  return String(str)
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[.,;:!?¿¡"']/g, '')
+    .replace(/\s+/g, ' ');
+}
+
+function escapeHtml(text) {
+  return String(text ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// Código determinista de 6 caracteres para desbloquear un intento en dispositivo local del estudiante
+function computeRetakeCode(studentId, grado) {
+  const input = `${String(studentId || '').trim()}|${Number(grado) || 3}|MEDUCA_AGRI_2026`;
+  let h1 = 0x811c9dc5;
+  let h2 = 0x9e3779b9;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input.charCodeAt(i);
+    h1 ^= ch;
+    h1 = Math.imul(h1, 0x01000193) >>> 0;
+    h2 = (Math.imul(h2 ^ ch, 0x85ebca6b) + i) >>> 0;
+  }
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let combined = (BigInt(h1) << 32n) | BigInt(h2);
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += alphabet[Number(combined % BigInt(alphabet.length))];
+    combined /= BigInt(alphabet.length);
+  }
+  return code;
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupLockScreen();
   await loadServerInfo();
   renderLessonsQrSection();
-  await loadData();
   setupDocenteEvents();
   setupQrModalEvents();
-  setupFirestoreRealtimeListener();
+  initAuthAndData();
 });
+
+function isTeacherUnlockedLocally() {
+  return sessionStorage.getItem('meduca_docente_auth') === TEACHER_PIN;
+}
+
+function updateAuthUI(user, unauthorizedEmail) {
+  const lockScreen = document.getElementById('teacherLockScreen');
+  const authBadge = document.getElementById('teacherAuthBadge');
+  const banner = document.getElementById('cloudStatusBanner');
+  const bannerMsg = document.getElementById('cloudStatusMessage');
+  const googleAuthErr = document.getElementById('googleAuthError');
+
+  if (unauthorizedEmail && googleAuthErr) {
+    googleAuthErr.textContent = `Acceso denegado: la cuenta "${unauthorizedEmail}" no está autorizada. Inicia sesión con civanp004@gmail.com.`;
+    googleAuthErr.style.display = 'block';
+  }
+
+  if (user) {
+    if (lockScreen) lockScreen.style.display = 'none';
+    if (googleAuthErr) googleAuthErr.style.display = 'none';
+    if (authBadge) {
+      authBadge.innerHTML = `🟢 Conectado: ${escapeHtml(user.email)}`;
+      authBadge.style.background = 'rgba(34, 197, 94, 0.25)';
+    }
+    if (banner && !hasCloudError) banner.style.display = 'none';
+  } else {
+    const localUnlocked = isTeacherUnlockedLocally();
+    if (lockScreen) {
+      lockScreen.style.display = localUnlocked ? 'none' : 'flex';
+    }
+    if (authBadge) {
+      authBadge.innerHTML = localUnlocked
+        ? '🟡 Modo Local (Sin sesión Google)'
+        : '🔒 Sesión requerida';
+      authBadge.style.background = 'rgba(255, 255, 255, 0.16)';
+    }
+    if (banner && localUnlocked) {
+      banner.style.display = 'flex';
+      if (bannerMsg) {
+        bannerMsg.textContent = cloudErrorMessage || 'Estás en modo local. Inicia sesión con Google (civanp004@gmail.com) para cargar los resultados guardados en Firebase.';
+      }
+    }
+  }
+}
+
+function initAuthAndData() {
+  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.onAuthStateChanged) {
+    window.MEDUCA_FIREBASE.onAuthStateChanged(async ({ user, unauthorizedEmail }) => {
+      updateAuthUI(user, unauthorizedEmail);
+      if (user) {
+        await loadData();
+        setupFirestoreRealtimeListener();
+      } else {
+        stopFirestoreRealtimeListener();
+        if (isTeacherUnlockedLocally()) {
+          await loadData();
+        }
+      }
+    });
+  } else {
+    updateAuthUI(null, null);
+    if (isTeacherUnlockedLocally()) {
+      loadData();
+    }
+  }
+}
 
 function setupLockScreen() {
   const lockScreen = document.getElementById('teacherLockScreen');
@@ -73,22 +185,56 @@ function setupLockScreen() {
   const pinError = document.getElementById('lockPinError');
   const submitBtn = document.getElementById('submitLockPinBtn');
   const logoutBtn = document.getElementById('logoutDocenteBtn');
+  const googleBtn = document.getElementById('googleSignInBtn');
+  const googleBtnText = document.getElementById('googleSignInBtnText');
+  const googleAuthErr = document.getElementById('googleAuthError');
+  const bannerGoogleBtn = document.getElementById('bannerGoogleSignInBtn');
+  const togglePinBtn = document.getElementById('toggleOfflinePinBtn');
+  const offlinePinSec = document.getElementById('offlinePinSection');
 
-  const isAuth = sessionStorage.getItem('meduca_docente_auth') === TEACHER_PIN;
-  if (!isAuth) {
-    if (lockScreen) {
-      lockScreen.style.display = 'flex';
-      setTimeout(() => { if (pinInput) pinInput.focus(); }, 150);
+  const triggerGoogleLogin = async (btnEl, labelEl) => {
+    if (!window.MEDUCA_FIREBASE || !window.MEDUCA_FIREBASE.signInWithGoogle) return;
+    if (googleAuthErr) googleAuthErr.style.display = 'none';
+    if (btnEl) btnEl.disabled = true;
+    if (labelEl) labelEl.textContent = 'Conectando con Google...';
+
+    const res = await window.MEDUCA_FIREBASE.signInWithGoogle();
+    if (btnEl) btnEl.disabled = false;
+    if (labelEl) labelEl.textContent = 'Continuar con Google';
+
+    if (!res.ok) {
+      if (googleAuthErr) {
+        googleAuthErr.textContent = res.message || 'No se pudo iniciar sesión con Google.';
+        googleAuthErr.style.display = 'block';
+      } else {
+        alert(res.message || 'No se pudo iniciar sesión con Google.');
+      }
     }
-  } else {
-    if (lockScreen) lockScreen.style.display = 'none';
+  };
+
+  if (googleBtn) {
+    googleBtn.addEventListener('click', () => triggerGoogleLogin(googleBtn, googleBtnText));
+  }
+  if (bannerGoogleBtn) {
+    bannerGoogleBtn.addEventListener('click', () => triggerGoogleLogin(bannerGoogleBtn, null));
   }
 
-  const unlock = () => {
+  if (togglePinBtn && offlinePinSec) {
+    togglePinBtn.addEventListener('click', () => {
+      const open = offlinePinSec.style.display !== 'none';
+      offlinePinSec.style.display = open ? 'none' : 'block';
+      if (!open && pinInput) setTimeout(() => pinInput.focus(), 100);
+    });
+  }
+
+  const unlockWithPin = async () => {
     if (!pinInput) return;
     if (pinInput.value.trim() === TEACHER_PIN) {
       sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
+      if (pinError) pinError.style.display = 'none';
       if (lockScreen) lockScreen.style.display = 'none';
+      updateAuthUI(window.MEDUCA_FIREBASE?.getCurrentUser?.() || null, null);
+      await loadData();
     } else {
       if (pinError) pinError.style.display = 'block';
       pinInput.value = '';
@@ -96,24 +242,32 @@ function setupLockScreen() {
     }
   };
 
-  if (submitBtn) submitBtn.addEventListener('click', unlock);
+  if (submitBtn) submitBtn.addEventListener('click', unlockWithPin);
   if (pinInput) {
     pinInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
-        unlock();
+        unlockWithPin();
       }
     });
   }
 
   if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
+    logoutBtn.addEventListener('click', async () => {
       sessionStorage.removeItem('meduca_docente_auth');
+      stopFirestoreRealtimeListener();
+      if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.signOut) {
+        await window.MEDUCA_FIREBASE.signOut();
+      }
+      cloudItemsCache = [];
+      allResults = [];
+      calculateAndRenderStats();
+      renderTable();
       if (lockScreen) {
         if (pinInput) pinInput.value = '';
         if (pinError) pinError.style.display = 'none';
+        if (googleAuthErr) googleAuthErr.style.display = 'none';
         lockScreen.style.display = 'flex';
-        setTimeout(() => { if (pinInput) pinInput.focus(); }, 150);
       } else {
         window.location.href = './index.html';
       }
@@ -200,10 +354,8 @@ function openQrModal(gradeNum) {
   linkText.href = fullUrl;
   openLink.href = fullUrl;
 
-  // Clear previous QR
   qrBox.innerHTML = '';
 
-  // Generate QR Code with qrcodejs
   if (typeof QRCode !== 'undefined') {
     new QRCode(qrBox, {
       text: fullUrl,
@@ -247,14 +399,13 @@ function setupQrModalEvents() {
           copyBtn.innerHTML = originalText;
           copyBtn.style.background = '';
         }, 2200);
-      } catch (err) {
+      } catch {
         alert('Enlace: ' + link);
       }
     });
   }
 }
 
-// Load Results and Student Data
 function getLocalResults(grade) {
   try {
     if (grade) {
@@ -272,9 +423,69 @@ function getLocalResults(grade) {
   }
 }
 
+function isEvaluationActive(r) {
+  return !r.tipo &&
+    r.estado !== 'reintento_autorizado' &&
+    r.estado !== 'duplicado_ignorado' &&
+    r.estado !== 'archivado_docente' &&
+    !r.archivado_por_reintento &&
+    r.activo !== false;
+}
+
+function rebuildCombinedState() {
+  const localResults = getLocalResults();
+  const cloudEvaluations = cloudItemsCache.filter(isEvaluationActive);
+  const cloudAuthorizations = cloudItemsCache.filter(r => r.tipo === 'autorizacion_reintento');
+
+  allAuthorizations = [...cloudAuthorizations, ...serverAuthorizationsCache];
+
+  const combinedMap = new Map();
+  serverResultsCache.forEach(r => {
+    if (isEvaluationActive(r)) {
+      combinedMap.set((r.grado || '3') + '_' + (r.id || r.estudiante_nombre), r);
+    }
+  });
+
+  localResults.forEach(r => {
+    if (isEvaluationActive(r)) {
+      const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
+      if (!combinedMap.has(key)) combinedMap.set(key, r);
+    }
+  });
+
+  cloudEvaluations.forEach(r => {
+    const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
+    combinedMap.set(key, r);
+  });
+
+  // Si hay una autorización activa para un estudiante EN ESE GRADO, remover resultado viejo no posterior
+  allAuthorizations.forEach(auth => {
+    if (auth.activo) {
+      const authName = cleanStudentName(auth.estudiante_nombre);
+      const authGrade = auth.grado ? Number(auth.grado) : null;
+      const authTs = Number(auth.autorizado_timestamp) || 0;
+      for (const [k, v] of combinedMap.entries()) {
+        const resGrade = Number(v.grado || 3);
+        const resTs = Number(v.completado_timestamp) || 0;
+        if (
+          cleanStudentName(v.estudiante_nombre) === authName &&
+          (!authGrade || resGrade === authGrade) &&
+          resTs <= authTs
+        ) {
+          combinedMap.delete(k);
+        }
+      }
+    }
+  });
+
+  allResults = Array.from(combinedMap.values());
+  calculateAndRenderStats();
+  renderTable();
+}
+
 async function loadData() {
   try {
-    // 1. Load Students
+    // 1. Cargar lista oficial de estudiantes
     try {
       const resEst = await fetch('/api/estudiantes');
       if (resEst.ok) allStudents = await resEst.json();
@@ -284,106 +495,106 @@ async function loadData() {
       allStudents = await resStatic.json();
     }
 
-    // 2. Load Results & Server Authorizations
-    let serverResults = [];
-    let serverAuthorizations = [];
+    // 2. Cargar resultados de servidor local (si existe)
+    serverResultsCache = [];
+    serverAuthorizationsCache = [];
     try {
       const resRes = await fetch('/api/resultados');
       if (resRes.ok) {
         const data = await resRes.json();
-        serverResults = data.resultados || [];
-        serverAuthorizations = data.autorizaciones || [];
+        serverResultsCache = data.resultados || [];
+        serverAuthorizationsCache = data.autorizaciones || [];
       }
     } catch {}
 
-    const localResults = getLocalResults();
-    let cloudItems = [];
+    // 3. Cargar resultados de Firestore (requiere docente autenticado con Google)
+    cloudItemsCache = [];
+    hasCloudError = false;
+    cloudErrorMessage = '';
+
+    const banner = document.getElementById('cloudStatusBanner');
+    const bannerMsg = document.getElementById('cloudStatusMessage');
+
     if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable()) {
-      try {
-        cloudItems = await window.MEDUCA_FIREBASE.getResults();
-      } catch (e) {
-        console.warn('Error cargando resultados de Firestore:', e);
+      if (window.MEDUCA_FIREBASE.isTeacherAuthenticated()) {
+        const cloudInfo = await window.MEDUCA_FIREBASE.getResultsDetailed();
+        if (cloudInfo.ok) {
+          cloudItemsCache = cloudInfo.items;
+          if (banner) banner.style.display = 'none';
+        } else {
+          hasCloudError = true;
+          cloudErrorMessage = cloudInfo.code === 'permission-denied'
+            ? 'Tu sesión de Google no tiene permisos para leer Firestore. Verifica que iniciaste sesión con civanp004@gmail.com.'
+            : `No se pudieron cargar los resultados de Firebase (${cloudInfo.code}). Mostrando datos locales disponibles.`;
+          if (banner && bannerMsg) {
+            bannerMsg.textContent = cloudErrorMessage;
+            banner.style.display = 'flex';
+          }
+        }
+      } else {
+        hasCloudError = true;
+        cloudErrorMessage = 'Inicia sesión con Google (civanp004@gmail.com) para cargar los resultados almacenados en Firebase.';
+        if (banner && bannerMsg && isTeacherUnlockedLocally()) {
+          bannerMsg.textContent = cloudErrorMessage;
+          banner.style.display = 'flex';
+        }
       }
     }
 
-    // Separar evaluaciones activas de autorizaciones
-    const cloudEvaluations = cloudItems.filter(r => 
-      !r.tipo && 
-      r.estado !== 'reintento_autorizado' && 
-      !r.archivado_por_reintento && 
-      r.activo !== false
-    );
-    const cloudAuthorizations = cloudItems.filter(r => r.tipo === 'autorizacion_reintento');
-
-    allAuthorizations = [...cloudAuthorizations, ...serverAuthorizations];
-
-    const combinedMap = new Map();
-    serverResults.forEach(r => {
-      if (r.estado !== 'reintento_autorizado' && !r.archivado_por_reintento && r.activo !== false) {
-        combinedMap.set((r.grado || '3') + '_' + (r.id || r.estudiante_nombre), r);
-      }
-    });
-
-    localResults.forEach(r => {
-      const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
-      if (!combinedMap.has(key)) combinedMap.set(key, r);
-    });
-
-    cloudEvaluations.forEach(r => {
-      const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
-      combinedMap.set(key, r);
-    });
-
-    // Si hay una autorización activa para un estudiante, remover resultado viejo
-    allAuthorizations.forEach(auth => {
-      if (auth.activo) {
-        for (const [k, v] of combinedMap.entries()) {
-          if (v.estudiante_nombre && v.estudiante_nombre.toLowerCase().trim() === auth.estudiante_nombre.toLowerCase().trim()) {
-            combinedMap.delete(k);
-          }
-        }
-      }
-    });
-
-    allResults = Array.from(combinedMap.values());
-
-    calculateAndRenderStats();
-    renderTable();
+    rebuildCombinedState();
   } catch (err) {
     console.error('Error cargando datos:', err);
   }
+}
+
+function findStudentAttempts(student) {
+  const sNameClean = cleanStudentName(student.nombre);
+  const matches = allResults.filter(r =>
+    ((Number(r.grado) === Number(student.grado)) || (!r.grado && Number(student.grado) === 3)) && (
+      (r.estudiante_id && r.estudiante_id === student.id) ||
+      (r.estudiante_nombre && cleanStudentName(r.estudiante_nombre) === sNameClean)
+    )
+  );
+  // Conservar orden cronológico ascendente: el primer examen enviado es la calificación oficial (único intento)
+  matches.sort((a, b) => (Number(a.completado_timestamp) || 0) - (Number(b.completado_timestamp) || 0));
+  return matches;
+}
+
+function getStudentRows() {
+  return allStudents.map(student => {
+    const attempts = findStudentAttempts(student);
+    return {
+      student,
+      result: attempts.length > 0 ? attempts[0] : null,
+      attempts
+    };
+  });
 }
 
 function calculateAndRenderStats() {
   const gradeSel = document.getElementById('gradeFilterSelect')?.value || 'todos';
   const groupSel = document.getElementById('groupFilterSelect')?.value || 'todos';
 
-  let filteredStudents = allStudents;
-  let filteredResults = allResults;
+  let rows = getStudentRows();
 
   if (gradeSel !== 'todos') {
     const gNum = parseInt(gradeSel, 10);
-    filteredStudents = allStudents.filter(s => s.grado === gNum);
-    filteredResults = allResults.filter(r => (r.grado === gNum) || (!r.grado && gNum === 3));
+    rows = rows.filter(item => item.student.grado === gNum);
   }
 
   if (groupSel !== 'todos') {
-    filteredStudents = filteredStudents.filter(s => s.grupo === groupSel);
-    filteredResults = filteredResults.filter(r => {
-      if (r.grupo) return r.grupo === groupSel;
-      const st = allStudents.find(s => (s.id && s.id === r.estudiante_id) || (s.nombre && s.nombre.toLowerCase().trim() === (r.estudiante_nombre || '').toLowerCase().trim()));
-      return st && st.grupo === groupSel;
-    });
+    rows = rows.filter(item => item.student.grupo === groupSel);
   }
 
-  const totalEst = filteredStudents.length;
-  const realizadas = filteredResults.length;
+  const totalEst = rows.length;
+  const completedRows = rows.filter(item => Boolean(item.result));
+  const realizadas = completedRows.length;
   const pendientes = Math.max(0, totalEst - realizadas);
 
   let sumaNotas = 0;
   let sumaTiempo = 0;
 
-  filteredResults.forEach(r => {
+  completedRows.forEach(({ result: r }) => {
     sumaNotas += Number(r.nota_meduca) || 1.0;
     sumaTiempo += Number(r.duracion_segundos) || 0;
   });
@@ -392,8 +603,8 @@ function calculateAndRenderStats() {
   const promedioTiempoSec = realizadas > 0 ? Math.round(sumaTiempo / realizadas) : 0;
   const min = Math.floor(promedioTiempoSec / 60);
   const sec = promedioTiempoSec % 60;
-  const promedioTiempoFmt = realizadas > 0 
-    ? `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')} min` 
+  const promedioTiempoFmt = realizadas > 0
+    ? `${min.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')} min`
     : '-';
 
   document.getElementById('statTotal').textContent = totalEst;
@@ -403,31 +614,18 @@ function calculateAndRenderStats() {
   document.getElementById('statPromedioTiempo').textContent = promedioTiempoFmt;
 }
 
-function renderTable() {
-  const tbody = document.getElementById('resultsTableBody');
+function getFilteredRows() {
   const search = (document.getElementById('searchInput').value || '').toLowerCase().trim();
   const gradeFilter = document.getElementById('gradeFilterSelect').value;
   const statusFilter = document.getElementById('statusFilter').value;
   const groupFilter = document.getElementById('groupFilterSelect').value;
 
-  tbody.innerHTML = '';
-
-  const rows = allStudents.map(student => {
-    const res = allResults.find(r => 
-      ((r.grado === student.grado) || (!r.grado && student.grado === 3)) && (
-        (r.estudiante_id && r.estudiante_id === student.id) ||
-        (r.estudiante_nombre && student.nombre && r.estudiante_nombre.toLowerCase().trim() === student.nombre.toLowerCase().trim())
-      )
-    );
-    return { student, result: res };
-  });
-
-  const filtered = rows.filter(item => {
+  return getStudentRows().filter(item => {
     const s = item.student;
     if (gradeFilter !== 'todos' && s.grado !== parseInt(gradeFilter, 10)) return false;
 
-    const matchSearch = (s.nombre || '').toLowerCase().includes(search) || 
-                        (s.apellidos || '').toLowerCase().includes(search) || 
+    const matchSearch = (s.nombre || '').toLowerCase().includes(search) ||
+                        (s.apellidos || '').toLowerCase().includes(search) ||
                         (s.nombres || '').toLowerCase().includes(search);
     if (!matchSearch) return false;
 
@@ -438,6 +636,13 @@ function renderTable() {
 
     return true;
   });
+}
+
+function renderTable() {
+  const tbody = document.getElementById('resultsTableBody');
+  tbody.innerHTML = '';
+
+  const filtered = getFilteredRows();
 
   if (filtered.length === 0) {
     tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 24px; color: #6b7280;">No se encontraron registros con los filtros seleccionados</td></tr>`;
@@ -446,7 +651,7 @@ function renderTable() {
 
   filtered.forEach((item, idx) => {
     const tr = document.createElement('tr');
-    const { student, result } = item;
+    const { student, result, attempts } = item;
     let gradoBadge = `<span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">3er Grado</span>`;
     if (student.grado === 4) {
       gradoBadge = `<span style="background: #ffedd5; color: #c2410c; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">4° Grado</span>`;
@@ -456,10 +661,12 @@ function renderTable() {
       gradoBadge = `<span style="background: #f3e8ff; color: #7c3aed; padding: 2px 8px; border-radius: 999px; font-weight: 800; font-size: 0.78rem;">6° Grado</span>`;
     }
 
-    const activeAuth = allAuthorizations.find(a => 
-      a.activo && 
-      a.estudiante_nombre && 
-      a.estudiante_nombre.toLowerCase().trim() === student.nombre.toLowerCase().trim()
+    const sNameClean = cleanStudentName(student.nombre);
+    const activeAuth = allAuthorizations.find(a =>
+      a.activo &&
+      a.estudiante_nombre &&
+      cleanStudentName(a.estudiante_nombre) === sNameClean &&
+      (!a.grado || Number(a.grado) === Number(student.grado))
     );
 
     if (result) {
@@ -473,16 +680,21 @@ function renderTable() {
         textColor = '#d97706';
       }
 
+      const dupBadge = attempts.length > 1
+        ? `<div style="margin-top: 4px;"><span style="background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; padding: 2px 7px; border-radius: 999px; font-size: 0.74rem; font-weight: 700;" title="Se muestra únicamente el 1er intento oficial. Haz clic en Ver para revisar envíos extra.">⚠️ ${attempts.length} envíos (1° oficial)</span></div>`
+        : '';
+
       tr.innerHTML = `
         <td style="font-weight: 700; color: #64748b;">${idx + 1}</td>
         <td>${gradoBadge}</td>
         <td>
-          <strong>${student.nombre_simple || student.nombre}</strong>
-          <span class="group-pill">${student.grupo_label || student.grupo}</span>
+          <strong>${escapeHtml(student.nombre_simple || student.nombre)}</strong>
+          <span class="group-pill">${escapeHtml(student.grupo_label || student.grupo)}</span>
+          ${dupBadge}
         </td>
         <td><span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;">✅ Realizada</span></td>
-        <td>${result.completado_at || '-'}</td>
-        <td style="font-family: monospace; font-weight: 700; color: #92400e;">⏱️ ${result.duracion_formato}</td>
+        <td>${escapeHtml(result.completado_at || '-')}</td>
+        <td style="font-family: monospace; font-weight: 700; color: #92400e;">⏱️ ${escapeHtml(result.duracion_formato || '-')}</td>
         <td><strong>${result.puntos_obtenidos}</strong> / ${result.puntos_totales}</td>
         <td>
           <span style="background: ${badgeColor}; color: ${textColor}; padding: 4px 12px; border-radius: 999px; font-weight: 800; font-size: 1.05rem;">
@@ -490,30 +702,31 @@ function renderTable() {
           </span>
         </td>
         <td>
-          <button class="btn-secondary" onclick="viewDetail('${result.id}')" style="margin-right: 6px;">
+          <button type="button" class="btn-secondary btn-view-detail" data-result-id="${escapeHtml(result.id)}" data-student-id="${escapeHtml(student.id)}" data-grado="${student.grado}" style="margin-right: 6px;">
             👁️ Ver
           </button>
-          <button class="btn-danger" onclick="resetAttempt('${result.id}', '${student.nombre}', ${student.grado})" title="Autorizar nueva oportunidad y archivar nota">
+          <button type="button" class="btn-danger btn-reset-attempt" data-result-id="${escapeHtml(result.id)}" data-student-id="${escapeHtml(student.id)}" data-student-name="${escapeHtml(student.nombre)}" data-grado="${student.grado}" title="Autorizar nueva oportunidad y archivar nota">
             🔄 Dar Oportunidad
           </button>
         </td>
       `;
     } else if (activeAuth) {
+      const code = computeRetakeCode(student.id, student.grado);
       tr.innerHTML = `
         <td style="font-weight: 700; color: #64748b;">${idx + 1}</td>
         <td>${gradoBadge}</td>
         <td>
-          <strong>${student.nombre_simple || student.nombre}</strong>
-          <span class="group-pill" style="opacity: 0.9;">${student.grupo_label || student.grupo}</span>
+          <strong>${escapeHtml(student.nombre_simple || student.nombre)}</strong>
+          <span class="group-pill" style="opacity: 0.9;">${escapeHtml(student.grupo_label || student.grupo)}</span>
         </td>
         <td><span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;">🔄 Oportunidad Autorizada</span></td>
-        <td><span style="color: #2563eb; font-size: 0.82rem; font-weight: 600;" title="Fecha y hora de autorización">📅 ${activeAuth.autorizado_at}</span></td>
-        <td style="color: #64748b; font-size: 0.82rem; font-style: italic;">En espera del alumno</td>
+        <td><span style="color: #2563eb; font-size: 0.82rem; font-weight: 600;" title="Fecha y hora de autorización">📅 ${escapeHtml(activeAuth.autorizado_at)}</span></td>
+        <td style="color: #475569; font-size: 0.82rem;">Código tablet: <strong style="font-family: monospace; color: #1d4ed8;">${code}</strong></td>
         <td style="color: #94a3b8;">-</td>
         <td><span style="background: #f1f5f9; color: #475569; padding: 3px 8px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">Autorizado</span></td>
         <td>
-          <button class="btn-secondary" onclick="resetAttempt(null, '${student.nombre}', ${student.grado})" title="Actualizar fecha de autorización">
-            🔄 Renovar
+          <button type="button" class="btn-secondary btn-reset-attempt" data-result-id="" data-student-id="${escapeHtml(student.id)}" data-student-name="${escapeHtml(student.nombre)}" data-grado="${student.grado}" title="Actualizar autorización y ver código">
+            🔄 Ver Código / Renovar
           </button>
         </td>
       `;
@@ -522,8 +735,8 @@ function renderTable() {
         <td style="font-weight: 700; color: #64748b;">${idx + 1}</td>
         <td>${gradoBadge}</td>
         <td>
-          <strong>${student.nombre_simple || student.nombre}</strong>
-          <span class="group-pill" style="opacity: 0.7;">${student.grupo_label || student.grupo}</span>
+          <strong>${escapeHtml(student.nombre_simple || student.nombre)}</strong>
+          <span class="group-pill" style="opacity: 0.7;">${escapeHtml(student.grupo_label || student.grupo)}</span>
         </td>
         <td><span style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; font-weight: 700;">⏳ Pendiente</span></td>
         <td style="color: #94a3b8;">-</td>
@@ -553,6 +766,24 @@ function setupDocenteEvents() {
   });
   document.getElementById('refreshBtn').addEventListener('click', loadData);
   document.getElementById('exportCsvBtn').addEventListener('click', exportResultsCsv);
+
+  // Delegación segura para botones de la tabla
+  document.getElementById('resultsTableBody').addEventListener('click', (e) => {
+    const viewBtn = e.target.closest('.btn-view-detail');
+    if (viewBtn) {
+      viewDetail(viewBtn.dataset.resultId, viewBtn.dataset.studentId, Number(viewBtn.dataset.grado));
+      return;
+    }
+    const resetBtn = e.target.closest('.btn-reset-attempt');
+    if (resetBtn) {
+      resetAttempt(
+        resetBtn.dataset.resultId || null,
+        resetBtn.dataset.studentId,
+        resetBtn.dataset.studentName,
+        Number(resetBtn.dataset.grado)
+      );
+    }
+  });
 
   const rosterModal = document.getElementById('rosterModal');
   document.getElementById('openRosterBtn').addEventListener('click', () => {
@@ -622,64 +853,85 @@ function updateGroupFilterOptions() {
   }
 }
 
-function exportResultsCsv() {
-  const gradeSel = document.getElementById('gradeFilterSelect').value;
-  let target = allResults;
-  if (gradeSel === '3') target = allResults.filter(r => r.grado === 3 || !r.grado);
-  else if (gradeSel === '4') target = allResults.filter(r => r.grado === 4);
-  else if (gradeSel === '5') target = allResults.filter(r => r.grado === 5);
-  else if (gradeSel === '6') target = allResults.filter(r => r.grado === 6);
+function csvCell(val) {
+  return `"${String(val ?? '').replace(/"/g, '""')}"`;
+}
 
-  if (target.length === 0) {
-    alert('No hay evaluaciones registradas con los filtros actuales para exportar.');
+function exportResultsCsv() {
+  const targetRows = getFilteredRows().filter(item => Boolean(item.result));
+
+  if (targetRows.length === 0) {
+    alert('No hay evaluaciones realizadas con los filtros actuales para exportar.');
     return;
   }
 
   let csv = '\uFEFF';
-  csv += 'N°,Grado,Salón,Estudiante,Fecha y Hora,Tiempo Empleado,Puntos,Nota MEDUCA,Nivel,Parte A,Parte B,Parte C,Parte D,Parte E\n';
+  csv += 'N°,Grado,Salón,Estudiante,Fecha y Hora,Tiempo Empleado,Puntos,Total Posible,Nota MEDUCA,Nivel,Parte A,Parte B,Parte C,Parte D,Parte E\n';
 
-  target.forEach((r, idx) => {
+  targetRows.forEach(({ student, result: r }, idx) => {
     const ptsA = r.detalles?.parte_a?.puntos ?? '-';
     const ptsB = r.detalles?.parte_b?.puntos ?? '-';
     const ptsC = r.detalles?.parte_c?.puntos ?? '-';
     const ptsD = r.detalles?.parte_d?.puntos ?? '-';
     const ptsE = r.detalles?.parte_e?.puntos ?? '-';
-    const grado = r.grado ? `${r.grado}°` : '3°';
-    const grupo = r.grupo || '';
-    
-    csv += `"${idx + 1}","${grado}","${grupo}","${r.estudiante_nombre}","${r.completado_at}","${r.duracion_formato}",${r.puntos_obtenidos},${r.nota_meduca},"${r.desempeno}",${ptsA},${ptsB},${ptsC},${ptsD},${ptsE}\n`;
+    const grado = r.grado ? `${r.grado}°` : `${student.grado || 3}°`;
+    const grupo = r.grupo || student.grupo || '';
+
+    csv += [
+      csvCell(idx + 1),
+      csvCell(grado),
+      csvCell(grupo),
+      csvCell(r.estudiante_nombre),
+      csvCell(r.completado_at),
+      csvCell(r.duracion_formato),
+      r.puntos_obtenidos ?? '',
+      r.puntos_totales ?? '',
+      r.nota_meduca ?? '',
+      csvCell(r.desempeno),
+      ptsA,
+      ptsB,
+      ptsC,
+      ptsD,
+      ptsE
+    ].join(',') + '\n';
   });
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `Resultados_Evaluaciones_MEDUCA_${new Date().toISOString().slice(0,10)}.csv`);
+  link.setAttribute('download', `Resultados_Evaluaciones_MEDUCA_${new Date().toISOString().slice(0, 10)}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 }
 
-async function resetAttempt(resultId, studentName, grado) {
-  const confirmReset = confirm(`¿Estás seguro de que deseas autorizar una NUEVA OPORTUNIDAD a "${studentName}" (${grado}° grado)?\n\n📌 Se registrará en la base de datos con la fecha y hora exacta actual, archivará su nota previa y le habilitará el acceso inmediato al estudiante desde su dispositivo.`);
+async function resetAttempt(resultId, studentId, studentName, grado) {
+  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable() && !window.MEDUCA_FIREBASE.isTeacherAuthenticated()) {
+    alert('🔐 Primero debes iniciar sesión con Google (civanp004@gmail.com) para autorizar reintentos en Firebase.');
+    return;
+  }
+
+  const confirmReset = confirm(`¿Estás seguro de que deseas autorizar una NUEVA OPORTUNIDAD a "${studentName}" (${grado}° grado)?\n\n📌 Se registrará en la base de datos con la fecha y hora exacta actual y archivará su nota previa.`);
   if (!confirmReset) return;
 
-  // 1. Limpiar localStorage local del docente
+  // 1. Limpiar localStorage local del docente si aplica
   try {
     const key = `meduca_agri_eval_${grado}to_grado`;
     const local = JSON.parse(localStorage.getItem(key) || '[]');
-    const updated = local.filter(r => r.id !== resultId && r.estudiante_nombre !== studentName);
+    const updated = local.filter(r => r.id !== resultId && cleanStudentName(r.estudiante_nombre) !== cleanStudentName(studentName));
     localStorage.setItem(key, JSON.stringify(updated));
   } catch (e) {
     console.warn(e);
   }
 
-  // 2. Registrar en la base de datos Firestore con fecha, hora y archivar intento
+  // 2. Registrar en Firestore con fecha, hora y archivar intento del mismo grado
   if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.authorizeRetake) {
-    try {
-      await window.MEDUCA_FIREBASE.authorizeRetake(studentName, grado);
-    } catch (e) {
-      console.warn('Error al autorizar reintento en Firestore:', e);
+    const authRes = await window.MEDUCA_FIREBASE.authorizeRetake(studentName, grado);
+    if (!authRes.ok) {
+      alert(`❌ No se pudo registrar la autorización en Firebase:\n${authRes.message}`);
+      return;
     }
   }
 
@@ -692,12 +944,26 @@ async function resetAttempt(resultId, studentName, grado) {
     });
   } catch {}
 
-  alert(`✅ Oportunidad autorizada y registrada en la base de datos para:\n"${studentName}" (${grado}° grado).\n\nEl estudiante ya puede ingresar desde su dispositivo para realizar su evaluación.`);
+  const unlockCode = computeRetakeCode(studentId, grado);
+  const lesson = LESSONS_DATA.find(l => l.grado === Number(grado));
+  const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  const directUnlockUrl = lesson
+    ? `${baseUrl}${lesson.slug}?est=${encodeURIComponent(studentId)}&reintento=${encodeURIComponent(unlockCode)}`
+    : '';
+
+  alert(
+    `✅ Oportunidad autorizada para:\n"${studentName}" (${grado}° grado).\n\n` +
+    `🔑 Código de desbloqueo (si el estudiante usa la misma tablet/celular): ${unlockCode}\n` +
+    (directUnlockUrl ? `\n🔗 Enlace directo de reintento:\n${directUnlockUrl}` : '')
+  );
   await loadData();
 }
 
-function viewDetail(resultId) {
-  const res = allResults.find(r => r.id === resultId);
+function viewDetail(resultId, studentId, grado) {
+  let res = allResults.find(r => r.id === resultId);
+  let student = allStudents.find(s => s.id === studentId && Number(s.grado) === Number(grado));
+  let attempts = student ? findStudentAttempts(student) : (res ? [res] : []);
+  if (!res && attempts.length > 0) res = attempts[0];
   if (!res) return;
 
   const modal = document.getElementById('detailModal');
@@ -716,11 +982,17 @@ function viewDetail(resultId) {
     return;
   }
 
+  const maxPtsA = (d.parte_a?.items || []).reduce((acc, it) => acc + (it.id === 'a2' && String(it.respuesta_esperada || '').includes(',') ? 3 : 1), 0);
+  const maxPtsB = (d.parte_b?.items || []).length;
+  const maxPtsC = (d.parte_c?.items || []).length;
+  const maxPtsD = (d.parte_d?.items || []).length;
+  const maxPtsE = (d.parte_e?.items || []).length;
+
   // Parte A
   let html = `
     <div style="margin-bottom: 20px;">
       <h4 style="color: #166534; border-bottom: 2px solid #86efac; padding-bottom: 4px; margin-bottom: 10px;">
-        Parte A. Completa (${d.parte_a.puntos} pts)
+        Parte A. Completa (${d.parte_a.puntos} de ${maxPtsA || d.parte_a.puntos} pts)
       </h4>
       <ul style="list-style: none; padding-left: 0;">
   `;
@@ -728,8 +1000,8 @@ function viewDetail(resultId) {
     const icon = item.es_correcta ? '✅' : '❌';
     html += `
       <li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
-        ${icon} <strong>Item ${item.numero}:</strong> Respuesta dada: <em>"${item.respuesta_dada}"</em> 
-        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Esperada: ${item.respuesta_esperada})</span>` : ''}
+        ${icon} <strong>Ítem ${item.numero}:</strong> Respuesta dada: <em>"${escapeHtml(item.respuesta_dada)}"</em> 
+        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Esperada: ${escapeHtml(item.respuesta_esperada)})</span>` : ''}
       </li>
     `;
   });
@@ -739,7 +1011,7 @@ function viewDetail(resultId) {
   html += `
     <div style="margin-bottom: 20px;">
       <h4 style="color: #166534; border-bottom: 2px solid #86efac; padding-bottom: 4px; margin-bottom: 10px;">
-        Parte B. Selección Múltiple (${d.parte_b.puntos} de 4 pts)
+        Parte B. Selección Múltiple (${d.parte_b.puntos} de ${maxPtsB} pts)
       </h4>
       <ul style="list-style: none; padding-left: 0;">
   `;
@@ -747,8 +1019,8 @@ function viewDetail(resultId) {
     const icon = item.es_correcta ? '✅' : '❌';
     html += `
       <li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
-        ${icon} <strong>Pregunta ${item.numero}:</strong> Opción elegida: <strong>${(item.respuesta_dada || '').toUpperCase()}</strong>
-        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${(item.respuesta_esperada || '').toUpperCase()})</span>` : ''}
+        ${icon} <strong>Pregunta ${item.numero}:</strong> Opción elegida: <strong>${escapeHtml((item.respuesta_dada || '').toUpperCase())}</strong>
+        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${escapeHtml((item.respuesta_esperada || '').toUpperCase())})</span>` : ''}
       </li>
     `;
   });
@@ -758,7 +1030,7 @@ function viewDetail(resultId) {
   html += `
     <div style="margin-bottom: 20px;">
       <h4 style="color: #166534; border-bottom: 2px solid #86efac; padding-bottom: 4px; margin-bottom: 10px;">
-        Parte C. Verdadero o Falso (${d.parte_c.puntos} de 6 pts)
+        Parte C. Verdadero o Falso (${d.parte_c.puntos} de ${maxPtsC} pts)
       </h4>
       <ul style="list-style: none; padding-left: 0;">
   `;
@@ -766,8 +1038,8 @@ function viewDetail(resultId) {
     const icon = item.es_correcta ? '✅' : '❌';
     html += `
       <li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
-        ${icon} <strong>Item ${item.numero}:</strong> Marcó: <strong>${item.respuesta_dada}</strong>
-        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${item.respuesta_esperada})</span>` : ''}
+        ${icon} <strong>Ítem ${item.numero}:</strong> Marcó: <strong>${escapeHtml(item.respuesta_dada)}</strong>
+        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${escapeHtml(item.respuesta_esperada)})</span>` : ''}
       </li>
     `;
   });
@@ -777,7 +1049,7 @@ function viewDetail(resultId) {
   html += `
     <div style="margin-bottom: 20px;">
       <h4 style="color: #166534; border-bottom: 2px solid #86efac; padding-bottom: 4px; margin-bottom: 10px;">
-        Parte D. Relaciona (${d.parte_d.puntos} pts)
+        Parte D. Relaciona (${d.parte_d.puntos} de ${maxPtsD} pts)
       </h4>
       <ul style="list-style: none; padding-left: 0;">
   `;
@@ -785,8 +1057,8 @@ function viewDetail(resultId) {
     const icon = item.es_correcta ? '✅' : '❌';
     html += `
       <li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
-        ${icon} <strong>${item.numero}. ${item.termino}:</strong> Relacionado con: <strong>${item.respuesta_dada}</strong>
-        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${item.respuesta_esperada})</span>` : ''}
+        ${icon} <strong>${item.numero}. ${escapeHtml(item.termino)}:</strong> Relacionado con: <strong>${escapeHtml(item.respuesta_dada)}</strong>
+        ${!item.es_correcta ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${escapeHtml(item.respuesta_esperada)})</span>` : ''}
       </li>
     `;
   });
@@ -794,28 +1066,85 @@ function viewDetail(resultId) {
 
   // Parte E
   if (d.parte_e?.items && d.parte_e.items.length > 0) {
+    const isClasificacion = Number(res.grado) === 6 || Boolean(d.parte_e.items.some(i => i.respuesta_esperada));
+    const titleE = isClasificacion
+      ? `Parte E. Clasificación (${d.parte_e.puntos} de ${maxPtsE} pts)`
+      : `Parte E. Respuesta Corta (${d.parte_e.puntos} de ${maxPtsE} pts)`;
+
     html += `
       <div style="margin-bottom: 20px;">
         <h4 style="color: #166534; border-bottom: 2px solid #86efac; padding-bottom: 4px; margin-bottom: 10px;">
-          Parte E. Respuesta Corta (${d.parte_e.puntos} de 4 pts)
+          ${titleE}
         </h4>
         <ul style="list-style: none; padding-left: 0;">
     `;
     d.parte_e.items.forEach(item => {
-      const icon = item.es_correcta ? '✅' : '⚠️';
-      html += `
-        <li style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
-          ${icon} <strong>Pregunta ${item.numero} (${item.enunciado}):</strong><br>
-          <div style="background: #f8fafc; padding: 8px 12px; border-left: 3px solid #22c55e; margin-top: 4px; font-style: italic;">
-            "${item.respuesta_dada}"
-          </div>
-        </li>
-      `;
+      if (isClasificacion) {
+        const icon = item.es_correcta ? '✅' : '❌';
+        html += `
+          <li style="padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+            ${icon} <strong>Ítem ${item.numero} (${escapeHtml(item.enunciado)}):</strong>
+            Clasificó: <strong>${escapeHtml(item.respuesta_dada)}</strong>
+            ${!item.es_correcta && item.respuesta_esperada ? `<span style="color: #15803d; font-weight: 700;">(Correcta: ${escapeHtml(item.respuesta_esperada)})</span>` : ''}
+          </li>
+        `;
+      } else {
+        const icon = item.es_correcta ? '✅' : '⚠️';
+        html += `
+          <li style="padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+            ${icon} <strong>Pregunta ${item.numero} (${escapeHtml(item.enunciado)}):</strong><br>
+            <div style="background: #f8fafc; padding: 8px 12px; border-left: 3px solid #22c55e; margin-top: 4px; font-style: italic;">
+              "${escapeHtml(item.respuesta_dada)}"
+            </div>
+          </li>
+        `;
+      }
     });
     html += `</ul></div>`;
   }
 
+  // Mostrar envíos duplicados si los hay, permitiendo archivar los sobrantes
+  if (attempts.length > 1) {
+    html += `
+      <div style="margin-top: 16px; padding: 12px 14px; background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 10px;">
+        <h4 style="color: #92400e; margin-bottom: 6px;">⚠️ Envíos duplicados detectados (${attempts.length})</h4>
+        <p style="font-size: 0.85rem; color: #78350f; margin-bottom: 10px;">
+          Se conserva como calificación oficial el <strong>primer envío</strong>. Los intentos adicionales no autorizados pueden archivarse:
+        </p>
+        <ul style="list-style: none; padding-left: 0; font-size: 0.88rem;">
+          ${attempts.slice(1).map((dup, i) => `
+            <li style="display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px dashed #fde68a;">
+              <span>Intento extra #${i + 2}: <strong>${dup.completado_at}</strong> — Nota ${Number(dup.nota_meduca).toFixed(1)} (${dup.puntos_obtenidos}/${dup.puntos_totales})</span>
+              <button type="button" class="btn-danger btn-archive-dup" data-dup-id="${escapeHtml(dup.id)}" style="padding: 4px 10px; font-size: 0.78rem;">Archivar</button>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+  }
+
   body.innerHTML = html;
+
+  body.querySelectorAll('.btn-archive-dup').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const dupId = btn.dataset.dupId;
+      if (!confirm('¿Archivar este envío duplicado para conservar únicamente el primer examen?')) return;
+      btn.disabled = true;
+      btn.textContent = 'Archivando...';
+      if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.archiveResult) {
+        const out = await window.MEDUCA_FIREBASE.archiveResult(dupId, 'Segundo intento no autorizado; se conserva primer examen');
+        if (out.ok) {
+          modal.classList.remove('active');
+          await loadData();
+        } else {
+          alert(out.message || 'No se pudo archivar el duplicado.');
+          btn.disabled = false;
+          btn.textContent = 'Archivar';
+        }
+      }
+    });
+  });
+
   modal.classList.add('active');
 }
 
@@ -835,13 +1164,14 @@ async function saveRoster() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ lista_texto: text })
     });
+    if (!res.ok) throw new Error('Endpoint no disponible');
     const data = await res.json();
     if (data.exito) {
-      alert(`¡Lista actualizada exitosamente!`);
+      alert('¡Lista actualizada exitosamente!');
       document.getElementById('rosterModal').classList.remove('active');
       await loadData();
     }
-  } catch (err) {
+  } catch {
     alert('Nota: En modo estático/GitHub Pages, edita el archivo data/estudiantes.json.');
   } finally {
     saveBtn.disabled = false;
@@ -849,45 +1179,38 @@ async function saveRoster() {
   }
 }
 
+function stopFirestoreRealtimeListener() {
+  if (typeof firestoreUnsubscribe === 'function') {
+    try { firestoreUnsubscribe(); } catch {}
+    firestoreUnsubscribe = null;
+  }
+}
+
 function setupFirestoreRealtimeListener() {
-  if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.listenResults) {
-    window.MEDUCA_FIREBASE.listenResults((cloudItems) => {
+  stopFirestoreRealtimeListener();
+  if (
+    window.MEDUCA_FIREBASE &&
+    window.MEDUCA_FIREBASE.listenResults &&
+    window.MEDUCA_FIREBASE.isTeacherAuthenticated()
+  ) {
+    firestoreUnsubscribe = window.MEDUCA_FIREBASE.listenResults((cloudItems) => {
       console.log('⚡ Actualización en tiempo real desde Firestore:', cloudItems.length, 'registros.');
-      
-      const cloudEvaluations = cloudItems.filter(r => 
-        !r.tipo && 
-        r.estado !== 'reintento_autorizado' && 
-        !r.archivado_por_reintento && 
-        r.activo !== false
-      );
-      const cloudAuthorizations = cloudItems.filter(r => r.tipo === 'autorizacion_reintento');
-
-      allAuthorizations = cloudAuthorizations;
-
-      const combinedMap = new Map();
-      allResults.forEach(r => {
-        const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
-        combinedMap.set(key, r);
-      });
-      cloudEvaluations.forEach(r => {
-        const key = (r.grado || '3') + '_' + (r.id || r.estudiante_nombre);
-        combinedMap.set(key, r);
-      });
-
-      // Si hay una autorización activa para un estudiante, remover resultado viejo
-      allAuthorizations.forEach(auth => {
-        if (auth.activo) {
-          for (const [k, v] of combinedMap.entries()) {
-            if (v.estudiante_nombre && v.estudiante_nombre.toLowerCase().trim() === auth.estudiante_nombre.toLowerCase().trim()) {
-              combinedMap.delete(k);
-            }
-          }
-        }
-      });
-
-      allResults = Array.from(combinedMap.values());
-      calculateAndRenderStats();
-      renderTable();
+      cloudItemsCache = cloudItems;
+      hasCloudError = false;
+      const banner = document.getElementById('cloudStatusBanner');
+      if (banner) banner.style.display = 'none';
+      rebuildCombinedState();
+    }, (err) => {
+      hasCloudError = true;
+      cloudErrorMessage = err?.code === 'permission-denied'
+        ? 'Sesión sin permisos para escuchar Firestore. Inicia sesión con civanp004@gmail.com.'
+        : 'Se perdió la conexión en tiempo real con Firestore.';
+      const banner = document.getElementById('cloudStatusBanner');
+      const bannerMsg = document.getElementById('cloudStatusMessage');
+      if (banner && bannerMsg) {
+        bannerMsg.textContent = cloudErrorMessage;
+        banner.style.display = 'flex';
+      }
     });
   }
 }

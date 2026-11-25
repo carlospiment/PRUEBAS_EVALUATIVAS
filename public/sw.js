@@ -3,7 +3,7 @@
    Soporte 100% Offline para PWA y GitHub Pages
    =================================================== */
 
-const CACHE_NAME = 'meduca-agri-eval-v13';
+const CACHE_NAME = 'meduca-agri-eval-v14';
 
 const STATIC_ASSETS = [
   './',
@@ -15,6 +15,7 @@ const STATIC_ASSETS = [
   './tercer_grado.html',
   './css/style.css',
   './js/vendor/firebase-app-compat.js',
+  './js/vendor/firebase-auth-compat.js',
   './js/vendor/firebase-firestore-compat.js',
   './js/firebase-config.js',
   './js/app.js',
@@ -26,14 +27,13 @@ const STATIC_ASSETS = [
   './data/prueba_5to.json',
   './data/prueba_6to.json',
   './data/prueba_config.json',
-  './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Quicksand:wght@500;600;700&display=swap'
+  './manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW v3] Precaching assets 3er y 4to grado...');
+      console.log('[SW v14] Precaching assets...');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('[SW] Error al cachear algunos recursos:', err);
       });
@@ -60,6 +60,11 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const url = new URL(event.request.url);
 
+  // Nunca interceptar Firebase Auth, Firestore, OAuth ni dominios externos
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(event.request).catch(() => {
@@ -71,22 +76,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Network-First con respaldo en caché para asegurar actualizaciones inmediatas en GitHub Pages
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
-        }
-
+    fetch(event.request).then((networkResponse) => {
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
         });
-
-        return networkResponse;
-      }).catch(() => {
+      }
+      return networkResponse;
+    }).catch(() => {
+      return caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }

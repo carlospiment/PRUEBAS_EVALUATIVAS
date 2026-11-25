@@ -25,20 +25,29 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Sound Synthesizer
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+// Sound Synthesizer (lazy init)
+let audioCtx = null;
+
+function getAudioContext() {
+  if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
 
 function playSound(type) {
   if (!soundEnabled) return;
   try {
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume();
     }
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    const now = audioCtx.currentTime;
+    gain.connect(ctx.destination);
+    const now = ctx.currentTime;
 
     if (type === 'click') {
       osc.type = 'sine';
@@ -59,10 +68,10 @@ function playSound(type) {
     } else if (type === 'success') {
       const notes = [523.25, 659.25, 783.99, 1046.50];
       notes.forEach((freq, idx) => {
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
         o.connect(g);
-        g.connect(audioCtx.destination);
+        g.connect(ctx.destination);
         o.type = 'triangle';
         o.frequency.setValueAtTime(freq, now + idx * 0.09);
         g.gain.setValueAtTime(0.15, now + idx * 0.09);
@@ -106,79 +115,61 @@ function cleanText(str) {
   return cleaned;
 }
 
+const DEFAULT_TOTALS_BY_GRADE = { 3: 19, 4: 24, 5: 31, 6: 32 };
+let pendingRetakeUnlockStudentId = null;
+
+function computeRetakeCode(studentId, grado) {
+  const input = `${String(studentId || '').trim()}|${Number(grado) || 3}|MEDUCA_AGRI_2026`;
+  let h1 = 0x811c9dc5;
+  let h2 = 0x9e3779b9;
+  for (let i = 0; i < input.length; i++) {
+    const ch = input.charCodeAt(i);
+    h1 ^= ch;
+    h1 = Math.imul(h1, 0x01000193) >>> 0;
+    h2 = (Math.imul(h2 ^ ch, 0x85ebca6b) + i) >>> 0;
+  }
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let combined = (BigInt(h1) << 32n) | BigInt(h2);
+  let code = '';
+  for (let i = 0; i < 6; i++) {
+    code += alphabet[Number(combined % BigInt(alphabet.length))];
+    combined /= BigInt(alphabet.length);
+  }
+  return code;
+}
+
+function handleRetakeUrlParam() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const estId = params.get('est');
+    const code = (params.get('reintento') || '').trim().toUpperCase();
+    if (estId && code && code === computeRetakeCode(estId, currentGrade)) {
+      removeLocalResultByIdOrName(estId, null);
+      pendingRetakeUnlockStudentId = estId;
+      params.delete('est');
+      params.delete('reintento');
+      const cleanUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+      window.history.replaceState({}, document.title, cleanUrl);
+    }
+  } catch (e) {
+    console.warn('Error procesando enlace de reintento:', e);
+  }
+}
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async () => {
   setupOnlineStatus();
   detectGrade();
+  handleRetakeUrlParam();
   await initGrade(currentGrade);
   setupAutocomplete();
   setupEventListeners();
   setupTeacherAuthModal();
 });
 
-const TEACHER_PIN = '0476';
-
-// Intercept clicks to docente.html and require PIN 0476
+// La autenticación del docente (Google Auth + PIN respaldo) se gestiona directamente en docente.html
 function setupTeacherAuthModal() {
-  const pinModal = document.getElementById('teacherPinModal');
-  const pinInput = document.getElementById('modalPinInput');
-  const pinError = document.getElementById('modalPinError');
-  const confirmBtn = document.getElementById('confirmPinModalBtn');
-  const cancelBtn = document.getElementById('cancelPinModalBtn');
-
-  document.querySelectorAll('a[href*="docente.html"]').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      // If already authenticated during current session, go directly
-      if (sessionStorage.getItem('meduca_docente_auth') === TEACHER_PIN) {
-        window.location.href = './docente.html';
-        return;
-      }
-      if (pinModal) {
-        pinInput.value = '';
-        pinError.style.display = 'none';
-        pinModal.classList.add('active');
-        setTimeout(() => pinInput.focus(), 150);
-      } else {
-        const entered = prompt('🔐 Ingrese la clave de acceso docente:');
-        if (entered === TEACHER_PIN) {
-          sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
-          window.location.href = './docente.html';
-        } else if (entered !== null) {
-          alert('❌ Clave incorrecta. Acceso denegado.');
-        }
-      }
-    });
-  });
-
-  const checkPin = () => {
-    if (!pinInput) return;
-    if (pinInput.value.trim() === TEACHER_PIN) {
-      sessionStorage.setItem('meduca_docente_auth', TEACHER_PIN);
-      pinModal.classList.remove('active');
-      window.location.href = './docente.html';
-    } else {
-      playSound('click');
-      pinError.style.display = 'block';
-      pinInput.value = '';
-      pinInput.focus();
-    }
-  };
-
-  if (confirmBtn) confirmBtn.addEventListener('click', checkPin);
-  if (pinInput) {
-    pinInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        checkPin();
-      }
-    });
-  }
-  if (cancelBtn && pinModal) {
-    cancelBtn.addEventListener('click', () => {
-      pinModal.classList.remove('active');
-    });
-  }
+  // Navegación directa sin doble bloqueo
 }
 
 // Detect Grade strictly from body dataset, pathname, or URL
@@ -295,27 +286,39 @@ async function loadStudents() {
       list = all.filter(s => s.grado === currentGrade);
     }
 
+    // Reintentar sincronización de resultados locales pendientes si ya hay internet
+    await syncPendingLocalResults();
+
     const localResults = getLocalResults();
+    let cloudReadOk = false;
     let cloudResults = [];
-    if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable()) {
+    if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable() && window.MEDUCA_FIREBASE.getResultsDetailed) {
       try {
-        cloudResults = await window.MEDUCA_FIREBASE.getResults();
+        const cloudInfo = await window.MEDUCA_FIREBASE.getResultsDetailed();
+        if (cloudInfo.ok) {
+          cloudReadOk = true;
+          cloudResults = cloudInfo.items || [];
+        }
       } catch (e) {
         console.warn('No se pudieron obtener resultados de Firestore:', e);
       }
     }
 
-    // Filtrar evaluaciones activas y autorizaciones de reintento
-    const activeCloudResults = cloudResults.filter(r => 
-      !r.tipo && 
-      r.estado !== 'reintento_autorizado' && 
+    // Filtrar evaluaciones activas y autorizaciones de reintento DEL GRADO ACTUAL
+    const activeCloudResults = cloudResults.filter(r =>
+      !r.tipo &&
+      (Number(r.grado) === currentGrade || (!r.grado && currentGrade === 3)) &&
+      r.estado !== 'reintento_autorizado' &&
+      r.estado !== 'duplicado_ignorado' &&
+      r.estado !== 'archivado_docente' &&
       !r.archivado_por_reintento &&
       r.activo !== false
     );
-    
-    const activeAuthorizations = cloudResults.filter(r => 
-      r.tipo === 'autorizacion_reintento' && 
-      r.activo === true
+
+    const activeAuthorizations = cloudResults.filter(r =>
+      r.tipo === 'autorizacion_reintento' &&
+      r.activo === true &&
+      (!r.grado || Number(r.grado) === currentGrade)
     );
 
     // En servidor local (Node.js) verificar autorizaciones
@@ -333,9 +336,20 @@ async function loadStudents() {
     allStudents = list.map(student => {
       const sNameClean = cleanText(student.nombre);
 
+      // 0. Si el docente usó enlace directo de desbloqueo (?est=...&reintento=...)
+      if (pendingRetakeUnlockStudentId && pendingRetakeUnlockStudentId === student.id) {
+        removeLocalResultByIdOrName(student.id, student.nombre);
+        return {
+          ...student,
+          completado: false,
+          reintento_autorizado: true,
+          fecha_autorizado: 'Autorizado por el docente'
+        };
+      }
+
       // 1. ¿Tiene una autorización activa otorgada por el docente?
-      const auth = allAuthorizations.find(a => 
-        cleanText(a.estudiante_nombre) === sNameClean && 
+      const auth = allAuthorizations.find(a =>
+        cleanText(a.estudiante_nombre) === sNameClean &&
         (!a.grado || Number(a.grado) === currentGrade)
       );
 
@@ -351,20 +365,20 @@ async function loadStudents() {
       }
 
       // 2. ¿Tiene evaluación activa en la nube?
-      const cloudRes = activeCloudResults.find(r => 
+      const cloudRes = activeCloudResults.find(r =>
         (r.estudiante_id && r.estudiante_id === student.id) ||
         cleanText(r.estudiante_nombre) === sNameClean
       );
 
       // 3. ¿Tiene evaluación en memoria de este celular/navegador?
-      const localRes = localResults.find(r => 
+      const localRes = localResults.find(r =>
         (r.estudiante_id && r.estudiante_id === student.id) ||
         cleanText(r.estudiante_nombre) === sNameClean
       );
 
-      // Si la base de datos en la nube está activa y NO tiene resultado activo,
-      // pero el celular aún tenía copia vieja, se purga la copia local
-      if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.isAvailable() && !cloudRes && localRes) {
+      // IMPORTANTE: Solo purgar copia local si Firestore respondió exitosamente (cloudReadOk === true).
+      // Si Firestore devolvió permission-denied (esperado para estudiantes) o sin conexión, NUNCA borrar localStorage.
+      if (cloudReadOk && !cloudRes && localRes) {
         removeLocalResult(student.nombre);
         return {
           ...student,
@@ -408,7 +422,12 @@ function saveLocalResult(nuevoResultado) {
   try {
     const key = `meduca_agri_eval_${currentGrade}to_grado`;
     const list = getLocalResults();
-    list.push(nuevoResultado);
+    const idx = list.findIndex(r => r.id && r.id === nuevoResultado.id);
+    if (idx !== -1) {
+      list[idx] = nuevoResultado;
+    } else {
+      list.push(nuevoResultado);
+    }
     localStorage.setItem(key, JSON.stringify(list));
   } catch (e) {
     console.warn(e);
@@ -416,14 +435,45 @@ function saveLocalResult(nuevoResultado) {
 }
 
 function removeLocalResult(studentName) {
+  removeLocalResultByIdOrName(null, studentName);
+}
+
+function removeLocalResultByIdOrName(studentId, studentName) {
   try {
     const key = `meduca_agri_eval_${currentGrade}to_grado`;
     const list = getLocalResults();
-    const cleanName = cleanText(studentName);
-    const filtered = list.filter(r => cleanText(r.estudiante_nombre) !== cleanName);
+    const cleanName = studentName ? cleanText(studentName) : '';
+    const filtered = list.filter(r => {
+      if (studentId && r.estudiante_id === studentId) return false;
+      if (cleanName && cleanText(r.estudiante_nombre) === cleanName) return false;
+      return true;
+    });
     localStorage.setItem(key, JSON.stringify(filtered));
   } catch (e) {
     console.warn(e);
+  }
+}
+
+async function syncPendingLocalResults() {
+  if (!navigator.onLine || !window.MEDUCA_FIREBASE || !window.MEDUCA_FIREBASE.saveResult) return;
+  try {
+    const list = getLocalResults();
+    let changed = false;
+    for (const item of list) {
+      if (item && item.sincronizado_nube === false) {
+        const saved = await window.MEDUCA_FIREBASE.saveResult(item);
+        if (saved) {
+          item.sincronizado_nube = true;
+          changed = true;
+        }
+      }
+    }
+    if (changed) {
+      const key = `meduca_agri_eval_${currentGrade}to_grado`;
+      localStorage.setItem(key, JSON.stringify(list));
+    }
+  } catch (e) {
+    console.warn('Error reintentando sincronización local:', e);
   }
 }
 
@@ -545,8 +595,30 @@ function selectStudent(student) {
       <p style="margin-top: 8px; font-size: 0.95rem; color: #991b1b;">
         * Solo se permite un intento por estudiante. Si requieres asistencia técnica, consulta con tu maestro.
       </p>
+      <div style="margin-top: 10px;">
+        <button type="button" id="unlockRetakeBtn" style="background: none; border: 1px dashed #b91c1c; color: #991b1b; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+          🔓 ¿Tu maestro autorizó un nuevo intento? Ingresar código
+        </button>
+      </div>
     `;
     alreadyDoneCard.style.display = 'block';
+
+    const unlockBtn = document.getElementById('unlockRetakeBtn');
+    if (unlockBtn) {
+      unlockBtn.addEventListener('click', () => {
+        const entered = prompt('🔐 Ingresa el código de 6 caracteres entregado por el docente:');
+        if (!entered) return;
+        if (entered.trim().toUpperCase() === computeRetakeCode(student.id, currentGrade)) {
+          removeLocalResultByIdOrName(student.id, student.nombre);
+          student.completado = false;
+          student.reintento_autorizado = true;
+          student.fecha_autorizado = 'Desbloqueado por el docente';
+          selectStudent(student);
+        } else {
+          alert('❌ Código incorrecto. Verifica con tu maestro.');
+        }
+      });
+    }
   } else {
     alreadyDoneCard.style.display = 'none';
     startBtn.disabled = false;
@@ -926,7 +998,7 @@ function renderParteE(data) {
 // Update Progress Bar
 function updateProgress() {
   let answered = 0;
-  const total = rawTestConfig?.puntos_totales || (currentGrade === 4 ? 24 : 19);
+  const total = rawTestConfig?.puntos_totales || DEFAULT_TOTALS_BY_GRADE[currentGrade] || 19;
 
   // Parte A
   document.querySelectorAll('.blank-input').forEach(input => {
@@ -948,9 +1020,12 @@ function updateProgress() {
     if (sel.value) answered++;
   });
 
-  // Parte E
+  // Parte E (respuesta corta en 4°/5° y clasificación en 6°)
   document.querySelectorAll('.short-answer-textarea').forEach(ta => {
     if (ta.value.trim().length > 0) answered++;
+  });
+  document.querySelectorAll('.short-answer-block[data-selected]').forEach(blk => {
+    if (blk.dataset.selected) answered++;
   });
 
   const pct = Math.min(100, Math.round((answered / total) * 100));
@@ -1143,12 +1218,13 @@ function evaluateTestOffline(responses, durationSec) {
         enunciado: q.enunciado,
         respuesta_dada: resp || '(En blanco)',
         es_correcta: esCorrecta,
+        respuesta_esperada: q.respuesta_correcta || null,
         puntos: pts
       });
     });
   }
 
-  const totalPts = cfg.puntos_totales || (currentGrade === 4 ? 24 : 19);
+  const totalPts = cfg.puntos_totales || DEFAULT_TOTALS_BY_GRADE[currentGrade] || 19;
   const notaMeduca = Number((1.0 + 4.0 * (puntosObtenidos / totalPts)).toFixed(1));
   const porcentaje = Math.round((puntosObtenidos / totalPts) * 100);
 
@@ -1157,14 +1233,15 @@ function evaluateTestOffline(responses, durationSec) {
   else if (notaMeduca < 4.0) desempeno = 'Regular / Aprobado';
   else if (notaMeduca < 4.5) desempeno = 'Bueno';
 
+  const randSuffix = Math.random().toString(36).substring(2, 7);
   return {
-    id: 'res-off-' + Date.now(),
+    id: 'res-off-' + Date.now() + '-' + randSuffix,
     grado: currentGrade,
     estudiante_id: currentStudent.id,
     estudiante_nombre: currentStudent.nombre,
     grupo: currentStudent.grupo || `${currentGrade}A`,
     iniciado_at: testStartTime.toISOString(),
-    completado_at: new Date().toLocaleString('es-PA'),
+    completado_at: new Date().toLocaleString('es-PA', { timeZone: 'America/Panama' }),
     completado_timestamp: Date.now(),
     duracion_segundos: durationSec,
     duracion_formato: formatTime(durationSec) + ' min',
@@ -1180,7 +1257,7 @@ function evaluateTestOffline(responses, durationSec) {
 
 // Confirm and Submit
 async function confirmAndSubmitTest() {
-  const total = rawTestConfig?.puntos_totales || (currentGrade === 4 ? 24 : 19);
+  const total = rawTestConfig?.puntos_totales || DEFAULT_TOTALS_BY_GRADE[currentGrade] || 19;
 
   let answered = 0;
   document.querySelectorAll('.blank-input').forEach(i => { if (i.value.trim()) answered++; });
@@ -1188,6 +1265,7 @@ async function confirmAndSubmitTest() {
   document.querySelectorAll('.tf-item').forEach(t => { if (t.dataset.selected) answered++; });
   document.querySelectorAll('.match-select').forEach(s => { if (s.value) answered++; });
   document.querySelectorAll('.short-answer-textarea').forEach(ta => { if (ta.value.trim()) answered++; });
+  document.querySelectorAll('.short-answer-block[data-selected]').forEach(blk => { if (blk.dataset.selected) answered++; });
 
   if (answered < total) {
     const faltantes = total - answered;
@@ -1273,15 +1351,17 @@ async function confirmAndSubmitTest() {
     finalResultado = evaluateTestOffline(responses, elapsedSeconds);
   }
 
-  saveLocalResult(finalResultado);
-
+  let cloudSaved = false;
   if (window.MEDUCA_FIREBASE && window.MEDUCA_FIREBASE.saveResult) {
     try {
-      await window.MEDUCA_FIREBASE.saveResult(finalResultado);
+      cloudSaved = await window.MEDUCA_FIREBASE.saveResult(finalResultado);
     } catch (e) {
       console.warn('Error al guardar en Firebase:', e);
     }
   }
+
+  finalResultado.sincronizado_nube = Boolean(cloudSaved);
+  saveLocalResult(finalResultado);
 
   showResultModal(finalResultado);
 }
