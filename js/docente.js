@@ -29,7 +29,7 @@ const LESSONS_DATA = [
     badgeBg: "#dcfce7",
     badgeColor: "#166534",
     softBg: "#f0fdf4",
-    gradoTexto: "Tercer Grado (3°)"
+    gradoTexto: "Tercer Grado"
   },
   {
     grado: 4,
@@ -43,7 +43,7 @@ const LESSONS_DATA = [
     badgeBg: "#ffedd5",
     badgeColor: "#c2410c",
     softBg: "#fff7ed",
-    gradoTexto: "Cuarto Grado (4°)"
+    gradoTexto: "Cuarto Grado"
   },
   {
     grado: 5,
@@ -57,7 +57,7 @@ const LESSONS_DATA = [
     badgeBg: "#dbeafe",
     badgeColor: "#1e40af",
     softBg: "#eff6ff",
-    gradoTexto: "Quinto Grado (5°)"
+    gradoTexto: "Quinto Grado"
   },
   {
     grado: 6,
@@ -71,7 +71,7 @@ const LESSONS_DATA = [
     badgeBg: "#ede9fe",
     badgeColor: "#5b21b6",
     softBg: "#f5f3ff",
-    gradoTexto: "Sexto Grado (6°)"
+    gradoTexto: "Sexto Grado"
   }
 ];
 

@@ -16,10 +16,10 @@
       { numero: 4, id: 'area-4', nombre: 'Ambiente y Agricultura Sostenible', icono: '🌎', color: '#0d9488', softBg: '#ccfbf1' }
     ],
     grados: [
-      { grado: 3, nombre: 'Tercer Grado (3°)', icono: '🌿', color: '#15803d', badgeBg: '#dcfce7', badgeColor: '#166534', softBg: '#f0fdf4' },
-      { grado: 4, nombre: 'Cuarto Grado (4°)', icono: '🥕', color: '#ea580c', badgeBg: '#ffedd5', badgeColor: '#c2410c', softBg: '#fff7ed' },
-      { grado: 5, nombre: 'Quinto Grado (5°)', icono: '🌽', color: '#1e40af', badgeBg: '#dbeafe', badgeColor: '#1e40af', softBg: '#eff6ff' },
-      { grado: 6, nombre: 'Sexto Grado (6°)', icono: '🍅', color: '#7c3aed', badgeBg: '#ede9fe', badgeColor: '#5b21b6', softBg: '#f5f3ff' }
+      { grado: 3, nombre: 'Tercer Grado', icono: '🌿', color: '#15803d', badgeBg: '#dcfce7', badgeColor: '#166534', softBg: '#f0fdf4' },
+      { grado: 4, nombre: 'Cuarto Grado', icono: '🥕', color: '#ea580c', badgeBg: '#ffedd5', badgeColor: '#c2410c', softBg: '#fff7ed' },
+      { grado: 5, nombre: 'Quinto Grado', icono: '🌽', color: '#1e40af', badgeBg: '#dbeafe', badgeColor: '#1e40af', softBg: '#eff6ff' },
+      { grado: 6, nombre: 'Sexto Grado', icono: '🍅', color: '#7c3aed', badgeBg: '#ede9fe', badgeColor: '#5b21b6', softBg: '#f5f3ff' }
     ],
     lecciones_programa: {},
     pruebas: [
